@@ -1,0 +1,139 @@
+[
+  {
+    "id": 1,
+    "name": "Matias Rojas",
+    "position": "Base",
+    "number": 4,
+    "avatar": "/images/avatars/player-1.svg",
+    "primaryCategoryId": 1,
+    "categoryIds": [
+      1,
+      2
+    ]
+  },
+  {
+    "id": 2,
+    "name": "Vicente Salazar",
+    "position": "Escolta",
+    "number": 7,
+    "avatar": "/images/avatars/player-2.svg",
+    "primaryCategoryId": 1,
+    "categoryIds": [
+      1,
+      2
+    ]
+  },
+  {
+    "id": 3,
+    "name": "Benjamin Fuentes",
+    "position": "Alero",
+    "number": 9,
+    "avatar": "/images/avatars/player-3.svg",
+    "primaryCategoryId": 1,
+    "categoryIds": [
+      1,
+      2
+    ]
+  },
+  {
+    "id": 4,
+    "name": "Joaquin Morales",
+    "position": "Ala-pivot",
+    "number": 11,
+    "avatar": "/images/avatars/player-4.svg",
+    "primaryCategoryId": 1,
+    "categoryIds": [
+      1,
+      2
+    ]
+  },
+  {
+    "id": 5,
+    "name": "Tomas Araya",
+    "position": "Pivot",
+    "number": 13,
+    "avatar": "/images/avatars/player-5.svg",
+    "primaryCategoryId": 1,
+    "categoryIds": [
+      1,
+      2
+    ]
+  },
+  {
+    "id": 6,
+    "name": "Diego Contreras",
+    "position": "Base",
+    "number": 5,
+    "avatar": "/images/avatars/player-6.svg",
+    "primaryCategoryId": 1,
+    "categoryIds": [
+      1
+    ]
+  },
+  {
+    "id": 7,
+    "name": "Cristobal Herrera",
+    "position": "Escolta",
+    "number": 8,
+    "avatar": "/images/avatars/player-7.svg",
+    "primaryCategoryId": 2,
+    "categoryIds": [
+      2
+    ]
+  },
+  {
+    "id": 8,
+    "name": "Lucas Navarro",
+    "position": "Alero",
+    "number": 10,
+    "avatar": "/images/avatars/player-8.svg",
+    "primaryCategoryId": 2,
+    "categoryIds": [
+      2
+    ]
+  },
+  {
+    "id": 9,
+    "name": "Ignacio Mella",
+    "position": "Ala-pivot",
+    "number": 12,
+    "avatar": "/images/avatars/player-9.svg",
+    "primaryCategoryId": 2,
+    "categoryIds": [
+      2
+    ]
+  },
+  {
+    "id": 10,
+    "name": "Felipe Bustos",
+    "position": "Pivot",
+    "number": 14,
+    "avatar": "/images/avatars/player-10.svg",
+    "primaryCategoryId": 2,
+    "categoryIds": [
+      2
+    ]
+  },
+  {
+    "id": 11,
+    "name": "Nicolas Paredes",
+    "position": "Alero",
+    "number": 15,
+    "avatar": "/images/avatars/player-11.svg",
+    "primaryCategoryId": 2,
+    "categoryIds": [
+      2
+    ]
+  },
+  {
+    "id": 12,
+    "name": "Sebastian Carrasco",
+    "position": "Escolta",
+    "number": 18,
+    "avatar": "/images/avatars/player-12.svg",
+    "primaryCategoryId": 2,
+    "categoryIds": [
+      2
+    ]
+  }
+]

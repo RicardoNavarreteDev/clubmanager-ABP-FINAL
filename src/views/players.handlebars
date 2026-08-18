@@ -1,2 +1,16 @@
-<h1>Jugadores</h1>
-<p>Esto es una prueba de la pagina de jugadores.</p>
+<header>
+  <h1>Jugadores</h1>
+  <p>Listado de jugadores del Club Prueba.</p>
+</header>
+
+<section class="players-grid">
+  {{#each players}}
+    <article class="player-card">
+      <img src="{{avatar}}" alt="Avatar de {{name}}" width="80">
+      <h2>{{name}}</h2>
+      <p>Posicion: {{position}}</p>
+      <p>Numero: {{number}}</p>
+      <p>Categoria principal: {{categoryName}}</p>
+    </article>
+  {{/each}}
+</section>

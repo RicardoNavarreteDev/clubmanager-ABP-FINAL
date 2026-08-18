@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1,
+    "name": "adulto",
+    "genderScope": "mixto",
+    "minAge": 18,
+    "maxAge": 34
+  },
+  {
+    "id": 2,
+    "name": "todo competidor",
+    "genderScope": "mixto",
+    "minAge": 18,
+    "maxAge": null
+  }
+]

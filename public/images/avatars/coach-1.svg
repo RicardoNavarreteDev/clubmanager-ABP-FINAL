@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+  <rect width="120" height="120" rx="60" fill="#f97316"/>
+  <circle cx="60" cy="44" r="22" fill="#fed7aa"/>
+  <path d="M24 104c9-18 25-28 36-28s27 10 36 28" fill="#312e81"/>
+  <text x="60" y="112" text-anchor="middle" font-size="14" fill="#fff" font-family="Arial">COACH</text>
+</svg>

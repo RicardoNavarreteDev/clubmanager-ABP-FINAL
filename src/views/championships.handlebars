@@ -1,0 +1,29 @@
+<header>
+  <h1>Campeonatos</h1>
+  <p>Resumen de los torneos en los que participa Club Prueba.</p>
+</header>
+
+<section class="championships-grid">
+  {{#each championships}}
+    <article class="championship-card">
+      <div class="championship-card-header">
+        <div>
+          <h2>{{name}}</h2>
+          <p>Temporada: {{season}}</p>
+        </div>
+
+        <p class="event-tag championship-status">{{status}}</p>
+      </div>
+
+      <div class="championship-meta">
+        <p class="championship-badge">Categoria: {{categoryName}}</p>
+        <p>Sede principal: {{primaryVenue}}</p>
+        <p>Descripcion: {{description}}</p>
+        <p>Inicio: {{startDate}}</p>
+        <p>Fin: {{endDate}}</p>
+        <p>Lugar variable: {{#if isVariableVenue}}Si{{else}}No{{/if}}</p>
+        <p>Jugadores inscritos: {{playersCount}}</p>
+      </div>
+    </article>
+  {{/each}}
+</section>

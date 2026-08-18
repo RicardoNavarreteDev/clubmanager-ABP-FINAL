@@ -1,0 +1,27 @@
+[
+  {
+    "matchId": 3,
+    "playerId": 1,
+    "status": "confirmed"
+  },
+  {
+    "matchId": 3,
+    "playerId": 2,
+    "status": "pending"
+  },
+  {
+    "matchId": 3,
+    "playerId": 3,
+    "status": "declined"
+  },
+  {
+    "matchId": 4,
+    "playerId": 7,
+    "status": "pending"
+  },
+  {
+    "matchId": 4,
+    "playerId": 8,
+    "status": "pending"
+  }
+]

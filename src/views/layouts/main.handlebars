@@ -7,6 +7,111 @@
     <link rel="stylesheet" href="/css/output.css">
 </head>
 <body>
-    {{{body}}}
+    <div class="app-shell">
+        <aside class="sidebar">
+            <div class="brand-block">
+                <p class="brand-kicker">Club Prueba</p>
+                <h1 class="brand-title">ClubManager</h1>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a class="nav-link {{#if isHome}}active{{/if}}" href="/">
+                    <span class="nav-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 10.5 12 3l9 7.5" />
+                            <path d="M5.5 9.5V21h13V9.5" />
+                        </svg>
+                    </span>
+                    <span>Inicio</span>
+                </a>
+                <a class="nav-link {{#if isPlayers}}active{{/if}}" href="/jugadores">
+                    <span class="nav-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="7.5" r="3.5" />
+                            <path d="M5 20c1.5-3.5 5-5.5 7-5.5s5.5 2 7 5.5" />
+                        </svg>
+                    </span>
+                    <span>Jugadores</span>
+                </a>
+                <a class="nav-link {{#if isEvents}}active{{/if}}" href="/eventos">
+                    <span class="nav-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3.5" y="5" width="17" height="15" rx="2" />
+                            <path d="M8 3.5V7" />
+                            <path d="M16 3.5V7" />
+                            <path d="M3.5 10h17" />
+                        </svg>
+                    </span>
+                    <span>Eventos</span>
+                </a>
+                <a class="nav-link {{#if isChampionships}}active{{/if}}" href="/campeonatos">
+                    <span class="nav-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M8 4h8v3a4 4 0 0 1-8 0Z" />
+                            <path d="M9.5 13h5" />
+                            <path d="M12 10v9" />
+                            <path d="M7.5 22h9" />
+                            <path d="M8 5H5.5a2 2 0 0 0 0 4H8" />
+                            <path d="M16 5h2.5a2 2 0 0 1 0 4H16" />
+                        </svg>
+                    </span>
+                    <span>Campeonatos</span>
+                </a>
+                <a class="nav-link {{#if isProfile}}active{{/if}}" href="/perfil">
+                    <span class="nav-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="8" r="3.5" />
+                            <path d="M5 20c1.5-3.5 5-5.5 7-5.5s5.5 2 7 5.5" />
+                        </svg>
+                    </span>
+                    <span>Perfil</span>
+                </a>
+            </nav>
+
+            <details class="sidebar-account">
+                <summary class="sidebar-profile">
+                    <img src="/images/avatars/profile.svg" alt="Perfil de Ricardo Navarrete">
+                    <div>
+                        <p class="profile-name">Ricardo Navarrete</p>
+                    </div>
+                    <span class="profile-menu">...</span>
+                </summary>
+
+                <div class="sidebar-account-menu">
+                    <button type="button">Log out @ranavarretes</button>
+                </div>
+            </details>
+        </aside>
+
+        <main class="content-column">
+            {{{body}}}
+        </main>
+
+        <aside class="aside-column">
+            <section class="aside-card">
+                <h2>Proximos partidos</h2>
+
+                {{#each upcomingMatches}}
+                    <article class="aside-item">
+                        <h3>{{opponent}}</h3>
+                        <p>{{date}} · {{time}}</p>
+                        <p>{{location}}</p>
+                    </article>
+                {{/each}}
+            </section>
+
+            <section class="aside-card">
+                <h2>Proximos entrenamientos</h2>
+
+                {{#each upcomingTrainings}}
+                    <article class="aside-item">
+                        <h3>{{categoryName}}</h3>
+                        <p>{{date}} · {{time}}</p>
+                        <p>{{location}}</p>
+                    </article>
+                {{/each}}
+            </section>
+        </aside>
+    </div>
 </body>
 </html>

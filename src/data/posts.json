@@ -1,0 +1,68 @@
+[
+  {
+    "id": 1,
+    "type": "post",
+    "author": "Camila Torres",
+    "role": "Entrenadora",
+    "date": "2026-08-11",
+    "content": "Gran intensidad en el entrenamiento de hoy. Muy buena comunicacion defensiva del equipo.",
+    "avatar": "/images/avatars/coach-1.svg",
+    "likes": 12,
+    "comments": 4
+  },
+  {
+    "id": 2,
+    "type": "announcement",
+    "author": "Club Prueba",
+    "role": "Administracion",
+    "date": "2026-08-11",
+    "content": "El partido del viernes fue reprogramado para las 20:00 horas.",
+    "avatar": "/images/avatars/club.svg",
+    "likes": 0,
+    "comments": 0
+  },
+  {
+    "id": 3,
+    "type": "post",
+    "author": "Matias Rojas",
+    "role": "Capitan",
+    "date": "2026-08-12",
+    "content": "Seguimos creciendo como equipo. A seguir trabajando con la misma energia.",
+    "avatar": "/images/avatars/player-1.svg",
+    "likes": 18,
+    "comments": 6
+  },
+  {
+    "id": 4,
+    "type": "post",
+    "author": "Valentina Muñoz",
+    "role": "Preparadora fisica",
+    "date": "2026-08-13",
+    "content": "Excelente asistencia en la sesion fisica. Buen compromiso del grupo.",
+    "avatar": "/images/avatars/staff-1.svg",
+    "likes": 9,
+    "comments": 2
+  },
+  {
+    "id": 5,
+    "type": "announcement",
+    "author": "Club Prueba",
+    "role": "Coordinacion",
+    "date": "2026-08-14",
+    "content": "Recordatorio: la citacion del proximo partido sera 45 minutos antes del inicio.",
+    "avatar": "/images/avatars/club.svg",
+    "likes": 0,
+    "comments": 0
+  },
+  {
+    "id": 6,
+    "type": "post",
+    "author": "Vicente Salazar",
+    "role": "Jugador",
+    "date": "2026-08-15",
+    "content": "Buen cierre de semana. Vamos con todo para el proximo desafio.",
+    "avatar": "/images/avatars/player-2.svg",
+    "likes": 14,
+    "comments": 3
+  }
+]

@@ -1,0 +1,38 @@
+[
+  {
+    "id": 1,
+    "name": "Liga Regional",
+    "season": "2026",
+    "categoryId": 1,
+    "description": "Campeonato oficial del circuito regional para planteles adultos del club.",
+    "primaryVenue": "Gimnasio Municipal",
+    "isVariableVenue": false,
+    "startDate": "2026-08-01",
+    "endDate": "2026-11-20",
+    "status": "active"
+  },
+  {
+    "id": 2,
+    "name": "Copa Metropolitana",
+    "season": "2026",
+    "categoryId": 2,
+    "description": "Torneo competitivo abierto para jugadores habilitados en todo competidor.",
+    "primaryVenue": "Arena Sur",
+    "isVariableVenue": true,
+    "startDate": "2026-08-10",
+    "endDate": "2026-12-01",
+    "status": "active"
+  },
+  {
+    "id": 3,
+    "name": "Torneo de Apertura",
+    "season": "2026",
+    "categoryId": 1,
+    "description": "Competencia de apertura con calendario propio y partidos en sedes mixtas.",
+    "primaryVenue": "Club Prueba",
+    "isVariableVenue": true,
+    "startDate": "2026-09-01",
+    "endDate": "2026-12-15",
+    "status": "upcoming"
+  }
+]

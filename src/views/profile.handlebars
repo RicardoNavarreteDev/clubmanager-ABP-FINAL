@@ -1,0 +1,145 @@
+<section class="profile-page">
+  <div class="profile-banner"></div>
+
+  <div class="profile-header-card">
+    <img class="profile-page-avatar" src="{{profile.avatar}}" alt="Avatar de {{profile.name}}">
+
+    <div class="profile-page-topbar">
+      <div>
+        <h1>{{profile.name}}</h1>
+        <p class="profile-page-username">{{profile.username}}</p>
+      </div>
+
+      <div class="profile-page-actions">
+        <button type="button" class="profile-edit-button" data-modal-open="profile-modal">Editar perfil</button>
+        <button type="button" class="profile-settings-button" data-modal-open="settings-modal" aria-label="Configuracion de cuenta">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3.2" />
+            <path d="M19.4 15a1.2 1.2 0 0 0 .24 1.32l.04.04a1.45 1.45 0 0 1-2.05 2.05l-.04-.04a1.2 1.2 0 0 0-1.32-.24 1.2 1.2 0 0 0-.73 1.1V19.5A1.5 1.5 0 0 1 14 21h-4a1.5 1.5 0 0 1-1.5-1.5v-.08a1.2 1.2 0 0 0-.73-1.1 1.2 1.2 0 0 0-1.32.24l-.04.04a1.45 1.45 0 1 1-2.05-2.05l.04-.04a1.2 1.2 0 0 0 .24-1.32 1.2 1.2 0 0 0-1.1-.73H3.5A1.5 1.5 0 0 1 2 13v-2a1.5 1.5 0 0 1 1.5-1.5h.08a1.2 1.2 0 0 0 1.1-.73 1.2 1.2 0 0 0-.24-1.32l-.04-.04A1.45 1.45 0 1 1 6.45 5.4l.04.04a1.2 1.2 0 0 0 1.32.24h.01a1.2 1.2 0 0 0 .69-1.08V4.5A1.5 1.5 0 0 1 10 3h4a1.5 1.5 0 0 1 1.5 1.5v.08a1.2 1.2 0 0 0 .73 1.1 1.2 1.2 0 0 0 1.32-.24l.04-.04a1.45 1.45 0 0 1 2.05 2.05l-.04.04a1.2 1.2 0 0 0-.24 1.32v.01a1.2 1.2 0 0 0 1.08.69h.08A1.5 1.5 0 0 1 22 11v2a1.5 1.5 0 0 1-1.5 1.5h-.08a1.2 1.2 0 0 0-1.02.5Z" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <p class="profile-page-role">{{profile.role}} · {{profile.category}}</p>
+    <p class="profile-page-bio">{{profile.bio}}</p>
+
+    <div class="profile-page-meta">
+      <p>Equipo: {{profile.team}}</p>
+      <p>Ubicacion: {{profile.location}}</p>
+      <p>Fecha de nacimiento: {{profile.birthDate}}</p>
+      <p>Correo: {{profile.email}}</p>
+    </div>
+  </div>
+
+  <section class="profile-championships">
+    <h2>Campeonatos</h2>
+
+    <div class="championships-grid">
+      {{#each championships}}
+        <article class="championship-card">
+          <div class="championship-card-header">
+            <div>
+              <h3>{{name}}</h3>
+              <p>Temporada: {{season}}</p>
+            </div>
+
+            <p class="event-tag championship-status">{{status}}</p>
+          </div>
+
+          <div class="championship-meta">
+            <p class="championship-badge">Categoria: {{categoryName}}</p>
+            <p>Sede principal: {{primaryVenue}}</p>
+            <p>Jugadores inscritos: {{playersCount}}</p>
+          </div>
+        </article>
+      {{/each}}
+    </div>
+  </section>
+</section>
+
+<div class="modal-backdrop" data-modal="profile-modal" hidden>
+  <div class="modal-panel profile-modal-panel" role="dialog" aria-modal="true" aria-labelledby="profile-modal-title">
+    <div class="modal-header">
+      <button type="button" class="modal-close-button" data-modal-close="profile-modal">×</button>
+      <h2 id="profile-modal-title">Editar perfil</h2>
+      <button type="button" class="modal-save-button">Guardar</button>
+    </div>
+
+    <div class="modal-banner"></div>
+
+    <div class="modal-avatar-row">
+      <img class="modal-avatar" src="{{profile.avatar}}" alt="Avatar de {{profile.name}}">
+
+      <div class="modal-avatar-card">
+        <div>
+          <h3>Edita tu foto</h3>
+          <p>Personaliza tu perfil con una imagen temporal.</p>
+        </div>
+
+        <button type="button" class="modal-photo-button">Editar foto</button>
+      </div>
+    </div>
+
+    <form class="profile-modal-form">
+      <label>
+        <span>Nombre</span>
+        <input type="text" value="{{profile.name}}">
+      </label>
+
+      <label>
+        <span>Bio</span>
+        <textarea>{{profile.bio}}</textarea>
+      </label>
+
+      <label>
+        <span>Ubicacion</span>
+        <input type="text" value="Chile">
+      </label>
+
+      <label>
+        <span>Fecha de nacimiento</span>
+        <input type="date" value="{{profile.birthDate}}">
+      </label>
+    </form>
+  </div>
+</div>
+
+<div class="modal-backdrop" data-modal="settings-modal" hidden>
+  <div class="modal-panel settings-modal-panel" role="dialog" aria-modal="true" aria-labelledby="settings-modal-title">
+    <div class="modal-header">
+      <button type="button" class="modal-close-button" data-modal-close="settings-modal">×</button>
+      <h2 id="settings-modal-title">Configuracion de cuenta</h2>
+      <button type="button" class="modal-save-button">Guardar</button>
+    </div>
+
+    <div class="profile-modal-form">
+      <label>
+        <span>Correo actual</span>
+        <input type="email" value="{{profile.email}}">
+      </label>
+
+      <label>
+        <span>Nuevo correo</span>
+        <input type="email" placeholder="nuevo-correo@ejemplo.com">
+      </label>
+
+      <label>
+        <span>Contraseña actual</span>
+        <input type="password" placeholder="••••••••">
+      </label>
+
+      <label>
+        <span>Nueva contraseña</span>
+        <input type="password" placeholder="••••••••">
+      </label>
+
+      <label>
+        <span>Repetir nueva contraseña</span>
+        <input type="password" placeholder="••••••••">
+      </label>
+    </div>
+  </div>
+</div>
+
+<script src="/js/modals.js"></script>

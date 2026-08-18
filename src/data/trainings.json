@@ -1,0 +1,42 @@
+[
+  {
+    "id": 1,
+    "date": "2026-08-18",
+    "time": "18:00",
+    "location": "Club Prueba",
+    "categoryId": 1,
+    "trainingType": "tecnico"
+  },
+  {
+    "id": 2,
+    "date": "2026-08-19",
+    "time": "19:00",
+    "location": "Club Prueba",
+    "categoryId": 1,
+    "trainingType": "fisico"
+  },
+  {
+    "id": 3,
+    "date": "2026-08-21",
+    "time": "18:30",
+    "location": "Cancha Central",
+    "categoryId": 2,
+    "trainingType": "tactico"
+  },
+  {
+    "id": 4,
+    "date": "2026-08-26",
+    "time": "18:00",
+    "location": "Club Prueba",
+    "categoryId": 2,
+    "trainingType": "mixto"
+  },
+  {
+    "id": 5,
+    "date": "2026-08-28",
+    "time": "19:30",
+    "location": "Cancha Auxiliar",
+    "categoryId": 2,
+    "trainingType": "tecnico"
+  }
+]

@@ -1,0 +1,59 @@
+<header>
+  <h1>Eventos</h1>
+  <p>Partidos y entrenamientos del Club Prueba.</p>
+</header>
+
+<section class="events-section">
+  <h2>Partidos jugados</h2>
+
+  <div class="events-grid">
+    {{#each playedMatches}}
+      <article class="event-card played-card">
+        <p class="event-tag">Finalizado</p>
+        <h3>{{opponent}}</h3>
+        <p>Campeonato: {{championshipName}}</p>
+        <p>Fecha: {{date}}</p>
+        <p>Hora: {{time}}</p>
+        <p>Lugar: {{location}}</p>
+        <p>Condicion: {{condition}}</p>
+        <p class="event-result">{{result}}</p>
+      </article>
+    {{/each}}
+  </div>
+</section>
+
+<section class="events-section">
+  <h2>Proximos partidos</h2>
+
+  <div class="events-grid">
+    {{#each pendingMatches}}
+      <article class="event-card pending-card">
+        <p class="event-tag">Proximo</p>
+        <h3>{{opponent}}</h3>
+        <p>Campeonato: {{championshipName}}</p>
+        <p>Fecha: {{date}}</p>
+        <p>Hora: {{time}}</p>
+        <p>Lugar: {{location}}</p>
+        <p>Condicion: {{condition}}</p>
+        <p class="event-result">{{result}}</p>
+      </article>
+    {{/each}}
+  </div>
+</section>
+
+<section class="events-section">
+  <h2>Proximos entrenamientos</h2>
+
+  <div class="trainings-grid">
+    {{#each trainings}}
+      <article class="event-card training-card">
+        <p class="event-tag">Entrenamiento</p>
+        <h3>{{trainingType}}</h3>
+        <p>Fecha: {{date}}</p>
+        <p>Hora: {{time}}</p>
+        <p>Lugar: {{location}}</p>
+        <p>Categoria: {{categoryName}}</p>
+      </article>
+    {{/each}}
+  </div>
+</section>

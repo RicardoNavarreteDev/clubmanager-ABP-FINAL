@@ -1,3 +1,75 @@
+<header>
+  <p>Bienvenido a la comunidad de Club Prueba.</p>
+</header>
 
-    <h1>ClubManager</h1>
-    <p>Primera vista con Handlebars</p>
+<section class="stats-section">
+  <h2>Resumen</h2>
+
+  <div class="stats-grid">
+    <article class="stat-card">
+      <h3>Jugadores</h3>
+      <p>{{stats.playersCount}}</p>
+    </article>
+
+    <article class="stat-card">
+      <h3>Partidos jugados</h3>
+      <p>{{stats.playedMatches}}</p>
+    </article>
+
+    <article class="stat-card">
+      <h3>Victorias</h3>
+      <p>{{stats.wins}}</p>
+    </article>
+
+    <article class="stat-card">
+      <h3>Proximos eventos</h3>
+      <p>{{stats.upcomingEvents}}</p>
+    </article>
+  </div>
+</section>
+
+<section class="composer-card">
+  <div class="composer-header">
+    <img src="/images/avatars/profile.svg" alt="Perfil de Ricardo Navarrete" width="80">
+    <div>
+      <h2>Comparte una novedad</h2>
+      <p>Escribe una publicacion o anuncio para la comunidad del club.</p>
+    </div>
+  </div>
+
+  <textarea placeholder="Que esta pasando en Club Prueba?"></textarea>
+
+  <div class="composer-actions">
+    <button type="button">Crear publicacion</button>
+    <button type="button" class="secondary-button">Crear anuncio</button>
+  </div>
+</section>
+
+<section class="feed-section">
+  <h2>Publicaciones y anuncios</h2>
+
+  {{#each posts}}
+    <article class="feed-card">
+      {{#if isAnnouncement}}
+        <p class="feed-badge">Anuncio</p>
+      {{/if}}
+
+      <div class="feed-header">
+        <img src="{{avatar}}" alt="Avatar de {{author}}" width="80">
+
+        <div>
+          <h3>{{author}}</h3>
+          <p>Rol: {{role}}</p>
+          <p>Fecha: {{date}}</p>
+        </div>
+      </div>
+
+      <p>{{content}}</p>
+
+      <div class="feed-meta">
+        <p>Likes: {{likes}}</p>
+        <p>Comentarios: {{comments}}</p>
+      </div>
+    </article>
+  {{/each}}
+</section>

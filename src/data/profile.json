@@ -1,0 +1,13 @@
+{
+  "playerId": 1,
+  "name": "Ricardo Navarrete",
+  "username": "@ranavarretes",
+  "email": "ricardo@clubmanager.dev",
+  "role": "Capitan",
+  "category": "adulto",
+  "team": "Club Prueba",
+  "bio": "Jugador y referente del equipo. Enfocado en competir, entrenar y seguir fortaleciendo la identidad de Club Prueba dentro y fuera de la cancha.",
+  "location": "Santiago, Chile",
+  "birthDate": "1998-07-21",
+  "avatar": "/images/avatars/profile.svg"
+}
