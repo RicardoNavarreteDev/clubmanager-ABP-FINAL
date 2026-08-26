@@ -1,3 +1,4 @@
+// Este archivo crea y exporta la conexion principal de Sequelize contra PostgreSQL.
 import "dotenv/config";
 import { Sequelize } from "sequelize";
 

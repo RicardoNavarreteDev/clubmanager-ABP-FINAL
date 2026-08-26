@@ -1,3 +1,4 @@
+// Este archivo guarda en disco cada acceso a la ruta /status.
 import { appendFile } from "fs/promises";
 import path from "path";
 import { fileURLToPath } from "url";

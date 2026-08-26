@@ -1,29 +1,81 @@
-<header>
+{{!-- Este archivo muestra el listado de campeonatos y su estado actual. --}}
+<header class="page-header">
   <h1>Campeonatos</h1>
   <p>Resumen de los torneos en los que participa Club Prueba.</p>
 </header>
 
 <section class="championships-grid">
   {{#each championships}}
-    <article class="championship-card">
-      <div class="championship-card-header">
-        <div>
-          <h2>{{name}}</h2>
-          <p>Temporada: {{season}}</p>
-        </div>
-
-        <p class="event-tag championship-status">{{status}}</p>
+    <article
+      class="championship-card championship-card-compact"
+      data-modal-open="championship-detail-modal"
+      data-championship-modal-trigger
+      data-championship-name="{{name}}"
+      data-championship-season="{{season}}"
+      data-championship-status="{{statusLabel}}"
+      data-championship-status-tone="{{statusTone}}"
+      data-championship-category="{{categoryName}}"
+      data-championship-venue="{{primaryVenue}}"
+      data-championship-description="{{description}}"
+      data-championship-start="{{startDate}}"
+      data-championship-end="{{endDate}}"
+      data-championship-variable="{{#if isVariableVenue}}Si{{else}}No{{/if}}"
+      data-championship-players="{{playersCount}}"
+      tabindex="0"
+      role="button"
+      aria-label="Ver detalle del campeonato {{name}}"
+    >
+      <div class="championship-card-topbar">
+        <p class="event-tag event-tag-{{statusTone}} championship-status">{{statusLabel}}</p>
+        <p class="championship-card-season">Temporada {{season}}</p>
       </div>
 
-      <div class="championship-meta">
-        <p class="championship-badge">Categoria: {{categoryName}}</p>
-        <p>Sede principal: {{primaryVenue}}</p>
-        <p>Descripcion: {{description}}</p>
-        <p>Inicio: {{startDate}}</p>
-        <p>Fin: {{endDate}}</p>
-        <p>Lugar variable: {{#if isVariableVenue}}Si{{else}}No{{/if}}</p>
-        <p>Jugadores inscritos: {{playersCount}}</p>
+      <div class="championship-card-copy">
+        <h2>{{name}}</h2>
+        <p class="championship-card-description">{{description}}</p>
+      </div>
+
+      <div class="championship-card-meta championship-card-meta-compact">
+        <p><span>Categoria</span>{{categoryName}}</p>
+        <p><span>Sede</span>{{primaryVenue}}</p>
+        <p><span>Jugadores</span>{{playersCount}}</p>
+      </div>
+
+      <div class="championship-card-footer">
+        <p class="championship-badge">{{#if isVariableVenue}}Sedes mixtas{{else}}Sede fija{{/if}}</p>
+        <span class="event-card-link">Ver detalle</span>
       </div>
     </article>
   {{/each}}
 </section>
+
+<div class="modal-backdrop" data-modal="championship-detail-modal" data-modal-archive hidden>
+  <div class="modal-panel championship-detail-modal-panel" role="dialog" aria-modal="true" aria-labelledby="championship-detail-title">
+    <div class="modal-header" data-modal-archive-item>
+      <button type="button" class="modal-close-button" data-modal-close="championship-detail-modal">×</button>
+      <h2 id="championship-detail-title">Detalle del campeonato</h2>
+      <button type="button" class="modal-save-button event-detail-close-button" data-modal-close="championship-detail-modal">Cerrar</button>
+    </div>
+
+    <div class="event-detail-body" data-modal-archive-item>
+      <div class="event-detail-hero championship-detail-hero">
+        <p class="event-tag" data-championship-detail-status></p>
+        <p class="event-detail-type" data-championship-detail-season></p>
+        <h3 data-championship-detail-name></h3>
+        <p class="event-detail-subtitle" data-championship-detail-description></p>
+      </div>
+
+      <div class="event-detail-grid">
+        <p><span>Categoria</span><strong data-championship-detail-category></strong></p>
+        <p><span>Sede principal</span><strong data-championship-detail-venue></strong></p>
+        <p><span>Inicio</span><strong data-championship-detail-start></strong></p>
+        <p><span>Fin</span><strong data-championship-detail-end></strong></p>
+      </div>
+
+      <div class="event-detail-grid">
+        <p><span>Lugar variable</span><strong data-championship-detail-variable></strong></p>
+        <p><span>Jugadores inscritos</span><strong data-championship-detail-players></strong></p>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,3 +1,4 @@
+// Este archivo inicia el servidor HTTP usando la app configurada en app.js.
 import app from './app.js';
 import dotenv from 'dotenv';
 

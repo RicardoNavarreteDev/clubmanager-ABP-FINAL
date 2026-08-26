@@ -1,3 +1,4 @@
+// Este archivo define la ruta que renderiza la pagina de campeonatos.
 import { Router } from "express";
 import { renderChampionships } from "../controllers/championships.controller.js";
 

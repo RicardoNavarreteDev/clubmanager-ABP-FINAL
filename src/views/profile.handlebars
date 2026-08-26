@@ -1,3 +1,4 @@
+{{!-- Este archivo muestra el perfil del usuario y sus campeonatos asociados. --}}
 <section class="profile-page">
   <div class="profile-banner"></div>
 
@@ -12,12 +13,19 @@
 
       <div class="profile-page-actions">
         <button type="button" class="profile-edit-button" data-modal-open="profile-modal">Editar perfil</button>
-        <button type="button" class="profile-settings-button" data-modal-open="settings-modal" aria-label="Configuracion de cuenta">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="3.2" />
-            <path d="M19.4 15a1.2 1.2 0 0 0 .24 1.32l.04.04a1.45 1.45 0 0 1-2.05 2.05l-.04-.04a1.2 1.2 0 0 0-1.32-.24 1.2 1.2 0 0 0-.73 1.1V19.5A1.5 1.5 0 0 1 14 21h-4a1.5 1.5 0 0 1-1.5-1.5v-.08a1.2 1.2 0 0 0-.73-1.1 1.2 1.2 0 0 0-1.32.24l-.04.04a1.45 1.45 0 1 1-2.05-2.05l.04-.04a1.2 1.2 0 0 0 .24-1.32 1.2 1.2 0 0 0-1.1-.73H3.5A1.5 1.5 0 0 1 2 13v-2a1.5 1.5 0 0 1 1.5-1.5h.08a1.2 1.2 0 0 0 1.1-.73 1.2 1.2 0 0 0-.24-1.32l-.04-.04A1.45 1.45 0 1 1 6.45 5.4l.04.04a1.2 1.2 0 0 0 1.32.24h.01a1.2 1.2 0 0 0 .69-1.08V4.5A1.5 1.5 0 0 1 10 3h4a1.5 1.5 0 0 1 1.5 1.5v.08a1.2 1.2 0 0 0 .73 1.1 1.2 1.2 0 0 0 1.32-.24l.04-.04a1.45 1.45 0 0 1 2.05 2.05l-.04.04a1.2 1.2 0 0 0-.24 1.32v.01a1.2 1.2 0 0 0 1.08.69h.08A1.5 1.5 0 0 1 22 11v2a1.5 1.5 0 0 1-1.5 1.5h-.08a1.2 1.2 0 0 0-1.02.5Z" />
-          </svg>
-        </button>
+        <div class="profile-settings-menu-wrap">
+          <button type="button" class="profile-settings-button" data-settings-menu-toggle aria-label="Configuracion de cuenta" aria-haspopup="menu" aria-expanded="false">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="3.2" />
+              <path d="M19.4 15a1.2 1.2 0 0 0 .24 1.32l.04.04a1.45 1.45 0 0 1-2.05 2.05l-.04-.04a1.2 1.2 0 0 0-1.32-.24 1.2 1.2 0 0 0-.73 1.1V19.5A1.5 1.5 0 0 1 14 21h-4a1.5 1.5 0 0 1-1.5-1.5v-.08a1.2 1.2 0 0 0-.73-1.1 1.2 1.2 0 0 0-1.32.24l-.04.04a1.45 1.45 0 1 1-2.05-2.05l.04-.04a1.2 1.2 0 0 0 .24-1.32 1.2 1.2 0 0 0-1.1-.73H3.5A1.5 1.5 0 0 1 2 13v-2a1.5 1.5 0 0 1 1.5-1.5h.08a1.2 1.2 0 0 0 1.1-.73 1.2 1.2 0 0 0-.24-1.32l-.04-.04A1.45 1.45 0 1 1 6.45 5.4l.04.04a1.2 1.2 0 0 0 1.32.24h.01a1.2 1.2 0 0 0 .69-1.08V4.5A1.5 1.5 0 0 1 10 3h4a1.5 1.5 0 0 1 1.5 1.5v.08a1.2 1.2 0 0 0 .73 1.1 1.2 1.2 0 0 0 1.32-.24l.04-.04a1.45 1.45 0 0 1 2.05 2.05l-.04.04a1.2 1.2 0 0 0-.24 1.32v.01a1.2 1.2 0 0 0 1.08.69h.08A1.5 1.5 0 0 1 22 11v2a1.5 1.5 0 0 1-1.5 1.5h-.08a1.2 1.2 0 0 0-1.02.5Z" />
+            </svg>
+          </button>
+
+          <div class="profile-settings-menu" data-settings-menu hidden>
+            <button type="button" class="profile-settings-menu-item" data-modal-open="password-modal">Cambiar contrasena</button>
+            <button type="button" class="profile-settings-menu-item" data-modal-open="email-modal">Cambiar correo</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -37,20 +45,21 @@
 
     <div class="championships-grid">
       {{#each championships}}
-        <article class="championship-card">
-          <div class="championship-card-header">
-            <div>
-              <h3>{{name}}</h3>
-              <p>Temporada: {{season}}</p>
-            </div>
-
-            <p class="event-tag championship-status">{{status}}</p>
+        <article class="championship-card championship-card-compact championship-card-profile">
+          <div class="championship-card-topbar">
+            <p class="event-tag event-tag-{{statusTone}} championship-status">{{statusLabel}}</p>
+            <p class="championship-card-season">Temporada {{season}}</p>
           </div>
 
-          <div class="championship-meta">
-            <p class="championship-badge">Categoria: {{categoryName}}</p>
-            <p>Sede principal: {{primaryVenue}}</p>
-            <p>Jugadores inscritos: {{playersCount}}</p>
+          <div class="championship-card-copy">
+            <h3>{{name}}</h3>
+            <p class="championship-card-description">{{description}}</p>
+          </div>
+
+          <div class="championship-card-meta championship-card-meta-compact">
+            <p><span>Categoria</span>{{categoryName}}</p>
+            <p><span>Sede</span>{{primaryVenue}}</p>
+            <p><span>Jugadores</span>{{playersCount}}</p>
           </div>
         </article>
       {{/each}}
@@ -58,17 +67,17 @@
   </section>
 </section>
 
-<div class="modal-backdrop" data-modal="profile-modal" hidden>
+<div class="modal-backdrop" data-modal="profile-modal" data-modal-archive hidden>
   <div class="modal-panel profile-modal-panel" role="dialog" aria-modal="true" aria-labelledby="profile-modal-title">
-    <div class="modal-header">
+    <div class="modal-header" data-modal-archive-item>
       <button type="button" class="modal-close-button" data-modal-close="profile-modal">×</button>
       <h2 id="profile-modal-title">Editar perfil</h2>
       <button type="button" class="modal-save-button">Guardar</button>
     </div>
 
-    <div class="modal-banner"></div>
+    <div class="modal-banner" data-modal-archive-item></div>
 
-    <div class="modal-avatar-row">
+    <div class="modal-avatar-row" data-modal-archive-item>
       <img class="modal-avatar" src="{{profile.avatar}}" alt="Avatar de {{profile.name}}">
 
       <div class="modal-avatar-card">
@@ -81,7 +90,7 @@
       </div>
     </div>
 
-    <form class="profile-modal-form">
+    <form class="profile-modal-form" data-modal-archive-item>
       <label>
         <span>Nombre</span>
         <input type="text" value="{{profile.name}}">
@@ -105,41 +114,72 @@
   </div>
 </div>
 
-<div class="modal-backdrop" data-modal="settings-modal" hidden>
-  <div class="modal-panel settings-modal-panel" role="dialog" aria-modal="true" aria-labelledby="settings-modal-title">
-    <div class="modal-header">
-      <button type="button" class="modal-close-button" data-modal-close="settings-modal">×</button>
-      <h2 id="settings-modal-title">Configuracion de cuenta</h2>
-      <button type="button" class="modal-save-button">Guardar</button>
+<div class="modal-backdrop" data-modal="password-modal" data-modal-archive hidden>
+  <div class="modal-panel settings-modal-panel" role="dialog" aria-modal="true" aria-labelledby="password-modal-title">
+    <div class="modal-header" data-modal-archive-item>
+      <button type="button" class="modal-close-button" data-modal-close="password-modal">×</button>
+      <h2 id="password-modal-title">Cambiar contrasena</h2>
+      <button type="submit" class="modal-save-button" form="password-form">Guardar</button>
     </div>
 
-    <div class="profile-modal-form">
-      <label>
-        <span>Correo actual</span>
-        <input type="email" value="{{profile.email}}">
+    <form id="password-form" class="profile-modal-form" data-modal-archive-item data-settings-form="password" novalidate>
+      <p class="form-status-message" data-form-status aria-live="polite"></p>
+
+      <label class="form-field">
+        <span>Contrasena actual</span>
+        <input type="password" name="currentPassword" placeholder="••••••••" required minlength="8" autocomplete="current-password">
+        <small class="form-help-text">Ingresa tu contrasena vigente para confirmar el cambio.</small>
+        <small class="form-error-text" data-field-error="currentPassword"></small>
       </label>
 
-      <label>
-        <span>Nuevo correo</span>
-        <input type="email" placeholder="nuevo-correo@ejemplo.com">
+      <label class="form-field">
+        <span>Nueva contrasena</span>
+        <input type="password" name="newPassword" placeholder="••••••••" required minlength="8" autocomplete="new-password">
+        <small class="form-help-text">Usa al menos 8 caracteres para una contrasena mas segura.</small>
+        <small class="form-error-text" data-field-error="newPassword"></small>
       </label>
 
-      <label>
-        <span>Contraseña actual</span>
-        <input type="password" placeholder="••••••••">
+      <label class="form-field">
+        <span>Repetir nueva contrasena</span>
+        <input type="password" name="confirmPassword" placeholder="••••••••" required minlength="8" autocomplete="new-password">
+        <small class="form-help-text">Debe coincidir exactamente con la nueva contrasena.</small>
+        <small class="form-error-text" data-field-error="confirmPassword"></small>
       </label>
-
-      <label>
-        <span>Nueva contraseña</span>
-        <input type="password" placeholder="••••••••">
-      </label>
-
-      <label>
-        <span>Repetir nueva contraseña</span>
-        <input type="password" placeholder="••••••••">
-      </label>
-    </div>
+    </form>
   </div>
 </div>
 
-<script src="/js/modals.js"></script>
+<div class="modal-backdrop" data-modal="email-modal" data-modal-archive hidden>
+  <div class="modal-panel settings-modal-panel" role="dialog" aria-modal="true" aria-labelledby="email-modal-title">
+    <div class="modal-header" data-modal-archive-item>
+      <button type="button" class="modal-close-button" data-modal-close="email-modal">×</button>
+      <h2 id="email-modal-title">Cambiar correo</h2>
+      <button type="submit" class="modal-save-button" form="email-form">Guardar</button>
+    </div>
+
+    <form id="email-form" class="profile-modal-form" data-modal-archive-item data-settings-form="email" novalidate>
+      <p class="form-status-message" data-form-status aria-live="polite"></p>
+
+      <label class="form-field">
+        <span>Correo actual</span>
+        <input type="email" name="currentEmail" value="{{profile.email}}" required autocomplete="email">
+        <small class="form-help-text">Confirma el correo que usas actualmente en tu cuenta.</small>
+        <small class="form-error-text" data-field-error="currentEmail"></small>
+      </label>
+
+      <label class="form-field">
+        <span>Nuevo correo</span>
+        <input type="email" name="newEmail" placeholder="nuevo-correo@ejemplo.com" required autocomplete="email">
+        <small class="form-help-text">Usa un correo valido al que puedas acceder ahora mismo.</small>
+        <small class="form-error-text" data-field-error="newEmail"></small>
+      </label>
+
+      <label class="form-field">
+        <span>Confirmar nuevo correo</span>
+        <input type="email" name="confirmEmail" placeholder="nuevo-correo@ejemplo.com" required autocomplete="email">
+        <small class="form-help-text">Debe coincidir exactamente con el nuevo correo.</small>
+        <small class="form-error-text" data-field-error="confirmEmail"></small>
+      </label>
+    </form>
+  </div>
+</div>

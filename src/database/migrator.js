@@ -1,3 +1,4 @@
+// Este archivo configura Umzug para descubrir y ejecutar las migraciones del proyecto.
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { SequelizeStorage, Umzug } from "umzug";

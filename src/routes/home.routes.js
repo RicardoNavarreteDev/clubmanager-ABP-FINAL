@@ -1,3 +1,4 @@
+// Este archivo define las rutas publicas del inicio y del endpoint de estado.
 import { Router } from "express";
 import { renderHome } from "../controllers/home.controller.js";
 import { logRouteAccess } from "../middlewares/log.middleware.js";

@@ -1,5 +1,5 @@
+// Este archivo crea la tabla de categorias.
 import { DataTypes } from "sequelize";
-
 export async function up({ context: queryInterface }) {
   await queryInterface.sequelize.transaction(async (transaction) => {
     await queryInterface.createTable(

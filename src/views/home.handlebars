@@ -1,4 +1,5 @@
-<header>
+{{!-- Este archivo renderiza la portada principal del club con resumen y actividad reciente. --}}
+<header class="page-header">
   <p>Bienvenido a la comunidad de Club Prueba.</p>
 </header>
 
@@ -7,23 +8,23 @@
 
   <div class="stats-grid">
     <article class="stat-card">
-      <h3>Jugadores</h3>
-      <p>{{stats.playersCount}}</p>
+      <h3>Total de jugadores</h3>
+      <p class="stat-value">{{stats.playersCount}}</p>
     </article>
 
     <article class="stat-card">
       <h3>Partidos jugados</h3>
-      <p>{{stats.playedMatches}}</p>
+      <p class="stat-value">{{stats.playedMatches}}</p>
     </article>
 
     <article class="stat-card">
       <h3>Victorias</h3>
-      <p>{{stats.wins}}</p>
+      <p class="stat-value">{{stats.wins}}</p>
     </article>
 
     <article class="stat-card">
       <h3>Proximos eventos</h3>
-      <p>{{stats.upcomingEvents}}</p>
+      <p class="stat-value">{{stats.upcomingEvents}}</p>
     </article>
   </div>
 </section>
@@ -52,6 +53,8 @@
     <article class="feed-card">
       {{#if isAnnouncement}}
         <p class="feed-badge">Anuncio</p>
+      {{else}}
+        <p class="feed-badge">Publicacion</p>
       {{/if}}
 
       <div class="feed-header">
@@ -66,10 +69,175 @@
 
       <p>{{content}}</p>
 
-      <div class="feed-meta">
-        <p>Likes: {{likes}}</p>
-        <p>Comentarios: {{comments}}</p>
+      <div class="feed-social-bar">
+        <button type="button" class="feed-social-button" data-feed-like-toggle>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 20.5s-6.5-3.99-8.56-7.16C1.54 10.46 2.2 6.9 5.3 5.48c2.2-1 4.3-.15 5.55 1.55 1.24-1.7 3.35-2.55 5.55-1.55 3.1 1.42 3.76 4.98 1.86 7.86C18.5 16.51 12 20.5 12 20.5Z" />
+          </svg>
+          <strong data-feed-like-count>{{likes}}</strong>
+        </button>
+
+        {{#unless isAnnouncement}}
+          <button type="button" class="feed-social-button feed-comments-trigger" data-modal-open="comments-modal-{{id}}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M20 11.2c0 4.4-3.76 8-8.4 8-1.36 0-2.65-.3-3.78-.84L4 19.8l1.16-3.32A7.7 7.7 0 0 1 3.2 11.2c0-4.42 3.76-8 8.4-8s8.4 3.58 8.4 8Z" />
+            </svg>
+            <strong data-feed-comment-count>{{comments}}</strong>
+          </button>
+        {{/unless}}
       </div>
+
+      <div class="feed-meta">
+        {{#if isAnnouncement}}
+          <p><span>Visibilidad</span>Equipo completo</p>
+        {{else}}
+          <p><span>Interaccion</span>{{comments}} comentarios activos</p>
+        {{/if}}
+      </div>
+
+      {{#unless isAnnouncement}}
+        {{#if commentPreview}}
+          <div class="feed-comments-preview">
+            <div class="feed-comments-preview-header">
+              <p class="feed-comments-preview-label">Ultimo comentario</p>
+            </div>
+
+            <article class="feed-comment-preview-card">
+              <div class="comment-thread-header comment-preview-header">
+                <img src="{{commentPreview.avatar}}" alt="Avatar de {{commentPreview.author}}" width="80">
+
+                <div>
+                  <h4>{{commentPreview.author}}</h4>
+                  <p>{{commentPreview.role}} · {{commentPreview.date}}</p>
+                </div>
+              </div>
+
+              <p class="comment-thread-content">{{commentPreview.content}}</p>
+            </article>
+          </div>
+        {{/if}}
+      {{/unless}}
     </article>
+
+    {{#unless isAnnouncement}}
+      <div class="modal-backdrop" data-modal="comments-modal-{{id}}" data-modal-archive hidden>
+        <div class="modal-panel comments-modal-panel" role="dialog" aria-modal="true" aria-labelledby="comments-modal-title-{{id}}">
+          <div class="modal-header" data-modal-archive-item>
+            <button type="button" class="modal-close-button" data-modal-close="comments-modal-{{id}}">×</button>
+            <h2 id="comments-modal-title-{{id}}">Comentarios de {{author}}</h2>
+          </div>
+
+          <div class="comments-modal-body" data-modal-archive-item>
+            <div class="comments-modal-layout">
+              <div class="comments-modal-post-card">
+                <div class="feed-header comments-modal-post-header">
+                  <img src="{{avatar}}" alt="Avatar de {{author}}" width="80">
+
+                  <div>
+                    <h3>{{author}}</h3>
+                    <p>{{role}} · {{date}}</p>
+                  </div>
+                </div>
+
+                <p class="comments-modal-post-content">{{content}}</p>
+
+                <div class="feed-social-bar comments-modal-social-bar">
+                  <button type="button" class="feed-social-button" data-feed-like-toggle>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M12 20.5s-6.5-3.99-8.56-7.16C1.54 10.46 2.2 6.9 5.3 5.48c2.2-1 4.3-.15 5.55 1.55 1.24-1.7 3.35-2.55 5.55-1.55 3.1 1.42 3.76 4.98 1.86 7.86C18.5 16.51 12 20.5 12 20.5Z" />
+                    </svg>
+                    <strong data-feed-like-count>{{likes}}</strong>
+                  </button>
+                </div>
+              </div>
+
+              <div class="comments-thread-shell">
+                <div class="comments-thread-list">
+                  {{#each commentThread}}
+                    <article class="comment-thread-card">
+                      <div class="comment-thread-header">
+                        <img src="{{avatar}}" alt="Avatar de {{author}}" width="80">
+
+                        <div>
+                          <h3>{{author}}</h3>
+                          <p>{{role}} · {{date}}</p>
+                        </div>
+                      </div>
+
+                      <p class="comment-thread-content">{{content}}</p>
+
+                      <div class="comment-thread-actions">
+                        <button type="button" class="comment-action-button" data-comment-like-toggle>
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M12 20.5s-6.5-3.99-8.56-7.16C1.54 10.46 2.2 6.9 5.3 5.48c2.2-1 4.3-.15 5.55 1.55 1.24-1.7 3.35-2.55 5.55-1.55 3.1 1.42 3.76 4.98 1.86 7.86C18.5 16.51 12 20.5 12 20.5Z" />
+                          </svg>
+                          <strong data-comment-like-count>{{likes}}</strong>
+                        </button>
+                        <button type="button" class="comment-action-button" data-comment-reply-toggle>
+                          Responder
+                        </button>
+                      </div>
+
+                      {{#if replies.length}}
+                        <button type="button" class="comment-inline-expand-button" data-comment-replies-toggle>
+                          Ver todas las respuestas ({{replies.length}})
+                        </button>
+
+                        <div class="comment-replies" data-comment-replies-panel hidden>
+                          {{#each replies}}
+                            <article class="comment-reply-card">
+                              <div class="comment-thread-header comment-reply-header">
+                                <img src="{{avatar}}" alt="Avatar de {{author}}" width="80">
+
+                                <div>
+                                  <h4>{{author}}</h4>
+                                  <p>{{role}} · {{date}}</p>
+                                </div>
+                              </div>
+
+                              <p class="comment-thread-content">{{content}}</p>
+
+                              <div class="comment-thread-actions">
+                                <button type="button" class="comment-action-button" data-comment-like-toggle>
+                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M12 20.5s-6.5-3.99-8.56-7.16C1.54 10.46 2.2 6.9 5.3 5.48c2.2-1 4.3-.15 5.55 1.55 1.24-1.7 3.35-2.55 5.55-1.55 3.1 1.42 3.76 4.98 1.86 7.86C18.5 16.51 12 20.5 12 20.5Z" />
+                                  </svg>
+                                  <strong data-comment-like-count>{{likes}}</strong>
+                                </button>
+                              </div>
+                            </article>
+                          {{/each}}
+                        </div>
+                      {{/if}}
+
+                      <form class="comment-reply-form" data-comment-reply-form hidden>
+                        <label class="form-field">
+                          <span>Responder comentario</span>
+                          <textarea placeholder="Escribe una respuesta breve"></textarea>
+                        </label>
+
+                        <div class="comment-reply-actions">
+                          <button type="submit" class="composer-actions-button-primary">Responder</button>
+                        </div>
+                      </form>
+                    </article>
+                  {{/each}}
+                </div>
+
+                <form class="comments-composer-form" data-comments-composer-form>
+                  <label class="form-field comments-composer-field">
+                    <textarea placeholder="Escribe tu comentario"></textarea>
+                  </label>
+
+                  <div class="comment-reply-actions">
+                    <button type="submit" class="composer-actions-button-primary">Publicar</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    {{/unless}}
   {{/each}}
 </section>

@@ -1,4 +1,5 @@
-<header>
+{{!-- Este archivo muestra partidos jugados, proximos partidos y entrenamientos. --}}
+<header class="page-header">
   <h1>Eventos</h1>
   <p>Partidos y entrenamientos del Club Prueba.</p>
 </header>
@@ -8,15 +9,42 @@
 
   <div class="events-grid">
     {{#each playedMatches}}
-      <article class="event-card played-card">
-        <p class="event-tag">Finalizado</p>
-        <h3>{{opponent}}</h3>
-        <p>Campeonato: {{championshipName}}</p>
-        <p>Fecha: {{date}}</p>
-        <p>Hora: {{time}}</p>
-        <p>Lugar: {{location}}</p>
-        <p>Condicion: {{condition}}</p>
-        <p class="event-result">{{result}}</p>
+      <article
+        class="event-card event-card-compact played-card"
+        data-event-modal-trigger
+        data-event-type="Partido jugado"
+        data-event-title="{{opponent}}"
+        data-event-tag="Finalizado"
+        data-event-tag-tone="{{resultTone}}"
+        data-event-subtitle="{{championshipName}}"
+        data-event-date="{{date}}"
+        data-event-time="{{time}}"
+        data-event-location="{{location}}"
+        data-event-condition="{{condition}}"
+        data-event-result="{{resultLabel}} · {{resultSummary}}"
+        tabindex="0"
+        role="button"
+        aria-label="Ver detalle de partido contra {{opponent}}"
+      >
+        <div class="event-card-topbar">
+          <p class="event-tag event-tag-{{resultTone}}">{{resultLabel}}</p>
+          <p class="event-card-date">{{date}}</p>
+        </div>
+
+        <div class="event-card-copy">
+          <h3>{{opponent}}</h3>
+          <p class="event-card-subtitle">{{championshipName}}</p>
+        </div>
+
+        <div class="event-card-summary">
+          <p>{{time}}</p>
+          <p>{{location}}</p>
+        </div>
+
+        <div class="event-card-footer">
+          <p class="event-result event-result-{{resultTone}}">{{resultSummary}}</p>
+          <span class="event-card-link">Ver detalle</span>
+        </div>
       </article>
     {{/each}}
   </div>
@@ -27,15 +55,42 @@
 
   <div class="events-grid">
     {{#each pendingMatches}}
-      <article class="event-card pending-card">
-        <p class="event-tag">Proximo</p>
-        <h3>{{opponent}}</h3>
-        <p>Campeonato: {{championshipName}}</p>
-        <p>Fecha: {{date}}</p>
-        <p>Hora: {{time}}</p>
-        <p>Lugar: {{location}}</p>
-        <p>Condicion: {{condition}}</p>
-        <p class="event-result">{{result}}</p>
+      <article
+        class="event-card event-card-compact pending-card"
+        data-event-modal-trigger
+        data-event-type="Proximo partido"
+        data-event-title="{{opponent}}"
+        data-event-tag="Proximo"
+        data-event-tag-tone="neutral"
+        data-event-subtitle="{{championshipName}}"
+        data-event-date="{{date}}"
+        data-event-time="{{time}}"
+        data-event-location="{{location}}"
+        data-event-condition="{{condition}}"
+        data-event-result="Pendiente"
+        tabindex="0"
+        role="button"
+        aria-label="Ver detalle del proximo partido contra {{opponent}}"
+      >
+        <div class="event-card-topbar">
+          <p class="event-tag event-tag-neutral">Proximo</p>
+          <p class="event-card-date">{{date}}</p>
+        </div>
+
+        <div class="event-card-copy">
+          <h3>{{opponent}}</h3>
+          <p class="event-card-subtitle">{{championshipName}} · {{condition}}</p>
+        </div>
+
+        <div class="event-card-summary">
+          <p>{{time}}</p>
+          <p>{{location}}</p>
+        </div>
+
+        <div class="event-card-footer">
+          <p class="event-result event-result-neutral">Pendiente</p>
+          <span class="event-card-link">Ver detalle</span>
+        </div>
       </article>
     {{/each}}
   </div>
@@ -46,14 +101,74 @@
 
   <div class="trainings-grid">
     {{#each trainings}}
-      <article class="event-card training-card">
-        <p class="event-tag">Entrenamiento</p>
-        <h3>{{trainingType}}</h3>
-        <p>Fecha: {{date}}</p>
-        <p>Hora: {{time}}</p>
-        <p>Lugar: {{location}}</p>
-        <p>Categoria: {{categoryName}}</p>
+      <article
+        class="event-card event-card-compact training-card"
+        data-event-modal-trigger
+        data-event-type="Entrenamiento"
+        data-event-title="{{trainingType}}"
+        data-event-tag="Entrenamiento"
+        data-event-tag-tone="neutral"
+        data-event-subtitle="{{categoryName}}"
+        data-event-date="{{date}}"
+        data-event-time="{{time}}"
+        data-event-location="{{location}}"
+        data-event-condition="Planificado"
+        data-event-result="Sesion programada"
+        tabindex="0"
+        role="button"
+        aria-label="Ver detalle del entrenamiento {{trainingType}}"
+      >
+        <div class="event-card-topbar">
+          <p class="event-tag event-tag-neutral">Entrenamiento</p>
+          <p class="event-card-date">{{date}}</p>
+        </div>
+
+        <div class="event-card-copy">
+          <h3>{{trainingType}}</h3>
+          <p class="event-card-subtitle">{{categoryName}}</p>
+        </div>
+
+        <div class="event-card-summary">
+          <p>{{time}}</p>
+          <p>{{location}}</p>
+        </div>
+
+        <div class="event-card-footer">
+          <p class="event-result event-result-neutral">Sesion programada</p>
+          <span class="event-card-link">Ver detalle</span>
+        </div>
       </article>
     {{/each}}
   </div>
 </section>
+
+<div class="modal-backdrop" data-modal="event-detail-modal" data-modal-archive hidden>
+  <div class="modal-panel event-detail-modal-panel" role="dialog" aria-modal="true" aria-labelledby="event-detail-title">
+    <div class="modal-header" data-modal-archive-item>
+      <button type="button" class="modal-close-button" data-modal-close="event-detail-modal">×</button>
+      <h2 id="event-detail-title">Detalle del evento</h2>
+      <button type="button" class="modal-save-button event-detail-close-button" data-modal-close="event-detail-modal">Cerrar</button>
+    </div>
+
+    <div class="event-detail-body" data-modal-archive-item>
+      <div class="event-detail-hero">
+        <p class="event-tag" data-event-detail-tag></p>
+        <p class="event-detail-type" data-event-detail-type></p>
+        <h3 data-event-detail-heading></h3>
+        <p class="event-detail-subtitle" data-event-detail-subtitle></p>
+      </div>
+
+      <div class="event-detail-grid">
+        <p><span>Fecha</span><strong data-event-detail-date></strong></p>
+        <p><span>Hora</span><strong data-event-detail-time></strong></p>
+        <p><span>Lugar</span><strong data-event-detail-location></strong></p>
+        <p><span>Condicion</span><strong data-event-detail-condition></strong></p>
+      </div>
+
+      <div class="event-detail-result-card">
+        <span>Estado actual</span>
+        <p data-event-detail-result></p>
+      </div>
+    </div>
+  </div>
+</div>

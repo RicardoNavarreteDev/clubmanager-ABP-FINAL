@@ -1,3 +1,4 @@
+// Este archivo centraliza la lectura de los archivos JSON usados como fuente de datos.
 import { readFile } from "fs/promises";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -6,6 +7,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const readJsonFile = async (fileName) => {
+  // Resolvemos la ruta relativa una sola vez aca para que el resto de servicios no sepan donde viven los JSON.
   const filePath = path.join(__dirname, "../data", fileName);
   const fileContent = await readFile(filePath, "utf-8");
   return JSON.parse(fileContent);

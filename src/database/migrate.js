@@ -1,3 +1,4 @@
+// Este archivo ejecuta todas las migraciones pendientes contra la base de datos.
 import sequelize from "../config/db.js";
 import migrator from "./migrator.js";
 

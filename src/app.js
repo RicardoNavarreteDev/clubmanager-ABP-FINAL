@@ -1,3 +1,4 @@
+// Este archivo configura Express, las vistas, los estaticos y el montaje de rutas.
 import express from "express";
 import morgan from "morgan";
 import { engine } from "express-handlebars";
@@ -16,6 +17,7 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 app.use(morgan('dev'));
+app.use(express.json());
 
 app.engine('handlebars', engine());
 app.set('view engine', 'handlebars');

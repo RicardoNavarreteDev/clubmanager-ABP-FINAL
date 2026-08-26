@@ -1,3 +1,4 @@
+// Este archivo revierte la ultima migracion aplicada en la base de datos.
 import sequelize from "../config/db.js";
 import migrator from "./migrator.js";
 
