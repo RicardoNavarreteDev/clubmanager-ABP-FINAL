@@ -1,5 +1,6 @@
 // Este archivo define las rutas API del modulo de usuarios.
 import { Router } from "express";
+import { authenticateJwt, authorizeRoles } from "../../middlewares/auth.middleware.js";
 import {
   listUsers,
   getUserById,
@@ -10,10 +11,10 @@ import {
 
 const router = Router();
 
-router.get("/", listUsers);
-router.get("/:id", getUserById);
-router.post("/", createUser);
-router.put("/:id", updateUser);
-router.delete("/:id", deleteUser);
+router.get("/", authenticateJwt, authorizeRoles("admin", "coach"), listUsers);
+router.get("/:id", authenticateJwt, authorizeRoles("admin", "coach"), getUserById);
+router.post("/", authenticateJwt, authorizeRoles("admin", "coach"), createUser);
+router.put("/:id", authenticateJwt, authorizeRoles("admin", "coach"), updateUser);
+router.delete("/:id", authenticateJwt, authorizeRoles("admin", "coach"), deleteUser);
 
 export default router;

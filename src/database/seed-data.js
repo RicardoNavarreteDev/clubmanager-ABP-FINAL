@@ -20,7 +20,7 @@ export const userSeeds = [
   {
     id: 1,
     email: "admin@clubmanager.dev",
-    password_hash: "seed_admin_hash",
+    password_hash: "3b612c75a7b5048a435fb6ec81e52ff92d6d795a8b5a9c17070f6a63c97a53b2",
     is_active: true,
     created_at: new Date(),
     updated_at: new Date(),
@@ -28,7 +28,7 @@ export const userSeeds = [
   {
     id: 2,
     email: "coach@clubmanager.dev",
-    password_hash: "seed_coach_hash",
+    password_hash: "f42fb01782c73deeda29d5130c88c10ed5f2d6d1468c2aeacc672ffd1a5e05b9",
     is_active: true,
     created_at: new Date(),
     updated_at: new Date(),
@@ -36,7 +36,7 @@ export const userSeeds = [
   {
     id: 3,
     email: "ricardo@clubmanager.dev",
-    password_hash: "seed_player_hash",
+    password_hash: "247519973b4bbeb9979d08e2b4902004bccdb105017ae17af5047bbd506d5660",
     is_active: true,
     created_at: new Date(),
     updated_at: new Date(),

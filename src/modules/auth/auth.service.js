@@ -1,5 +1,6 @@
 // Este archivo concentra la logica de negocio del registro y login basados en invitaciones.
 import { createHash } from "node:crypto";
+import jwt from "jsonwebtoken";
 import sequelize from "../../config/db.js";
 import Invitation from "../../models/invitation.model.js";
 import { initModelAssociations } from "../../models/associations.js";
@@ -8,6 +9,19 @@ import UserRole from "../../models/user-role.model.js";
 import User from "../../models/user.model.js";
 
 const hashPassword = (password) => createHash("sha256").update(password).digest("hex");
+
+// Firmamos un token chico con la identidad basica del usuario para resolver sesion y permisos en rutas privadas.
+const signAuthToken = ({ userId, email, roles }) => jwt.sign(
+  {
+    userId,
+    email,
+    roles,
+  },
+  process.env.JWT_SECRET,
+  {
+    expiresIn: process.env.JWT_EXPIRES_IN,
+  },
+);
 
 const mapAuthUser = (user) => ({
   id: user.id,
@@ -36,31 +50,59 @@ const buildUserIncludes = () => ([
   },
 ]);
 
-const mapRegisteredSession = (user) => ({
-  user: {
-    ...mapAuthUser(user),
-    roles: (user.roles ?? []).map((role) => ({ id: role.id, name: role.name })),
-  },
-  player: user.player
-    ? {
-        id: user.player.id,
-        name: user.player.name,
-        position: user.player.position,
-        number: user.player.number,
-        avatar: user.player.avatar,
-        bio: user.player.bio,
-        birthDate: user.player.birthDate,
-        rosterStatus: user.player.rosterStatus,
-        primaryCategoryId: user.player.primaryCategoryId,
-        primaryCategory: user.player.primaryCategory
-          ? {
-              id: user.player.primaryCategory.id,
-              name: user.player.primaryCategory.name,
-            }
-          : null,
-      }
-    : null,
-});
+const mapRegisteredSession = (user) => {
+  const roleNames = (user.roles ?? []).map((role) => role.name);
+  const token = signAuthToken({
+    userId: user.id,
+    email: user.email,
+    roles: roleNames,
+  });
+
+  return {
+    token,
+    user: {
+      ...mapAuthUser(user),
+      roles: (user.roles ?? []).map((role) => ({ id: role.id, name: role.name })),
+    },
+    player: user.player
+      ? {
+          id: user.player.id,
+          name: user.player.name,
+          position: user.player.position,
+          number: user.player.number,
+          avatar: user.player.avatar,
+          bio: user.player.bio,
+          birthDate: user.player.birthDate,
+          rosterStatus: user.player.rosterStatus,
+          primaryCategoryId: user.player.primaryCategoryId,
+          primaryCategory: user.player.primaryCategory
+            ? {
+                id: user.player.primaryCategory.id,
+                name: user.player.primaryCategory.name,
+              }
+            : null,
+        }
+      : null,
+  };
+};
+
+export const getAuthenticatedSession = async (userId) => {
+  initModelAssociations();
+
+  const user = await User.findByPk(userId, {
+    include: buildUserIncludes(),
+  });
+
+  if (!user) {
+    throw new Error("El usuario autenticado no existe.");
+  }
+
+  if (!user.isActive) {
+    throw new Error("La cuenta del usuario esta inactiva.");
+  }
+
+  return mapRegisteredSession(user);
+};
 
 export const registerWithInvitation = async (payload) => {
   initModelAssociations();

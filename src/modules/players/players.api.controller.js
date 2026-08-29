@@ -74,6 +74,12 @@ export const patchPlayerStatus = async (req, res) => {
   try {
     const playerId = validatePlayerId(req.params.id);
     const payload = validatePlayerStatusPayload(req.body);
+
+    // Dejar a un jugador inactivo es una decision de administracion mas sensible que hoy reservamos solo a admin.
+    if (payload.rosterStatus === "inactive" && !req.user.roles.includes("admin")) {
+      return sendError(res, "Solo un admin puede dejar a un jugador en estado inactive.", 403);
+    }
+
     const updatedPlayer = await updatePlayerStatus(playerId, payload.rosterStatus);
 
     if (!updatedPlayer) {

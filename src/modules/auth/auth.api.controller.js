@@ -1,5 +1,5 @@
 // Este archivo recibe las requests HTTP del modulo de autenticacion y responde en formato JSON.
-import { loginWithCredentials, registerWithInvitation } from "./auth.service.js";
+import { getAuthenticatedSession, loginWithCredentials, registerWithInvitation } from "./auth.service.js";
 import { validateLoginPayload, validateRegisterPayload } from "./auth.validation.js";
 import { sendError, sendSuccess } from "../../shared/responses/api-response.js";
 
@@ -40,5 +40,14 @@ export const login = async (req, res) => {
     return sendSuccess(res, "Sesion iniciada correctamente", session);
   } catch (error) {
     return sendError(res, error.message || "No se pudo iniciar sesion", resolveErrorStatus(error.message || ""));
+  }
+};
+
+export const me = async (req, res) => {
+  try {
+    const session = await getAuthenticatedSession(req.user.userId);
+    return sendSuccess(res, "Usuario autenticado obtenido correctamente", session);
+  } catch (error) {
+    return sendError(res, error.message || "No se pudo obtener la sesion autenticada", resolveErrorStatus(error.message || ""));
   }
 };
