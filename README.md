@@ -1,28 +1,29 @@
 # ClubManager
 
-Repositorio: `https://github.com/RicardoNavarreteDev/clubmanager-modulo-6`
+Repositorio: `https://github.com/RicardoNavarreteDev/clubmanager-ABP-FINAL`
 
-Aplicacion web backend construida con Node.js y Express para la entrega academica del Modulo 6. El proyecto representa la base de `ClubManager`, una plataforma de gestion para clubes o equipos deportivos, usando como ejemplo inicial a `Club Prueba`.
-
-En esta primera entrega el objetivo es dejar una base funcional, modular y documentada, con rutas publicas, vistas con Handlebars, archivos estaticos y persistencia simple en archivo plano.
+Aplicacion web y backend construidos con `Node.js`, `Express` y `PostgreSQL` para la entrega academica del proyecto final ABP. El sistema modela la gestion de un club deportivo con vistas renderizadas, acceso a datos con `Sequelize`, flujos de invitacion para nuevos usuarios y una API modular que sigue creciendo hacia autenticacion y paneles por rol.
 
 ## Descripcion
 
 Esta version incluye:
 
-- servidor Express funcional
-- configuracion con `dotenv`
-- logs HTTP con `morgan`
+- servidor Express funcional con `ES Modules`
 - vistas con `express-handlebars`
 - archivos estaticos servidos desde `public/`
-- rutas publicas `/`, `/jugadores` y `/status`
-- pagina `404` personalizada
-- registro de accesos en `logs/log.txt` usando `fs/promises`
+- persistencia simple en `logs/log.txt` para `/status`
+- conexion real a `PostgreSQL`
+- migraciones con `Umzug`
+- modelos y relaciones con `Sequelize`
+- arquitectura modular por dominio en `src/modules/`
+- API REST para `users`, `players`, `invitations` y `auth`
+- flujo real de invitaciones para el registro de jugadores
 
 ## Requisitos
 
 - Node.js 18 o superior
 - npm
+- PostgreSQL
 - Git
 
 ## Instalacion
@@ -34,13 +35,44 @@ Esta version incluye:
 npm install
 ```
 
-3. Crear un archivo `.env` en la raiz del proyecto a partir de `.env.example`.
+3. Crear el archivo `.env` a partir de `.env.example`.
+4. Crear la base de datos en PostgreSQL.
+5. Ejecutar migraciones:
 
-Contenido minimo sugerido:
+```bash
+npm run db:migrate
+```
+
+## Configuracion
+
+Variables principales:
 
 ```env
 PORT=3000
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=clubmanager
+DB_USER=clubmanager_app
+DB_PASSWORD=change_me
 ```
+
+Flags de lectura desde base de datos:
+
+```env
+DB_READ_CATEGORIES=true
+DB_READ_PLAYERS=true
+DB_READ_CHAMPIONSHIPS=true
+DB_READ_MATCHES=true
+DB_READ_TRAININGS=true
+DB_READ_PLAYER_CHAMPIONSHIPS=true
+DB_READ_INVITATIONS=true
+DB_READ_USERS=true
+DB_READ_ROLES=true
+DB_READ_PROFILE=true
+DB_PROFILE_USER_ID=3
+```
+
+Si alguno de esos flags esta en `false`, el modulo correspondiente puede seguir leyendo desde JSON o desactivar la lectura segun el caso.
 
 ## Ejecucion
 
@@ -58,18 +90,74 @@ npm start
 
 ## Scripts
 
-- `npm run dev`: ejecuta el servidor con `nodemon` para reiniciar automaticamente al guardar cambios.
-- `npm start`: ejecuta el servidor con Node.js en modo normal.
+- `npm run dev`: levanta el servidor con `nodemon`.
+- `npm start`: levanta el servidor con Node.js.
+- `npm run db:migrate`: aplica migraciones pendientes.
+- `npm run db:migrate:undo`: revierte la ultima migracion aplicada.
 
-El proyecto usa `ES Modules` con `"type": "module"` en `package.json`, por eso los archivos trabajan con `import` y `export`.
+## Arquitectura
 
-Se eligio `src/server.js` como punto de entrada porque separa claramente el arranque del servidor de la configuracion de la aplicacion. La configuracion de Express vive en `src/app.js`.
+El proyecto usa una arquitectura modular por dominio con capas internas livianas.
 
-## Rutas principales
+- `src/modules/`: organiza el codigo por feature o dominio.
+- `*.web.routes.js` y `*.web.controller.js`: rutas y controladores que renderizan HTML.
+- `*.api.routes.js` y `*.api.controller.js`: rutas y controladores que responden JSON.
+- `*.service.js`: acceso a datos y logica reutilizable del dominio.
+- `*.validation.js`: validaciones de entrada.
+- `src/models/`: modelos Sequelize.
+- `src/database/`: migraciones, seeds y utilidades de base de datos.
+- `src/shared/`: utilidades compartidas, como lectura de JSON y respuestas API.
 
-- `/`: renderiza la vista principal con Handlebars.
-- `/jugadores`: renderiza una vista de prueba para la seccion de jugadores.
-- `/status`: devuelve una respuesta JSON para comprobar el estado del servidor.
+El entrypoint real del servidor es `src/server.js` y la configuracion de Express vive en `src/app.js`.
+
+## Estructura del proyecto
+
+```text
+Proyecto-ABP-M6/
+├── logs/
+│   └── log.txt
+├── public/
+│   ├── css/
+│   ├── images/
+│   └── js/
+├── src/
+│   ├── app.js
+│   ├── server.js
+│   ├── config/
+│   ├── database/
+│   ├── middlewares/
+│   ├── models/
+│   ├── modules/
+│   │   ├── auth/
+│   │   ├── championships/
+│   │   ├── categories/
+│   │   ├── events/
+│   │   ├── home/
+│   │   ├── invitations/
+│   │   ├── matches/
+│   │   ├── player-championships/
+│   │   ├── players/
+│   │   ├── posts/
+│   │   ├── profile/
+│   │   ├── roles/
+│   │   ├── status/
+│   │   ├── trainings/
+│   │   └── users/
+│   ├── shared/
+│   └── views/
+├── .env.example
+├── package.json
+└── README.md
+```
+
+## Rutas web principales
+
+- `/`: portada principal del club.
+- `/status`: estado del servidor y escritura en `logs/log.txt`.
+- `/jugadores`: vista de jugadores.
+- `/eventos`: vista de partidos y entrenamientos.
+- `/campeonatos`: vista de campeonatos.
+- `/perfil`: vista de perfil del usuario cargado.
 
 Ejemplo de respuesta en `/status`:
 
@@ -80,23 +168,153 @@ Ejemplo de respuesta en `/status`:
 }
 ```
 
-## Archivos estaticos
+## API REST disponible
 
-Los archivos estaticos se sirven desde `public/` usando `express.static()`.
+### Users
 
-Ejemplo actual:
+- `GET /api/users`
+- `GET /api/users/:id`
+- `POST /api/users`
+- `PUT /api/users/:id`
+- `DELETE /api/users/:id`
 
-- `public/css/output.css`
+Nota:
+`POST /api/users` y `DELETE /api/users/:id` se mantuvieron para cubrir la consigna del modulo 7 y para pruebas administrativas del backend. El flujo real del producto no considera un alta libre de usuarios ni un borrado directo de cuentas desde la experiencia final del club; el ingreso real se resuelve con invitaciones y registro por token.
+
+Filtros disponibles:
+
+- `email`
+- `displayName`
+- `isActive`
+
+### Players
+
+- `GET /api/players`
+- `GET /api/players/:id`
+- `PUT /api/players/:id`
+- `PATCH /api/players/:id/status`
+
+Filtros disponibles:
+
+- `name`
+- `primaryCategoryId`
+- `rosterStatus`
+
+### Invitations
+
+- `GET /api/invitations`
+- `GET /api/invitations/:id`
+- `GET /api/invitations/token/:token`
+- `POST /api/invitations`
+- `PATCH /api/invitations/:id/status`
+
+Filtros disponibles:
+
+- `email`
+- `roleId`
+- `status`
+
+### Auth
+
+- `POST /api/auth/register`
+- `POST /api/auth/login`
+
+## Flujo real de invitaciones
+
+El flujo actual del proyecto ya no depende del alta libre de usuarios.
+
+1. `admin` o `coach` crea una invitacion.
+2. Si la invitacion es para rol `player`, se crea una ficha deportiva en estado `invited`.
+3. La invitacion genera un `token` unico.
+4. El usuario entra al link de registro con ese `token`.
+5. `POST /api/auth/register` valida la invitacion y crea la cuenta.
+6. El sistema asigna el rol, vincula el `player`, cambia su estado a `active` y marca la invitacion como `accepted`.
+
+Este flujo se ejecuta dentro de una transaccion para mantener consistencia entre `users`, `user_roles`, `players` e `invitations`.
+
+## Ejemplos de uso
+
+### Crear invitacion para jugador
+
+```http
+POST /api/invitations
+Content-Type: application/json
+```
+
+```json
+{
+  "email": "jugador.prueba@clubmanager.dev",
+  "name": "Jugador Prueba",
+  "roleId": 3,
+  "primaryCategoryId": 2
+}
+```
+
+### Registrar usuario con token
+
+```http
+POST /api/auth/register
+Content-Type: application/json
+```
+
+```json
+{
+  "token": "TOKEN_GENERADO_EN_LA_INVITACION",
+  "name": "Jugador Prueba",
+  "birthDate": "1999-04-20",
+  "password": "secreta123",
+  "confirmPassword": "secreta123",
+  "position": "Base",
+  "number": 9,
+  "bio": "Jugador de prueba para el flujo de registro."
+}
+```
+
+En la aplicacion final, ese `token` no se escribe manualmente. La idea es que viaje en el link que recibe el usuario por correo y que el frontend lo lea automaticamente para habilitar el formulario de registro.
+
+### Iniciar sesion
+
+```http
+POST /api/auth/login
+Content-Type: application/json
+```
+
+```json
+{
+  "email": "jugador.prueba@clubmanager.dev",
+  "password": "secreta123"
+}
+```
+
+## Validacion manual recomendada
+
+Rutas web:
+
+- `/`
+- `/status`
+- `/jugadores`
+- `/eventos`
+- `/campeonatos`
+- `/perfil`
+- una URL inexistente para confirmar el `404`
+
+Rutas API:
+
+- `GET /api/users`
+- `POST /api/users`
+- `PUT /api/users/:id`
+- `DELETE /api/users/:id`
+- `GET /api/players`
+- `PUT /api/players/:id`
+- `PATCH /api/players/:id/status`
+- `POST /api/invitations`
+- `GET /api/invitations/token/:token`
+- `POST /api/auth/register`
+- `POST /api/auth/login`
 
 ## Registro en archivo plano
 
-La ruta `/status` utiliza un middleware propio para registrar accesos en `logs/log.txt`.
-
-Cada linea guarda:
-
-- fecha
-- hora
-- ruta accedida
+La ruta `/status` sigue usando un middleware propio para registrar accesos en `logs/log.txt`.
 
 Ejemplo:
 
@@ -104,7 +322,14 @@ Ejemplo:
 11/8/2026 5:34:11 p.m. - /status
 ```
 
-Se eligio este mecanismo para cumplir la persistencia simple pedida en la primera entrega, sin incorporar todavia base de datos.
+## Decisiones tecnicas
+
+- Se mantuvo `src/app.js` separado de `src/server.js` para distinguir configuracion y arranque.
+- Se uso `Sequelize` con `PostgreSQL` para trabajar relaciones y migraciones de forma consistente.
+- Se migro desde una estructura por capas globales a una arquitectura modular por dominio para escalar mejor.
+- Se conservaron vistas renderizadas con `Handlebars` y se sumo una API REST sobre la misma app Express.
+- El registro real de jugadores ya no es libre: depende de invitaciones con `token`.
+- Se implemento transaccionalidad en el registro para mantener consistencia entre invitaciones, usuarios, roles y jugadores.
 
 ## Evidencias
 
@@ -115,10 +340,6 @@ Se eligio este mecanismo para cumplir la persistencia simple pedida en la primer
 ### Ruta principal `/`
 
 ![Ruta principal](public/images/paginaPrincipal.png)
-
-### Ruta `/jugadores`
-
-![Ruta jugadores](public/images/rutaJugadores.png)
 
 ### Ruta `/status`
 
@@ -136,94 +357,63 @@ Se eligio este mecanismo para cumplir la persistencia simple pedida en la primer
 
 ![Arquitectura del proyecto](public/images/arquitectura.png)
 
-## Estructura del proyecto
+### Modulo 7 - GET de usuarios
 
-```text
-Proyecto-ABP-M6/
-├── logs/
-│   └── log.txt
-├── public/
-│   └── css/
-│       └── output.css
-├── src/
-│   ├── controllers/
-│   │   ├── home.controller.js
-│   │   └── players.controller.js
-│   ├── middlewares/
-│   │   └── log.middleware.js
-│   ├── routes/
-│   │   ├── home.routes.js
-│   │   └── players.routes.js
-│   ├── views/
-│   │   ├── layouts/
-│   │   │   └── main.handlebars
-│   │   ├── 404.handlebars
-│   │   ├── home.handlebars
-│   │   └── players.handlebars
-│   ├── app.js
-│   └── server.js
-├── .env.example
-├── .gitignore
-├── package.json
-└── README.md
-```
+![GET usuarios](public/images/getallusers.png)
 
-## Decisiones tecnicas
+### Modulo 7 - POST de usuarios
 
-- Se uso `app.js` para concentrar la configuracion de Express y `server.js` para iniciar el servidor.
-- Se eligio `express-handlebars` para trabajar con vistas reutilizables y separar layout de contenido.
-- Se modularizaron rutas, controladores y middlewares para dejar una base escalable para las siguientes entregas.
-- Se uso `public/` para servir recursos estaticos de forma simple y clara.
-- Se implemento persistencia en archivo plano con `fs/promises` porque la consigna del Modulo 6 aun no requiere base de datos.
+![POST usuarios](public/images/createuser.png)
 
-## Reflexion tecnica
+### Modulo 7 - PUT de usuarios
 
-- Express simplifica el manejo de rutas, middlewares y respuestas frente a trabajar solo con Node.js puro.
-- La separacion entre `src/app.js` y `src/server.js` deja mas clara la diferencia entre configurar la aplicacion e iniciar el servidor.
-- El uso de `express-handlebars` permitio servir HTML con una estructura reutilizable, separando layout y vistas.
-- La modularizacion en `routes/`, `controllers/` y `middlewares/` deja una base ordenada para la siguiente etapa con base de datos y ORM.
-- El registro en `logs/log.txt` con `fs.appendFile()` resuelve la persistencia simple pedida por la consigna sin sobredisenar la solucion antes de tiempo.
-- La estructura actual deja el proyecto listo para integrar persistencia real y operaciones CRUD en el Modulo 7.
+![PUT usuarios](public/images/updateuser.png)
 
-## Estado de la entrega 1
+### Modulo 7 - DELETE de usuarios
 
-Actualmente el proyecto ya cumple con:
+![DELETE usuarios](public/images/deleteuser.png)
+
+### Modulo 7 - GET de jugadores
+
+![GET jugadores](public/images/getaallplayers.png)
+
+### Modulo 7 - PATCH de estado de jugador
+
+![PATCH jugadores](public/images/changeplayerstatus.png)
+
+### Modulo 7 - POST de invitaciones
+
+![POST invitaciones](public/images/createinvitation.png)
+
+### Modulo 7 - Registro con token
+
+![Registro con token](public/images/register.png)
+
+### Modulo 7 - Login
+
+![Login](public/images/login.png)
+
+## Estado del proyecto
+
+Actualmente el proyecto ya cuenta con:
 
 - servidor Express funcional
-- scripts `start` y `dev`
-- configuracion de `dotenv`
-- uso de `nodemon`
-- rutas publicas
-- respuesta HTML y JSON
-- carpeta `public/` funcionando
-- registro simple en archivo plano
-- estructura modular basica
-- pagina 404 personalizada
+- vistas web operativas
+- conexion real a PostgreSQL
+- migraciones y seeds
+- modelos y relaciones con Sequelize
+- CRUD completo para `users`
+- modulo API de `players`
+- modulo API de `invitations`
+- registro y login basados en invitacion
+- persistencia simple en archivo plano para `/status`
 
-## Checklist de cumplimiento
+## Proyeccion
 
-- Node.js y Express configurados y funcionando
-- `dotenv`, `morgan` y `nodemon` instalados y usados correctamente
-- `app.js` y `server.js` separados por responsabilidad
-- rutas publicas `/` y `/status` implementadas
-- respuesta HTML y respuesta JSON verificadas
-- carpeta `public/` servida con `express.static()`
-- registro de accesos en `logs/log.txt` con `fs.appendFile()`
-- estructura modular con `controllers`, `routes` y `middlewares`
-- pagina 404 personalizada
-- README con instalacion, ejecucion, decisiones tecnicas y evidencias
+Los siguientes pasos naturales del proyecto son:
 
-## Proyeccion de modulos 7 y 8
-
-En siguientes entregas `ClubManager` se extendera con:
-
-- base de datos real
-- ORM
-- CRUD de entidades principales
-- relaciones entre modelos
-- API RESTful
-- autenticacion con JWT
-- rutas protegidas
-- subida de archivos
-
-Estas partes no forman parte del alcance actual del Modulo 6.
+- reemplazar el hash temporal por `bcrypt` o `bcryptjs`
+- agregar `JWT`
+- proteger rutas privadas por rol
+- separar experiencia de panel para `admin`, `coach` y `player`
+- evolucionar a una landing publica con creacion de club y admin fundador

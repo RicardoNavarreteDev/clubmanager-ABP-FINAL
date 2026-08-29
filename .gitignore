@@ -1,2 +1,5 @@
 node_modules/
 .env
+.opencode/
+AGENTS.md
+npm-debug.log*
