@@ -7,25 +7,135 @@
 <section class="players-grid">
   {{#each players}}
     <article class="player-card">
-      <div class="player-card-topbar">
-        <span class="player-card-role">Jugador</span>
-        <span class="player-card-number">#{{number}}</span>
-      </div>
-
       <div class="player-card-profile">
         <div class="player-card-portrait">
-          <img src="{{avatar}}" alt="Avatar de {{name}}" width="80">
+          <img src="{{displayAvatar}}" alt="Avatar de {{name}}" width="80">
         </div>
 
         <div class="player-card-copy">
+          <div class="player-card-topbar">
+            <span class="player-card-role">Jugador</span>
+            <span class="player-card-number">#{{number}}</span>
+          </div>
+
           <h2>{{name}}</h2>
+          <p class="player-card-position">{{position}}</p>
+
+          <div class="player-card-inline-meta">
+            <div class="player-detail-card">
+              <div class="player-detail-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="9" cy="8" r="3" />
+                  <path d="M3.5 18c1.2-2.6 3.6-4.2 5.5-4.2" />
+                  <path d="M14 7h6" />
+                  <path d="M17 4v6" />
+                </svg>
+              </div>
+
+              <div>
+                <span>Categoria</span>
+                <strong>{{categoryName}}</strong>
+              </div>
+            </div>
+
+            <div class="player-detail-card">
+              <div class="player-detail-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3.5" y="5" width="17" height="15" rx="2" />
+                  <path d="M8 3.5V7" />
+                  <path d="M16 3.5V7" />
+                  <path d="M3.5 10h17" />
+                </svg>
+              </div>
+
+              <div>
+                <span>Edad</span>
+                <strong>{{age}} anos</strong>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div class="player-card-meta">
-        <p><span>Categoria</span>{{categoryName}}</p>
-        <p><span>Edad</span>{{age}} anos</p>
+      <div class="player-card-divider"></div>
+
+      <div class="player-status-grid">
+        <div class="player-status-info">
+          <div class="player-status-info-icon player-status-info-icon-status" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m12 2 7 4v6c0 4.5-3 8.5-7 10-4-1.5-7-5.5-7-10V6l7-4Z" />
+              <path d="m9.5 12 1.8 1.8 3.2-3.6" />
+            </svg>
+          </div>
+
+          <div>
+            <span>Estado actual</span>
+            <strong class="player-status-text" data-tone="{{rosterStatusTone}}">{{rosterStatusLabel}}</strong>
+          </div>
+        </div>
+
+        <div class="player-status-info player-status-info-team">
+          <div class="player-status-info-icon player-status-info-icon-team" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 21s6-4.35 6-10a6 6 0 1 0-12 0c0 5.65 6 10 6 10Z" />
+              <circle cx="12" cy="11" r="2" />
+            </svg>
+          </div>
+
+          <div>
+            <span>Equipo</span>
+            <strong>{{teamName}}</strong>
+          </div>
+        </div>
       </div>
+
+      {{#if ../showManagementLinks}}
+        <div class="player-management-actions">
+          <button type="button" class="player-action-button player-action-button-secondary">
+            <span class="player-action-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m4 20 4.5-1 9-9a2.1 2.1 0 0 0-3-3l-9 9L4 20Z" />
+                <path d="m13.5 6.5 4 4" />
+              </svg>
+            </span>
+            <span>Editar jugador</span>
+          </button>
+
+          <button type="button" class="player-action-button player-action-button-primary">
+            <span class="player-action-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 11a8 8 0 0 0-14.9-4" />
+                <path d="M4 4v4h4" />
+                <path d="M4 13a8 8 0 0 0 14.9 4" />
+                <path d="M20 20v-4h-4" />
+              </svg>
+            </span>
+            <span>Cambiar estado</span>
+          </button>
+        </div>
+      {{/if}}
     </article>
   {{/each}}
+</section>
+
+<section class="players-pagination-card">
+  <div class="players-pagination-controls">
+    {{#if pagination.hasPreviousPage}}
+      <a class="pagination-link" href="{{pagination.previousPageHref}}">Anterior</a>
+    {{else}}
+      <span class="pagination-link pagination-link-disabled">Anterior</span>
+    {{/if}}
+
+    <div class="pagination-pages">
+      {{#each pagination.pages}}
+        <a class="pagination-page {{#if isCurrent}}active{{/if}}" href="{{href}}">{{number}}</a>
+      {{/each}}
+    </div>
+
+    {{#if pagination.hasNextPage}}
+      <a class="pagination-link" href="{{pagination.nextPageHref}}">Siguiente</a>
+    {{else}}
+      <span class="pagination-link pagination-link-disabled">Siguiente</span>
+    {{/if}}
+  </div>
 </section>

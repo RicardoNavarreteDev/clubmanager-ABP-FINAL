@@ -14,6 +14,7 @@ export const renderChampionships = async (req, res) => {
       return {
         statusLabel: "Activo",
         statusTone: "positive",
+        statusFilterLabel: "Activos",
       };
     }
 
@@ -21,12 +22,14 @@ export const renderChampionships = async (req, res) => {
       return {
         statusLabel: "Proximo",
         statusTone: "neutral",
+        statusFilterLabel: "Proximos",
       };
     }
 
     return {
       statusLabel: status,
       statusTone: "neutral",
+      statusFilterLabel: "Finalizados",
     };
   };
 
@@ -42,10 +45,18 @@ export const renderChampionships = async (req, res) => {
       ...statusMeta,
       categoryName: categories.find((category) => category.id === championship.categoryId)?.name ?? "Sin categoria",
       playersCount,
+      venueBadgeLabel: championship.isVariableVenue ? "Sedes mixtas" : "Sede fija",
+      cardAccentTone: championship.status === "active" ? (championship.isVariableVenue ? "orange" : "violet") : "blue",
     };
   });
 
   res.render("championships", {
     championships: championshipsWithPlayersCount,
+    championshipFilters: [
+      { label: "Todos", isActive: true, tone: "all" },
+      { label: "Activos", isActive: false, tone: "positive" },
+      { label: "Proximos", isActive: false, tone: "neutral" },
+      { label: "Finalizados", isActive: false, tone: "muted" },
+    ],
   });
 };

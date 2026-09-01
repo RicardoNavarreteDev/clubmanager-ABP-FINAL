@@ -1,119 +1,226 @@
-{{!-- Este archivo renderiza la portada principal del club con resumen y actividad reciente. --}}
-<header class="page-header">
-  <p>Bienvenido a la comunidad de Club Prueba.</p>
-</header>
+{{!-- Este archivo renderiza la portada principal del club con resumen, actividad y feed social. --}}
+<section class="home-hero-shell">
+  <div class="home-hero-main">
+    <header class="home-hero-header">
+      <div>
+        <h1>Bienvenido, {{currentViewer.name}}!</h1>
+        <p>Aqui tienes un resumen de lo que esta pasando en Club Prueba.</p>
+      </div>
 
-<section class="stats-section">
-  <h2>Resumen</h2>
+      <label class="home-season-select">
+        <select aria-label="Seleccionar temporada">
+          {{#each homeSeasonOptions}}
+            <option {{#if @first}}selected{{/if}}>{{this}}</option>
+          {{/each}}
+        </select>
+      </label>
+    </header>
 
-  <div class="stats-grid">
-    <article class="stat-card">
-      <h3>Total de jugadores</h3>
-      <p class="stat-value">{{stats.playersCount}}</p>
-    </article>
+    <section class="home-stats-grid">
+      {{#each dashboardStats}}
+        <article class="home-stat-card" data-tone="{{tone}}">
+          <div class="home-stat-card-topbar">
+            <span class="home-stat-icon" aria-hidden="true">
+              {{#if isPlayersIcon}}
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="8" cy="9" r="3" />
+                  <circle cx="16.5" cy="8" r="2.5" />
+                  <path d="M3.5 18c1.2-2.8 3.8-4.5 6.5-4.5s5.3 1.7 6.5 4.5" />
+                  <path d="M14.5 15.5c.9-.9 2.1-1.5 3.5-1.5 1.6 0 3 .7 4 2" />
+                </svg>
+              {{/if}}
+              {{#if isCalendarIcon}}
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3.5" y="5" width="17" height="15" rx="2" />
+                  <path d="M8 3.5V7" />
+                  <path d="M16 3.5V7" />
+                  <path d="M3.5 10h17" />
+                </svg>
+              {{/if}}
+              {{#if isTrophyIcon}}
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M8 4h8v3a4 4 0 0 1-8 0Z" />
+                  <path d="M9.5 13h5" />
+                  <path d="M12 10v9" />
+                  <path d="M7.5 22h9" />
+                  <path d="M8 5H5.5a2 2 0 0 0 0 4H8" />
+                  <path d="M16 5h2.5a2 2 0 0 1 0 4H16" />
+                </svg>
+              {{/if}}
+              {{#if isScheduleIcon}}
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3.5" y="5" width="17" height="15" rx="2" />
+                  <path d="M8 3.5V7" />
+                  <path d="M16 3.5V7" />
+                  <path d="M3.5 10h17" />
+                </svg>
+              {{/if}}
+            </span>
 
-    <article class="stat-card">
-      <h3>Partidos jugados</h3>
-      <p class="stat-value">{{stats.playedMatches}}</p>
-    </article>
+            <div>
+              <h2>{{title}}</h2>
+              <p class="home-stat-value">{{value}}</p>
+            </div>
+          </div>
 
-    <article class="stat-card">
-      <h3>Victorias</h3>
-      <p class="stat-value">{{stats.wins}}</p>
-    </article>
+          <p class="home-stat-note">{{note}}</p>
+        </article>
+      {{/each}}
+    </section>
 
-    <article class="stat-card">
-      <h3>Proximos eventos</h3>
-      <p class="stat-value">{{stats.upcomingEvents}}</p>
-    </article>
-  </div>
-</section>
-
-<section class="composer-card">
-  <div class="composer-header">
-    <img src="/images/avatars/profile.svg" alt="Perfil de Ricardo Navarrete" width="80">
-    <div>
-      <h2>Comparte una novedad</h2>
-      <p>Escribe una publicacion o anuncio para la comunidad del club.</p>
-    </div>
-  </div>
-
-  <textarea placeholder="Que esta pasando en Club Prueba?"></textarea>
-
-  <div class="composer-actions">
-    <button type="button">Crear publicacion</button>
-    <button type="button" class="secondary-button">Crear anuncio</button>
-  </div>
-</section>
-
-<section class="feed-section">
-  <h2>Publicaciones y anuncios</h2>
-
-  {{#each posts}}
-    <article class="feed-card">
-      {{#if isAnnouncement}}
-        <p class="feed-badge">Anuncio</p>
-      {{else}}
-        <p class="feed-badge">Publicacion</p>
-      {{/if}}
-
-      <div class="feed-header">
-        <img src="{{avatar}}" alt="Avatar de {{author}}" width="80">
+    <section class="home-composer-card">
+      <div class="home-composer-header">
+        <img src="{{currentViewer.avatar}}" alt="Perfil de {{currentViewer.name}}" width="80">
 
         <div>
-          <h3>{{author}}</h3>
-          <p>Rol: {{role}}</p>
-          <p>Fecha: {{date}}</p>
+          <h2>Comparte una novedad</h2>
+          {{#if showManagementLinks}}
+            <p>Publica una noticia o anuncio para la comunidad del club.</p>
+          {{else}}
+            <p>Publica una novedad para la comunidad del club.</p>
+          {{/if}}
         </div>
       </div>
 
-      <p>{{content}}</p>
+      <textarea placeholder="Que esta pasando en Club Prueba?"></textarea>
 
-      <div class="feed-social-bar">
-        <button type="button" class="feed-social-button" data-feed-like-toggle>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M12 20.5s-6.5-3.99-8.56-7.16C1.54 10.46 2.2 6.9 5.3 5.48c2.2-1 4.3-.15 5.55 1.55 1.24-1.7 3.35-2.55 5.55-1.55 3.1 1.42 3.76 4.98 1.86 7.86C18.5 16.51 12 20.5 12 20.5Z" />
-          </svg>
-          <strong data-feed-like-count>{{likes}}</strong>
-        </button>
-
-        {{#unless isAnnouncement}}
-          <button type="button" class="feed-social-button feed-comments-trigger" data-modal-open="comments-modal-{{id}}">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M20 11.2c0 4.4-3.76 8-8.4 8-1.36 0-2.65-.3-3.78-.84L4 19.8l1.16-3.32A7.7 7.7 0 0 1 3.2 11.2c0-4.42 3.76-8 8.4-8s8.4 3.58 8.4 8Z" />
+      <div class="home-composer-toolbar">
+        <div class="home-composer-tools" aria-hidden="true">
+          <span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="4" y="5" width="16" height="14" rx="2" />
+              <circle cx="9" cy="10" r="1.6" />
+              <path d="m20 15-4.5-4.5L7 19" />
             </svg>
-            <strong data-feed-comment-count>{{comments}}</strong>
-          </button>
-        {{/unless}}
+          </span>
+          <span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="4" y="6" width="12" height="12" rx="2" />
+              <path d="m16 10 4-2.5v9L16 14" />
+            </svg>
+          </span>
+          <span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="8.5" />
+              <path d="M9 10h.01" />
+              <path d="M15 10h.01" />
+              <path d="M8.5 14c1.1 1.3 2.2 2 3.5 2s2.4-.7 3.5-2" />
+            </svg>
+          </span>
+        </div>
+
+        <div class="home-composer-actions">
+          {{#if showManagementLinks}}
+            <button type="button" class="home-composer-button home-composer-button-secondary">Crear anuncio</button>
+          {{/if}}
+          <button type="button" class="home-composer-button home-composer-button-primary">Publicar</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+</section>
+
+<section class="home-feed-section">
+  <header class="home-feed-header">
+    <h2>Publicaciones y anuncios</h2>
+    <p>Enterate de lo que pasa en Club Prueba.</p>
+  </header>
+
+  {{#each posts}}
+    <article class="home-feed-card">
+      <div class="home-feed-card-header">
+        <img src="{{avatar}}" alt="Avatar de {{author}}" width="80">
+
+        <div class="home-feed-author-copy">
+          <div class="home-feed-author-line">
+            <h3>{{author}}</h3>
+            <span class="home-feed-role-badge" data-tone="{{roleTone}}">{{role}}</span>
+            <span class="home-feed-time-dot">•</span>
+            <p>{{displayDate}}</p>
+          </div>
+
+          {{#if isAnnouncement}}
+            <p class="home-feed-card-kicker">Anuncio</p>
+          {{/if}}
+        </div>
+
+        <button type="button" class="home-feed-more-button" aria-label="Mas opciones">•••</button>
       </div>
 
-      <div class="feed-meta">
+      <div class="home-feed-card-body">
+        <p class="home-feed-card-content">{{content}}</p>
+
         {{#if isAnnouncement}}
-          <p><span>Visibilidad</span>Equipo completo</p>
-        {{else}}
-          <p><span>Interaccion</span>{{comments}} comentarios activos</p>
+          <div class="home-feed-announcement-strip">
+            <div class="home-feed-announcement-item">
+              <span>Visibilidad</span>
+              <strong>Equipo completo</strong>
+            </div>
+            <div class="home-feed-announcement-item">
+              <span>Tipo</span>
+              <strong>Comunicado interno</strong>
+            </div>
+            <div class="home-feed-announcement-item">
+              <span>Estado</span>
+              <strong>Activo</strong>
+            </div>
+          </div>
         {{/if}}
       </div>
 
+      <div class="home-feed-social-row">
+        <div class="feed-social-bar">
+          <button type="button" class="feed-social-button" data-feed-like-toggle>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 20.5s-6.5-3.99-8.56-7.16C1.54 10.46 2.2 6.9 5.3 5.48c2.2-1 4.3-.15 5.55 1.55 1.24-1.7 3.35-2.55 5.55-1.55 3.1 1.42 3.76 4.98 1.86 7.86C18.5 16.51 12 20.5 12 20.5Z" />
+            </svg>
+            <strong data-feed-like-count>{{likes}}</strong>
+          </button>
+
+          {{#unless isAnnouncement}}
+            <button type="button" class="feed-social-button feed-comments-trigger" data-modal-open="comments-modal-{{id}}">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M20 11.2c0 4.4-3.76 8-8.4 8-1.36 0-2.65-.3-3.78-.84L4 19.8l1.16-3.32A7.7 7.7 0 0 1 3.2 11.2c0-4.42 3.76-8 8.4-8s8.4 3.58 8.4 8Z" />
+              </svg>
+              <strong data-feed-comment-count>{{comments}}</strong>
+            </button>
+          {{/unless}}
+        </div>
+
+        <div class="home-feed-secondary-actions" aria-hidden="true">
+          <span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4.5h12a1.5 1.5 0 0 1 1.5 1.5v14l-7.5-4-7.5 4V6A1.5 1.5 0 0 1 6 4.5Z" /></svg>
+          </span>
+          <span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7" /><path d="M9 7h8v8" /></svg>
+          </span>
+        </div>
+      </div>
+
       {{#unless isAnnouncement}}
-        {{#if commentPreview}}
-          <div class="feed-comments-preview">
-            <div class="feed-comments-preview-header">
-              <p class="feed-comments-preview-label">Ultimo comentario</p>
+        {{#if commentPreviewList.length}}
+          <div class="feed-comments-preview home-feed-comments-preview">
+            <div class="home-feed-comments-stack">
+              {{#each commentPreviewList}}
+                <article class="home-feed-comment-line">
+                  <div class="home-feed-comment-line-header">
+                    <h4>{{author}}</h4>
+                    <span>{{role}}</span>
+                    <span class="home-feed-time-dot">•</span>
+                    <p>{{date}}</p>
+                  </div>
+
+                  <p class="home-feed-comment-line-content">{{content}}</p>
+                </article>
+              {{/each}}
+
+              {{#if remainingCommentsCount}}
+                <button type="button" class="home-feed-comments-more-button" data-modal-open="comments-modal-{{id}}">
+                  Ver los {{remainingCommentsCount}} comentarios restantes
+                </button>
+              {{/if}}
             </div>
-
-            <article class="feed-comment-preview-card">
-              <div class="comment-thread-header comment-preview-header">
-                <img src="{{commentPreview.avatar}}" alt="Avatar de {{commentPreview.author}}" width="80">
-
-                <div>
-                  <h4>{{commentPreview.author}}</h4>
-                  <p>{{commentPreview.role}} · {{commentPreview.date}}</p>
-                </div>
-              </div>
-
-              <p class="comment-thread-content">{{commentPreview.content}}</p>
-            </article>
           </div>
         {{/if}}
       {{/unless}}

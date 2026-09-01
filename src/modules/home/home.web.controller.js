@@ -4,6 +4,19 @@ import { getMatches } from "../matches/matches.service.js";
 import { getTrainings } from "../trainings/trainings.service.js";
 import { getPosts } from "../posts/posts.service.js";
 
+const formatCompactDate = (dateValue) => {
+  const date = new Date(`${dateValue}T00:00:00`);
+
+  if (Number.isNaN(date.getTime())) {
+    return dateValue;
+  }
+
+  return date.toLocaleDateString("es-CL", {
+    day: "numeric",
+    month: "long",
+  });
+};
+
 export const renderHome = async (req, res) => {
   // Cargamos todas las fuentes de datos que necesita la pagina de inicio.
   const players = await getPlayers();
@@ -27,6 +40,7 @@ export const renderHome = async (req, res) => {
       const [teamScore, opponentScore] = match.result.split("-").map(Number);
       return teamScore > opponentScore;
     }).length;
+  const effectivenessRate = playedMatches ? Math.round((wins / playedMatches) * 100) : 0;
 
   // Estos hilos son contenido de apoyo del feed. Quedan en el controller porque hoy no vienen desde una fuente persistente.
   const commentThreads = {
@@ -181,25 +195,73 @@ export const renderHome = async (req, res) => {
   // Preparamos una bandera para diferenciar anuncios de posts normales en la vista.
   const feed = posts.map((post) => {
     const thread = commentThreads[post.id] ?? [];
+    const displayMoments = {
+      1: "Hace 2 horas",
+      2: "Ayer a las 18:30",
+      3: "Hace 4 horas",
+      4: "Hace 45 min",
+      5: "Ayer a las 09:15",
+      6: "Hace 1 hora",
+    };
+    const roleToneMap = {
+      Administracion: "admin",
+      Coordinacion: "admin",
+      Entrenadora: "coach",
+      Capitan: "leader",
+      Jugador: "player",
+      "Preparadora fisica": "staff",
+    };
 
     return {
       ...post,
       isAnnouncement: post.type === "announcement",
+      displayTypeLabel: post.type === "announcement" ? "Anuncio" : "Publicacion",
+      displayDate: displayMoments[post.id] ?? formatCompactDate(post.date),
+      roleTone: roleToneMap[post.role] ?? "neutral",
       // Dejamos tanto el hilo completo como una vista previa para que la plantilla no tenga que decidir cual usar.
       commentThread: thread,
       commentPreview: thread.length ? thread[thread.length - 1] : null,
     };
   });
 
-  const stats = {
-    playersCount: players.length,
-    playedMatches,
-    wins,
-    upcomingEvents,
-  };
+  const dashboardStats = [
+    {
+      title: "Total de jugadores",
+      value: players.length,
+      note: "+2 este mes",
+      tone: "violet",
+      isPlayersIcon: true,
+    },
+    {
+      title: "Partidos jugados",
+      value: playedMatches,
+      note: "+1 esta semana",
+      tone: "green",
+      isCalendarIcon: true,
+    },
+    {
+      title: "Victorias",
+      value: wins,
+      note: `${effectivenessRate}% de efectividad`,
+      tone: "orange",
+      isTrophyIcon: true,
+    },
+    {
+      title: "Proximos eventos",
+      value: upcomingEvents,
+      note: "En los proximos 30 dias",
+      tone: "blue",
+      isScheduleIcon: true,
+    },
+  ];
 
   res.render("home", {
-    stats,
-    posts: feed,
+    dashboardStats,
+    posts: feed.map((post) => ({
+      ...post,
+      commentPreviewList: post.commentThread.slice(0, 2),
+      remainingCommentsCount: Math.max(post.comments - 2, 0),
+    })),
+    homeSeasonOptions: ["Temporada 2026", "Temporada 2025", "Temporada 2024"],
   });
 };

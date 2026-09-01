@@ -9,6 +9,63 @@ if (window.gsap && window.Flip && window.CustomEase) {
 
 const modalArchiveDuration = 0.6;
 
+function getMobileNavToggle() {
+  return document.querySelector("[data-mobile-nav-toggle]");
+}
+
+function getMobileNavPanel() {
+  return document.querySelector("[data-mobile-nav-panel]");
+}
+
+function getMobileNavBackdrop() {
+  return document.querySelector("[data-mobile-nav-backdrop]");
+}
+
+function isMobileNavOpen() {
+  return document.body.classList.contains("mobile-nav-open");
+}
+
+function closeMobileNav() {
+  document.body.classList.remove("mobile-nav-open");
+
+  const toggle = getMobileNavToggle();
+  const backdrop = getMobileNavBackdrop();
+
+  if (toggle) {
+    toggle.setAttribute("aria-expanded", "false");
+    toggle.setAttribute("aria-label", "Abrir menu de navegacion");
+  }
+
+  if (backdrop) {
+    backdrop.hidden = true;
+  }
+}
+
+function openMobileNav() {
+  document.body.classList.add("mobile-nav-open");
+
+  const toggle = getMobileNavToggle();
+  const backdrop = getMobileNavBackdrop();
+
+  if (toggle) {
+    toggle.setAttribute("aria-expanded", "true");
+    toggle.setAttribute("aria-label", "Cerrar menu de navegacion");
+  }
+
+  if (backdrop) {
+    backdrop.hidden = false;
+  }
+}
+
+function toggleMobileNav() {
+  if (isMobileNavOpen()) {
+    closeMobileNav();
+    return;
+  }
+
+  openMobileNav();
+}
+
 function getModal(modalName) {
   return document.querySelector(`[data-modal="${modalName}"]`);
 }
@@ -513,6 +570,23 @@ document.addEventListener("click", (event) => {
     return;
   }
 
+  const mobileNavToggle = event.target.closest("[data-mobile-nav-toggle]");
+  if (mobileNavToggle) {
+    toggleMobileNav();
+    return;
+  }
+
+  const mobileNavBackdrop = event.target.closest("[data-mobile-nav-backdrop]");
+  if (mobileNavBackdrop) {
+    closeMobileNav();
+    return;
+  }
+
+  const mobileNavLink = event.target.closest(".sidebar .nav-link[href]");
+  if (mobileNavLink && window.innerWidth <= 768) {
+    closeMobileNav();
+  }
+
   const feedLikeButton = event.target.closest("[data-feed-like-toggle]");
   if (feedLikeButton) {
     const likeCountElement = feedLikeButton.querySelector("[data-feed-like-count]");
@@ -618,6 +692,11 @@ document.addEventListener("click", (event) => {
 
 document.addEventListener("keydown", (event) => {
   if (event.key !== "Escape") {
+    return;
+  }
+
+  if (isMobileNavOpen()) {
+    closeMobileNav();
     return;
   }
 

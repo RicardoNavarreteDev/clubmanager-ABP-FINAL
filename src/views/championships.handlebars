@@ -4,6 +4,12 @@
   <p>Resumen de los torneos en los que participa Club Prueba.</p>
 </header>
 
+<section class="championships-filter-bar">
+  {{#each championshipFilters}}
+    <button type="button" class="championship-filter-chip {{#if isActive}}active{{/if}}" data-tone="{{tone}}">{{label}}</button>
+  {{/each}}
+</section>
+
 <section class="championships-grid">
   {{#each championships}}
     <article
@@ -30,23 +36,96 @@
         <p class="championship-card-season">Temporada {{season}}</p>
       </div>
 
-      <div class="championship-card-copy">
-        <h2>{{name}}</h2>
-        <p class="championship-card-description">{{description}}</p>
+      <div class="championship-card-hero">
+        <div class="championship-card-emblem" data-tone="{{cardAccentTone}}" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 4h8v3a4 4 0 0 1-8 0Z" />
+            <path d="M9.5 13h5" />
+            <path d="M12 10v9" />
+            <path d="M7.5 22h9" />
+            <path d="M8 5H5.5a2 2 0 0 0 0 4H8" />
+            <path d="M16 5h2.5a2 2 0 0 1 0 4H16" />
+          </svg>
+        </div>
+
+        <div class="championship-card-copy">
+          <h2>{{name}}</h2>
+          <p class="championship-card-description">{{description}}</p>
+        </div>
       </div>
 
       <div class="championship-card-meta championship-card-meta-compact">
-        <p><span>Categoria</span>{{categoryName}}</p>
-        <p><span>Sede</span>{{primaryVenue}}</p>
-        <p><span>Jugadores</span>{{playersCount}}</p>
+        <p>
+          <span class="championship-meta-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="8" cy="8" r="3" />
+              <path d="M2.5 18c1.15-2.45 3.4-4 5.5-4" />
+              <path d="M14 7h7" />
+              <path d="M17.5 3.5v7" />
+            </svg>
+          </span>
+          <span>Categoria</span>
+          <strong>{{categoryName}}</strong>
+        </p>
+        <p>
+          <span class="championship-meta-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 20s6-5.33 6-10a6 6 0 1 0-12 0c0 4.67 6 10 6 10Z" />
+              <circle cx="12" cy="10" r="2.5" />
+            </svg>
+          </span>
+          <span>Sede</span>
+          <strong>{{primaryVenue}}</strong>
+        </p>
+        <p>
+          <span class="championship-meta-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="7.5" r="3.5" />
+              <path d="M5 20c1.5-3.5 5-5.5 7-5.5s5.5 2 7 5.5" />
+            </svg>
+          </span>
+          <span>Jugadores</span>
+          <strong>{{playersCount}}</strong>
+        </p>
       </div>
 
       <div class="championship-card-footer">
-        <p class="championship-badge">{{#if isVariableVenue}}Sedes mixtas{{else}}Sede fija{{/if}}</p>
-        <span class="event-card-link">Ver detalle</span>
+        <p class="championship-badge" data-tone="{{cardAccentTone}}">{{venueBadgeLabel}}</p>
+        <span class="championship-card-link">Ver detalle →</span>
       </div>
     </article>
   {{/each}}
+</section>
+
+<section class="championships-cta-card">
+  <div class="championships-cta-illustration" aria-hidden="true">
+    <svg viewBox="0 0 64 64" fill="none">
+      <path d="M20 10h24v8c0 8-5.4 14.86-12 16.8C25.4 32.86 20 26 20 18v-8Z" fill="url(#ctaCup)"/>
+      <path d="M24 36h16v4c0 4.42-3.58 8-8 8s-8-3.58-8-8v-4Z" fill="url(#ctaStem)"/>
+      <path d="M18 48h28" stroke="#7A67F8" stroke-width="3" stroke-linecap="round"/>
+      <path d="M20 14h-4a4 4 0 0 0 0 8h4" stroke="#8A79FF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M44 14h4a4 4 0 1 1 0 8h-4" stroke="#8A79FF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="m13 17 1.4 2.8 3.1.45-2.25 2.2.54 3.1L13 24.1l-2.79 1.45.54-3.1-2.25-2.2 3.1-.45L13 17Z" fill="#FFB74D" opacity=".9"/>
+      <path d="m53 20 1.1 2.15 2.39.35-1.73 1.69.41 2.38L53 25.45l-2.17 1.12.42-2.38-1.73-1.69 2.38-.35L53 20Z" fill="#8A79FF" opacity=".8"/>
+      <defs>
+        <linearGradient id="ctaCup" x1="20" y1="10" x2="44" y2="34.8" gradientUnits="userSpaceOnUse">
+          <stop stop-color="#8E7CFF"/>
+          <stop offset="1" stop-color="#5F47D6"/>
+        </linearGradient>
+        <linearGradient id="ctaStem" x1="24" y1="36" x2="40" y2="48" gradientUnits="userSpaceOnUse">
+          <stop stop-color="#C7BEFF"/>
+          <stop offset="1" stop-color="#7A67F8"/>
+        </linearGradient>
+      </defs>
+    </svg>
+  </div>
+
+  <div class="championships-cta-copy">
+    <h2>Quieres organizar un nuevo torneo?</h2>
+    <p>Crea un campeonato y gestiona todos los partidos, equipos y estadisticas en un solo lugar.</p>
+  </div>
+
+  <button type="button" class="championships-cta-button">+ Crear campeonato</button>
 </section>
 
 <div class="modal-backdrop" data-modal="championship-detail-modal" data-modal-archive hidden>

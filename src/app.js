@@ -14,6 +14,7 @@ import authApiRouter from "./modules/auth/auth.api.routes.js";
 import invitationsApiRouter from "./modules/invitations/invitations.api.routes.js";
 import usersApiRouter from "./modules/users/users.api.routes.js";
 import playersApiRouter from "./modules/players/players.api.routes.js";
+import { getCurrentViewerContext } from "./modules/profile/profile.service.js";
 import { getCategories } from "./modules/categories/categories.service.js";
 import { getMatches } from "./modules/matches/matches.service.js";
 import { getTrainings } from "./modules/trainings/trainings.service.js";
@@ -38,17 +39,26 @@ app.use(async (req, res, next) => {
     const matches = await getMatches();
     const trainings = await getTrainings();
     const categories = await getCategories();
+    const currentViewer = await getCurrentViewerContext();
 
     res.locals.isHome = req.path === "/";
     res.locals.isPlayers = req.path === "/jugadores";
     res.locals.isEvents = req.path === "/eventos";
     res.locals.isProfile = req.path === "/perfil";
     res.locals.upcomingMatches = matches.filter((match) => match.status === "upcoming");
+    res.locals.nextUpcomingMatch = res.locals.upcomingMatches[0] ?? null;
     res.locals.upcomingTrainings = trainings.map((training) => ({
       ...training,
       categoryName: categories.find((category) => category.id === training.categoryId)?.name ?? "Sin categoria",
+      trainingAccentTone: training.categoryId === 1 ? "violet" : "orange",
+      trainingIconLabel: training.categoryId === 1 ? "GR" : "TC",
     }));
     res.locals.isChampionships = req.path === "/campeonatos";
+    res.locals.currentViewer = currentViewer;
+    res.locals.isAdmin = currentViewer.isAdmin;
+    res.locals.isCoach = currentViewer.isCoach;
+    res.locals.isPlayer = currentViewer.isPlayer;
+    res.locals.showManagementLinks = currentViewer.showManagementLinks;
     next();
   } catch (error) {
     next(error);
