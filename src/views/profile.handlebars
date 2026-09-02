@@ -22,7 +22,15 @@
             <h1>{{profile.name}}</h1>
             <p class="profile-page-username">{{profile.username}}</p>
             <p class="profile-page-role">
-              <span class="profile-role-chip">{{profile.role}}</span>
+              <span class="profile-role-chip">
+                <span class="profile-role-chip-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 3.5 6 6v4.8c0 4.05 2.55 7.78 6 9.2 3.45-1.42 6-5.15 6-9.2V6l-6-2.5Z" />
+                    <path d="m9.5 12 1.65 1.65L14.8 10" />
+                  </svg>
+                </span>
+                <span>{{profile.roleBadge}}</span>
+              </span>
               <span class="profile-role-divider">•</span>
               <span>{{profile.category}}</span>
             </p>
@@ -62,7 +70,7 @@
   </section>
 
   <div class="profile-page-meta profile-contact-strip">
-    <p>
+    <p class="profile-contact-item">
       <span class="profile-contact-icon" aria-hidden="true">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="8" cy="8.5" r="2.8" />
@@ -74,7 +82,7 @@
       <span>Equipo</span>
       <strong>{{profile.team}}</strong>
     </p>
-    <p>
+    <p class="profile-contact-item">
       <span class="profile-contact-icon" aria-hidden="true">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 20s6-5.33 6-10a6 6 0 1 0-12 0c0 4.67 6 10 6 10Z" />
@@ -84,7 +92,7 @@
       <span>Ubicacion</span>
       <strong>{{profile.location}}</strong>
     </p>
-    <p>
+    <p class="profile-contact-item">
       <span class="profile-contact-icon" aria-hidden="true">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           <rect x="3.5" y="5" width="17" height="15" rx="2" />
@@ -96,7 +104,7 @@
       <span>Fecha de nacimiento</span>
       <strong>{{profile.birthDate}}</strong>
     </p>
-    <p>
+    <p class="profile-contact-item">
       <span class="profile-contact-icon" aria-hidden="true">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           <rect x="3.5" y="5" width="17" height="14" rx="2" />
