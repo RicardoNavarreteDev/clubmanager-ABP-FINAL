@@ -1,7 +1,7 @@
 {{!-- Este archivo muestra la lista de jugadores con su informacion principal. --}}
 <header class="page-header">
   <h1>Jugadores</h1>
-  <p>Listado de jugadores del Club Prueba.</p>
+  <p>Listado de jugadores de {{currentClub.name}}.</p>
 </header>
 
 <section class="players-grid">
@@ -91,7 +91,19 @@
 
       {{#if ../showManagementLinks}}
         <div class="player-management-actions">
-          <button type="button" class="player-action-button player-action-button-secondary">
+          <button
+            type="button"
+            class="player-action-button player-action-button-secondary"
+            data-player-edit-open
+            data-modal-open="edit-player-modal"
+            data-player-id="{{id}}"
+            data-player-name="{{name}}"
+            data-player-position="{{position}}"
+            data-player-number="{{number}}"
+            data-player-bio="{{bio}}"
+            data-player-location="{{location}}"
+            data-player-birth-date="{{birthDate}}"
+          >
             <span class="player-action-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                 <path d="m4 20 4.5-1 9-9a2.1 2.1 0 0 0-3-3l-9 9L4 20Z" />
@@ -101,7 +113,15 @@
             <span>Editar jugador</span>
           </button>
 
-          <button type="button" class="player-action-button player-action-button-primary">
+          <button
+            type="button"
+            class="player-action-button player-action-button-primary"
+            data-player-status-open
+            data-modal-open="player-status-modal"
+            data-player-id="{{id}}"
+            data-player-name="{{name}}"
+            data-player-status="{{rosterStatus}}"
+          >
             <span class="player-action-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M20 11a8 8 0 0 0-14.9-4" />
@@ -115,8 +135,100 @@
         </div>
       {{/if}}
     </article>
+  {{else}}
+    <article class="empty-state-card collection-empty-state">
+      <h3>El plantel aun esta vacio</h3>
+      <p>Los jugadores apareceran aqui cuando acepten sus invitaciones.</p>
+      {{#if showManagementLinks}}<a class="public-button public-button-primary" href="/gestion/invitaciones">Invitar jugador</a>{{/if}}
+    </article>
   {{/each}}
 </section>
+
+{{#if showManagementLinks}}
+  <div class="modal-backdrop" data-modal="edit-player-modal" data-modal-archive hidden>
+    <div class="modal-panel settings-modal-panel" role="dialog" aria-modal="true" aria-labelledby="edit-player-modal-title">
+      <div class="modal-header" data-modal-archive-item>
+        <button type="button" class="modal-close-button" data-modal-close="edit-player-modal">×</button>
+        <h2 id="edit-player-modal-title">Editar jugador</h2>
+        <button type="submit" class="modal-save-button" form="edit-player-form">Guardar</button>
+      </div>
+
+      <form id="edit-player-form" class="profile-modal-form" data-modal-archive-item data-player-edit-form novalidate>
+        <p class="form-status-message" data-form-status aria-live="polite"></p>
+        <input type="hidden" name="playerId">
+
+        <label class="form-field">
+          <span>Nombre</span>
+          <input type="text" name="name" required>
+          <small class="form-error-text" data-field-error="name"></small>
+        </label>
+
+        <label class="form-field">
+          <span>Posicion</span>
+          <input type="text" name="position">
+          <small class="form-error-text" data-field-error="position"></small>
+        </label>
+
+        <label class="form-field">
+          <span>Numero</span>
+          <input type="number" name="number" min="0">
+          <small class="form-error-text" data-field-error="number"></small>
+        </label>
+
+        <label class="form-field">
+          <span>Bio</span>
+          <textarea name="bio"></textarea>
+          <small class="form-error-text" data-field-error="bio"></small>
+        </label>
+
+        <label class="form-field">
+          <span>Ubicacion</span>
+          <input type="text" name="location">
+          <small class="form-error-text" data-field-error="location"></small>
+        </label>
+
+        <label class="form-field">
+          <span>Fecha de nacimiento</span>
+          <input type="date" name="birthDate">
+          <small class="form-error-text" data-field-error="birthDate"></small>
+        </label>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" data-modal="player-status-modal" data-modal-archive hidden>
+    <div class="modal-panel settings-modal-panel" role="dialog" aria-modal="true" aria-labelledby="player-status-modal-title">
+      <div class="modal-header" data-modal-archive-item>
+        <button type="button" class="modal-close-button" data-modal-close="player-status-modal">×</button>
+        <h2 id="player-status-modal-title">Cambiar estado del jugador</h2>
+        <button type="submit" class="modal-save-button" form="player-status-form">Guardar</button>
+      </div>
+
+      <form id="player-status-form" class="profile-modal-form" data-modal-archive-item data-player-status-form novalidate>
+        <p class="form-status-message" data-form-status aria-live="polite"></p>
+        <input type="hidden" name="playerId">
+
+        <label class="form-field">
+          <span>Jugador</span>
+          <input type="text" name="playerName" readonly>
+        </label>
+
+        <label class="form-field">
+          <span>Nuevo estado</span>
+          <select name="rosterStatus" required>
+            <option value="invited">invited</option>
+            <option value="active">active</option>
+            {{#if isAdmin}}
+              <option value="inactive">inactive</option>
+            {{/if}}
+          </select>
+          <small class="form-help-text">Solo admin puede dejar un jugador en estado inactive.</small>
+          <small class="form-error-text" data-field-error="rosterStatus"></small>
+        </label>
+      </form>
+    </div>
+  </div>
+{{/if}}
 
 <section class="players-pagination-card">
   <div class="players-pagination-controls">

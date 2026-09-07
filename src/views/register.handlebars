@@ -1,0 +1,63 @@
+<main class="invitation-register-page">
+  <a class="auth-back-link" href="/login">&#8592; Volver al login</a>
+  <section class="auth-card auth-card-wide public-auth-card">
+    <div class="page-header auth-header">
+      <h1>Registro con invitacion</h1>
+      <p>Completa tu cuenta usando el token recibido por correo.</p>
+    </div>
+
+    {{#if registerError}}
+      <div class="web-alert web-alert-error">{{registerError}}</div>
+    {{/if}}
+
+    {{#if invitation}}
+      <div class="auth-support-card invitation-summary-card">
+        <p><strong>Invitado:</strong> {{invitation.name}}</p>
+        <p><strong>Correo:</strong> {{invitation.email}}</p>
+        <p><strong>Rol:</strong> {{invitation.role.name}}</p>
+        <p><strong>Categoria:</strong> {{#if invitation.primaryCategory}}{{invitation.primaryCategory.name}}{{else}}Sin categoria{{/if}}</p>
+      </div>
+    {{/if}}
+
+    <form class="profile-modal-form auth-form" action="/registro" method="post">
+      <input type="hidden" name="token" value="{{invitationToken}}">
+
+      <label class="form-field">
+        <span>Nombre</span>
+        <input type="text" name="name" value="{{registerForm.name}}" required>
+      </label>
+
+      <label class="form-field">
+        <span>Fecha de nacimiento</span>
+        <input type="date" name="birthDate" value="{{registerForm.birthDate}}" required>
+      </label>
+
+      <label class="form-field">
+        <span>Posicion</span>
+        <input type="text" name="position" value="{{registerForm.position}}" required>
+      </label>
+
+      <label class="form-field">
+        <span>Numero</span>
+        <input type="number" name="number" min="0" value="{{registerForm.number}}">
+      </label>
+
+      <label class="form-field">
+        <span>Bio</span>
+        <textarea name="bio">{{registerForm.bio}}</textarea>
+      </label>
+
+      <label class="form-field">
+        <span>Password</span>
+        <input type="password" name="password" required minlength="6" autocomplete="new-password">
+      </label>
+
+      <label class="form-field">
+        <span>Confirmar password</span>
+        <input type="password" name="confirmPassword" required minlength="6" autocomplete="new-password">
+      </label>
+
+      <button type="submit" class="modal-save-button auth-submit-button">Completar registro</button>
+    </form>
+  </section>
+</main>

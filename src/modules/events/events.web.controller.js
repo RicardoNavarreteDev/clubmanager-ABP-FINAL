@@ -45,11 +45,15 @@ const estimateTrainingAttendance = (training) => {
 };
 
 export const renderEvents = async (req, res) => {
+  const clubId = req.authSession?.user?.clubId ?? null;
+  const shouldLoadDemoData = res.locals.shouldShowDemoData;
+  const shouldLoadData = Boolean(clubId) || shouldLoadDemoData;
+  const scope = clubId ? { clubId } : undefined;
   // Juntamos estas colecciones aca porque la vista necesita cruces entre partidos, campeonatos y categorias.
-  const matches = await getMatches();
-  const trainings = await getTrainings();
-  const championships = await getChampionships();
-  const categories = await getCategories();
+  const matches = shouldLoadData ? await getMatches(scope) : [];
+  const trainings = shouldLoadDemoData ? await getTrainings() : [];
+  const championships = shouldLoadData ? await getChampionships(scope) : [];
+  const categories = shouldLoadData ? await getCategories(scope) : [];
 
   const getMatchOutcome = (result) => {
     // Si el resultado no viene en formato numerico, devolvemos el texto tal cual para no romper la UI.
@@ -100,10 +104,11 @@ export const renderEvents = async (req, res) => {
       compactDate,
       isLocal: match.condition === "local",
       conditionLabel: match.condition === "local" ? "Local" : "Visitante",
-      homeTeamName: match.condition === "local" ? "Club Prueba" : match.opponent,
-      awayTeamName: match.condition === "local" ? match.opponent : "Club Prueba",
-      homeTeamShortLabel: match.condition === "local" ? "CP" : match.opponent.slice(0, 2).toUpperCase(),
-      awayTeamShortLabel: match.condition === "local" ? match.opponent.slice(0, 2).toUpperCase() : "CP",
+      homeTeamName: match.condition === "local" ? res.locals.currentClub.name : match.opponent,
+      awayTeamName: match.condition === "local" ? match.opponent : res.locals.currentClub.name,
+      homeTeamShortLabel: match.condition === "local" ? res.locals.clubInitials : match.opponent.slice(0, 2).toUpperCase(),
+      awayTeamShortLabel: match.condition === "local" ? match.opponent.slice(0, 2).toUpperCase() : res.locals.clubInitials,
+      opponentShortLabel: match.opponent.slice(0, 2).toUpperCase(),
     };
   });
 

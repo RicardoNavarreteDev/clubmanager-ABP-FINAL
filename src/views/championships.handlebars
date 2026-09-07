@@ -1,7 +1,7 @@
 {{!-- Este archivo muestra el listado de campeonatos y su estado actual. --}}
 <header class="page-header">
   <h1>Campeonatos</h1>
-  <p>Resumen de los torneos en los que participa Club Prueba.</p>
+  <p>Resumen de los torneos en los que participa {{currentClub.name}}.</p>
 </header>
 
 <section class="championships-filter-bar">
@@ -94,39 +94,46 @@
         <span class="championship-card-link">Ver detalle →</span>
       </div>
     </article>
+  {{else}}
+    <article class="empty-state-card collection-empty-state">
+      <h3>Todavia no hay campeonatos</h3>
+      <p>Cuando configures la primera competencia aparecera en esta seccion.</p>
+    </article>
   {{/each}}
 </section>
 
-<section class="championships-cta-card">
-  <div class="championships-cta-illustration" aria-hidden="true">
-    <svg viewBox="0 0 64 64" fill="none">
-      <path d="M20 10h24v8c0 8-5.4 14.86-12 16.8C25.4 32.86 20 26 20 18v-8Z" fill="url(#ctaCup)"/>
-      <path d="M24 36h16v4c0 4.42-3.58 8-8 8s-8-3.58-8-8v-4Z" fill="url(#ctaStem)"/>
-      <path d="M18 48h28" stroke="#7A67F8" stroke-width="3" stroke-linecap="round"/>
-      <path d="M20 14h-4a4 4 0 0 0 0 8h4" stroke="#8A79FF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-      <path d="M44 14h4a4 4 0 1 1 0 8h-4" stroke="#8A79FF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-      <path d="m13 17 1.4 2.8 3.1.45-2.25 2.2.54 3.1L13 24.1l-2.79 1.45.54-3.1-2.25-2.2 3.1-.45L13 17Z" fill="#FFB74D" opacity=".9"/>
-      <path d="m53 20 1.1 2.15 2.39.35-1.73 1.69.41 2.38L53 25.45l-2.17 1.12.42-2.38-1.73-1.69 2.38-.35L53 20Z" fill="#8A79FF" opacity=".8"/>
-      <defs>
-        <linearGradient id="ctaCup" x1="20" y1="10" x2="44" y2="34.8" gradientUnits="userSpaceOnUse">
-          <stop stop-color="#8E7CFF"/>
-          <stop offset="1" stop-color="#5F47D6"/>
-        </linearGradient>
-        <linearGradient id="ctaStem" x1="24" y1="36" x2="40" y2="48" gradientUnits="userSpaceOnUse">
-          <stop stop-color="#C7BEFF"/>
-          <stop offset="1" stop-color="#7A67F8"/>
-        </linearGradient>
-      </defs>
-    </svg>
-  </div>
+{{#if showManagementLinks}}
+  <section class="championships-cta-card">
+    <div class="championships-cta-illustration" aria-hidden="true">
+      <svg viewBox="0 0 64 64" fill="none">
+        <path d="M20 10h24v8c0 8-5.4 14.86-12 16.8C25.4 32.86 20 26 20 18v-8Z" fill="url(#ctaCup)"/>
+        <path d="M24 36h16v4c0 4.42-3.58 8-8 8s-8-3.58-8-8v-4Z" fill="url(#ctaStem)"/>
+        <path d="M18 48h28" stroke="#7A67F8" stroke-width="3" stroke-linecap="round"/>
+        <path d="M20 14h-4a4 4 0 0 0 0 8h4" stroke="#8A79FF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M44 14h4a4 4 0 1 1 0 8h-4" stroke="#8A79FF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="m13 17 1.4 2.8 3.1.45-2.25 2.2.54 3.1L13 24.1l-2.79 1.45.54-3.1-2.25-2.2 3.1-.45L13 17Z" fill="#FFB74D" opacity=".9"/>
+        <path d="m53 20 1.1 2.15 2.39.35-1.73 1.69.41 2.38L53 25.45l-2.17 1.12.42-2.38-1.73-1.69 2.38-.35L53 20Z" fill="#8A79FF" opacity=".8"/>
+        <defs>
+          <linearGradient id="ctaCup" x1="20" y1="10" x2="44" y2="34.8" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#8E7CFF"/>
+            <stop offset="1" stop-color="#5F47D6"/>
+          </linearGradient>
+          <linearGradient id="ctaStem" x1="24" y1="36" x2="40" y2="48" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#C7BEFF"/>
+            <stop offset="1" stop-color="#7A67F8"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    </div>
 
-  <div class="championships-cta-copy">
-    <h2>Quieres organizar un nuevo torneo?</h2>
-    <p>Crea un campeonato y gestiona todos los partidos, equipos y estadisticas en un solo lugar.</p>
-  </div>
+    <div class="championships-cta-copy">
+      <h2>Quieres organizar un nuevo torneo?</h2>
+      <p>Crea un campeonato y gestiona todos los partidos, equipos y estadisticas en un solo lugar.</p>
+    </div>
 
-  <button type="button" class="championships-cta-button">+ Crear campeonato</button>
-</section>
+    <a href="/campeonatos/nuevo" class="championships-cta-button">+ Crear campeonato</a>
+  </section>
+{{/if}}
 
 <div class="modal-backdrop" data-modal="championship-detail-modal" data-modal-archive hidden>
   <div class="modal-panel championship-detail-modal-panel" role="dialog" aria-modal="true" aria-labelledby="championship-detail-title">

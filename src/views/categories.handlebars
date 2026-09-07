@@ -1,0 +1,102 @@
+<header class="page-header management-create-header">
+  <div>
+    <p class="public-eyebrow">Gestion deportiva</p>
+    <h1>{{pageTitle}}</h1>
+    <p>Completa los datos para {{currentClub.name}}.</p>
+  </div>
+  <a class="management-back-link" href="/dashboard">Volver al inicio</a>
+</header>
+
+{{#if error}}<div class="web-alert web-alert-error" role="alert">{{error}}</div>{{/if}}
+{{#if success}}<div class="web-alert web-alert-success" role="status">{{success}}</div>{{/if}}
+
+{{#if isCategoryForm}}
+  <div class="management-create-layout">
+    <section class="management-create-card">
+      <span class="management-card-number">01</span>
+      <h2>Nueva categoria</h2>
+      <p>Define el grupo que usaras para plantel, invitaciones y competencias.</p>
+      <form class="management-create-form" action="/gestion/categorias" method="post">
+        <label class="form-field"><span>Nombre</span><input name="name" maxlength="60" value="{{values.name}}" placeholder="Ej. Sub-18" required></label>
+        <label class="form-field"><span>Alcance de genero</span><select name="genderScope" required><option value="mixto">Mixto</option><option value="femenino">Femenino</option><option value="masculino">Masculino</option></select></label>
+        <div class="management-form-grid">
+          <label class="form-field"><span>Edad minima</span><input type="number" name="minAge" min="0" value="{{values.minAge}}" required></label>
+          <label class="form-field"><span>Edad maxima</span><input type="number" name="maxAge" min="0" value="{{values.maxAge}}"></label>
+        </div>
+        <button class="public-button public-button-primary" type="submit">Crear categoria</button>
+      </form>
+    </section>
+    <section class="management-list-panel">
+      <header><p class="public-eyebrow">Disponibles</p><h2>Categorias del club</h2></header>
+      <div class="management-record-list">
+        {{#each categories}}
+          <article><span>{{name}}</span><strong>{{genderScope}}</strong><p>Desde {{minAge}} anos{{#if maxAge}}, hasta {{maxAge}}{{/if}}</p></article>
+        {{else}}
+          <div class="empty-state-card"><h3>No hay categorias</h3><p>Crea la primera para continuar.</p></div>
+        {{/each}}
+      </div>
+    </section>
+  </div>
+{{/if}}
+
+{{#if isChampionshipForm}}
+  <section class="management-create-card management-create-card-wide management-sport-form-card championship-create-card">
+    <div class="management-sport-form-heading">
+      <span class="management-heading-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 4h8v3a4 4 0 0 1-8 0Z"/><path d="M12 11v7M8 21h8M8 5H5.5a2 2 0 0 0 0 4H8M16 5h2.5a2 2 0 0 1 0 4H16"/></svg>
+      </span>
+      <div><span class="management-card-number">Nuevo torneo</span><h2>Informacion del campeonato</h2><p>Organiza la competencia, sus fechas y la categoria participante.</p></div>
+    </div>
+    <form class="management-create-form" action="/campeonatos" method="post">
+      <p class="management-form-section-label"><span>01</span> Identidad del torneo</p>
+      <div class="management-form-grid">
+        <label class="form-field"><span>Nombre del campeonato</span><input name="name" maxlength="120" value="{{values.name}}" placeholder="Ej. Liga Regional" required></label>
+        <label class="form-field"><span>Temporada</span><input name="season" maxlength="20" value="{{values.season}}" placeholder="2026" required></label>
+        <label class="form-field"><span>Categoria</span><select name="categoryId" required><option value="">Seleccionar</option>{{#each categories}}<option value="{{id}}">{{name}}</option>{{/each}}</select></label>
+        <label class="form-field"><span>Sede principal</span><input name="primaryVenue" maxlength="160" value="{{values.primaryVenue}}" placeholder="Gimnasio o recinto" required></label>
+      </div>
+      <p class="management-form-section-label"><span>02</span> Calendario</p>
+      <div class="management-form-grid">
+        <label class="form-field"><span>Fecha de inicio</span><input type="date" name="startDate" value="{{values.startDate}}" required></label>
+        <label class="form-field"><span>Fecha de termino</span><input type="date" name="endDate" value="{{values.endDate}}" required></label>
+      </div>
+      <label class="form-field"><span>Descripcion</span><textarea name="description" rows="4" placeholder="Objetivo, formato o informacion importante del campeonato" required>{{values.description}}</textarea></label>
+      <label class="management-checkbox"><input type="checkbox" name="isVariableVenue"><span>Este campeonato utiliza sedes variables</span></label>
+      <div class="management-form-actions"><a href="/campeonatos">Cancelar</a><button class="public-button public-button-primary" type="submit">Crear campeonato</button></div>
+    </form>
+  </section>
+{{/if}}
+
+{{#if isMatchForm}}
+  <div class="management-create-layout match-create-layout">
+    <section class="management-create-card management-sport-form-card match-create-card">
+      <div class="management-sport-form-heading">
+        <span class="management-heading-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8"/><path d="m12 4 3 4-1 4h-4L9 8Zm-7 9 5-1 3 4-2 4m8-7-5-1-3 4 2 4"/></svg>
+        </span>
+        <div><span class="management-card-number">Proximo partido</span><h2>Programa el encuentro</h2><p>Se guardara como proximo y con resultado pendiente.</p></div>
+      </div>
+      <form class="management-create-form" action="/gestion/partidos" method="post">
+        <p class="management-form-section-label"><span>01</span> Encuentro</p>
+        <label class="form-field"><span>Equipo rival</span><input name="opponent" maxlength="120" value="{{values.opponent}}" placeholder="Nombre del rival" required></label>
+        <div class="management-form-grid">
+          <label class="form-field"><span>Fecha</span><input type="date" name="date" value="{{values.date}}" required></label>
+          <label class="form-field"><span>Hora</span><input type="time" name="time" value="{{values.time}}" required></label>
+        </div>
+        <p class="management-form-section-label"><span>02</span> Contexto deportivo</p>
+        <label class="form-field"><span>Ubicacion</span><input name="location" maxlength="160" value="{{values.location}}" placeholder="Cancha, gimnasio o direccion" required></label>
+        <div class="management-form-grid">
+          <label class="form-field"><span>Condicion</span><select name="condition" required><option value="local">Local</option><option value="visita">Visita</option></select></label>
+          <label class="form-field"><span>Campeonato</span><select name="championshipId"><option value="">Partido amistoso</option>{{#each championships}}<option value="{{id}}">{{name}} - {{season}}</option>{{/each}}</select></label>
+        </div>
+        <button class="public-button public-button-primary" type="submit">Crear partido</button>
+      </form>
+    </section>
+    <section class="management-list-panel">
+      <header><p class="public-eyebrow">Agenda</p><h2>Partidos programados</h2></header>
+      <div class="management-record-list">
+        {{#each matches}}<article><span>{{opponent}}</span><strong>{{date}} · {{time}}</strong><p>{{location}} · {{condition}}</p></article>{{else}}<div class="empty-state-card"><h3>Agenda vacia</h3><p>Crea el primer partido del club.</p></div>{{/each}}
+      </div>
+    </section>
+  </div>
+{{/if}}

@@ -6,8 +6,10 @@ const PLAYERS_PER_PAGE = 4;
 
 export const renderPlayers = async (req, res) => {
   // Traemos jugadores y categorias por separado para poder enriquecer la vista sin acoplarla a la fuente de datos.
-  const players = await getPlayers();
-  const categories = await getCategories();
+  const clubId = req.authSession?.user?.clubId ?? null;
+  const shouldLoadDemoData = res.locals.shouldShowDemoData;
+  const players = clubId ? await getPlayers({ clubId }) : shouldLoadDemoData ? await getPlayers() : [];
+  const categories = clubId ? await getCategories({ clubId }) : shouldLoadDemoData ? await getCategories() : [];
   const currentPage = Math.max(Number.parseInt(req.query.page ?? "1", 10) || 1, 1);
 
   const getPlayerAge = (player, category) => {
@@ -57,7 +59,7 @@ export const renderPlayers = async (req, res) => {
     return {
       ...player,
       displayAvatar: player.avatar || "/images/avatars/profile.svg",
-      teamName: player.team || "Club Prueba",
+      teamName: player.team || res.locals.currentClub.name,
       categoryName: primaryCategory?.name ?? "Sin categoria",
       age: getPlayerAge(player, primaryCategory),
       ...rosterStatusMeta,

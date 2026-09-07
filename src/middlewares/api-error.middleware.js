@@ -5,7 +5,12 @@ export const apiErrorHandler = (error, req, res, next) => {
     return;
   }
 
-  res.status(500).json({
+  if (!req.originalUrl.startsWith("/api")) {
+    next(error);
+    return;
+  }
+
+  res.status(error.statusCode || 500).json({
     status: "error",
     message: error.message || "Error interno del servidor",
     data: null,

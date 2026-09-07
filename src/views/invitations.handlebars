@@ -1,0 +1,130 @@
+<section class="management-shell">
+  <header class="page-header management-create-header invitation-page-header">
+    <div>
+      <p class="public-eyebrow">Accesos del club</p>
+      <h1>Gestion de invitaciones</h1>
+      <p>Incorpora personas a {{currentClub.name}} y sigue cada invitacion desde un solo lugar.</p>
+    </div>
+    <span class="management-header-badge">Admin · Coach</span>
+  </header>
+
+  <div class="management-layout invitation-management-layout">
+    <section class="management-form-card invitation-create-panel">
+      <div class="invitation-panel-heading">
+        <span class="management-heading-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 5v14M5 12h14"/><circle cx="18" cy="6" r="3"/></svg>
+        </span>
+        <div>
+        <h2>Nueva invitacion</h2>
+          <p>Define la identidad y el acceso del nuevo miembro.</p>
+        </div>
+      </div>
+
+      <form class="profile-modal-form invitation-create-form" data-invitation-create-form novalidate>
+        <p class="form-status-message" data-form-status aria-live="polite"></p>
+
+        <label class="form-field">
+          <span>Correo del nuevo miembro</span>
+          <input type="email" name="email" placeholder="persona@correo.cl" autocomplete="email" required>
+          <small class="form-error-text" data-field-error="email"></small>
+        </label>
+
+        <label class="form-field">
+          <span>Nombre completo</span>
+          <input type="text" name="name" placeholder="Nombre y apellido" autocomplete="name" required>
+          <small class="form-error-text" data-field-error="name"></small>
+        </label>
+
+        <div class="invitation-access-grid">
+          <label class="form-field">
+            <span>Rol dentro del club</span>
+            <select name="roleId" required data-invitation-role-select>
+              {{#each roles}}
+                <option value="{{id}}">{{name}}</option>
+              {{/each}}
+            </select>
+            <small class="form-error-text" data-field-error="roleId"></small>
+          </label>
+
+          <label class="form-field" data-invitation-category-field>
+            <span>Categoria deportiva</span>
+            <select name="primaryCategoryId" data-invitation-category-select>
+              <option value="">Sin categoria</option>
+              {{#each categories}}
+                <option value="{{id}}">{{name}}</option>
+              {{/each}}
+            </select>
+            <small class="form-error-text" data-field-error="primaryCategoryId"></small>
+          </label>
+        </div>
+
+        <div class="invitation-permission-note">
+          <span aria-hidden="true">i</span>
+          <p>La categoria es obligatoria para jugadores. Los entrenadores pueden invitar jugadores y los administradores cualquier rol.</p>
+        </div>
+
+        <button type="submit" class="modal-save-button auth-submit-button invitation-submit-button">Crear invitacion <span aria-hidden="true">&#8594;</span></button>
+      </form>
+    </section>
+
+    <section class="management-list-card invitation-history-panel">
+      <div class="invitation-history-heading">
+        <div>
+          <p class="public-eyebrow">Seguimiento</p>
+          <h2>Invitaciones enviadas</h2>
+        </div>
+        <span>Historial</span>
+      </div>
+
+      <div class="invitation-list">
+        {{#each invitations}}
+          <article class="invitation-card" data-invitation-id="{{id}}">
+            <div class="invitation-card-topbar">
+              <div class="invitation-person">
+                <span class="invitation-person-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c1.5-3.5 5-5.5 7-5.5s5.5 2 7 5.5"/></svg>
+                </span>
+                <div>
+                  <h3>{{name}}</h3>
+                  <p>{{email}}</p>
+                </div>
+              </div>
+
+              <span class="event-tag event-tag-{{statusTone}}">{{statusLabel}}</span>
+            </div>
+
+            <div class="invitation-card-grid">
+              <p><span>Rol</span><strong>{{role.name}}</strong></p>
+              <p><span>Categoria</span><strong>{{#if primaryCategory}}{{primaryCategory.name}}{{else}}Sin categoria{{/if}}</strong></p>
+              <p class="invitation-token-field"><span>Token de acceso</span><strong class="invitation-token">{{token}}</strong></p>
+              <p><span>Expira</span><strong>{{expiresAt}}</strong></p>
+            </div>
+
+            {{#if canChangeStatus}}
+              <form class="invitation-status-inline-form" data-invitation-status-form>
+                <input type="hidden" name="invitationId" value="{{id}}">
+                <label class="form-field compact-form-field">
+                  <span>Cambiar estado</span>
+                  <select name="status">
+                    <option value="pending">pending</option>
+                    <option value="cancelled">cancelled</option>
+                    <option value="expired">expired</option>
+                  </select>
+                </label>
+                <button type="submit" class="home-composer-button home-composer-button-secondary invitation-update-button">Actualizar</button>
+                <p class="form-status-message compact-status-message" data-form-status aria-live="polite"></p>
+              </form>
+            {{/if}}
+          </article>
+        {{/each}}
+        {{#unless invitations}}
+          <div class="invitation-empty-state">
+            <span aria-hidden="true">&#9993;</span>
+            <h3>Aun no hay invitaciones</h3>
+            <p>La primera invitacion que generes aparecera aqui.</p>
+          </div>
+        {{/unless}}
+      </div>
+    </section>
+  </div>
+</section>

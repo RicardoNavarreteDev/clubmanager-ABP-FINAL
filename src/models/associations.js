@@ -1,6 +1,7 @@
 // Este archivo declara las relaciones entre los modelos de Sequelize y las inicializa una sola vez.
 import Category from "./category.model.js";
 import Championship from "./championship.model.js";
+import Club from "./club.model.js";
 import Invitation from "./invitation.model.js";
 import Match from "./match.model.js";
 import Player from "./player.model.js";
@@ -20,6 +21,24 @@ export function initModelAssociations() {
 
   User.hasOne(Player, { foreignKey: "user_id", as: "player" });
   Player.belongsTo(User, { foreignKey: "user_id", as: "user" });
+
+  Club.hasMany(User, { foreignKey: "club_id", as: "users" });
+  User.belongsTo(Club, { foreignKey: "club_id", as: "club" });
+
+  Club.hasMany(Category, { foreignKey: { name: "clubId", field: "club_id" }, as: "categories" });
+  Category.belongsTo(Club, { foreignKey: { name: "clubId", field: "club_id" }, as: "club" });
+
+  Club.hasMany(Championship, { foreignKey: { name: "clubId", field: "club_id" }, as: "championships" });
+  Championship.belongsTo(Club, { foreignKey: { name: "clubId", field: "club_id" }, as: "club" });
+
+  Club.hasMany(Match, { foreignKey: { name: "clubId", field: "club_id" }, as: "matches" });
+  Match.belongsTo(Club, { foreignKey: { name: "clubId", field: "club_id" }, as: "club" });
+
+  Club.hasMany(Player, { foreignKey: { name: "clubId", field: "club_id" }, as: "clubPlayers" });
+  Player.belongsTo(Club, { foreignKey: { name: "clubId", field: "club_id" }, as: "club" });
+
+  Club.hasMany(Invitation, { foreignKey: { name: "clubId", field: "club_id" }, as: "invitations" });
+  Invitation.belongsTo(Club, { foreignKey: { name: "clubId", field: "club_id" }, as: "club" });
 
   User.belongsToMany(Role, {
     through: UserRole,

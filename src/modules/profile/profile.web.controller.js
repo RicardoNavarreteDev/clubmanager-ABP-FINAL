@@ -23,13 +23,17 @@ const formatDisplayDate = (dateValue) => {
 
 export const renderProfile = async (req, res) => {
   // El perfil se arma mezclando el usuario actual con las relaciones que lo conectan a sus campeonatos.
-  const profile = await getProfile();
-  const playerChampionships = await getPlayerChampionships();
-  const championships = await getChampionships();
-  const categories = await getCategories();
-  const players = await getPlayers();
-  const matches = await getMatches();
-  const trainings = await getTrainings();
+  const profile = await getProfile(req.authSession);
+  const clubId = req.authSession?.user?.clubId ?? null;
+  const shouldLoadDemoData = res.locals.shouldShowDemoData;
+  const shouldLoadClubData = Boolean(clubId);
+  const scope = clubId ? { clubId } : undefined;
+  const playerChampionships = shouldLoadDemoData ? await getPlayerChampionships() : [];
+  const championships = shouldLoadClubData || shouldLoadDemoData ? await getChampionships(scope) : [];
+  const categories = shouldLoadClubData || shouldLoadDemoData ? await getCategories(scope) : [];
+  const players = shouldLoadClubData ? await getPlayers({ clubId }) : shouldLoadDemoData ? await getPlayers() : [];
+  const matches = shouldLoadClubData || shouldLoadDemoData ? await getMatches(scope) : [];
+  const trainings = shouldLoadDemoData ? await getTrainings() : [];
 
   const getStatusMeta = (status) => {
     if (status === "active") {
@@ -59,9 +63,9 @@ export const renderProfile = async (req, res) => {
     || normalizedRole.includes("entrenadora");
 
   // Primero filtramos solo los enlaces del jugador del perfil para no recorrer campeonatos sin necesidad.
-  const profileChampionshipLinks = playerChampionships.filter(
-    (item) => item.playerId === profile.playerId,
-  );
+  const profileChampionshipLinks = profile.playerId
+    ? playerChampionships.filter((item) => item.playerId === profile.playerId)
+    : [];
 
   // Despues resolvemos los campeonatos completos y les agregamos etiquetas listas para pintar en la vista.
   const visibleChampionships = championships.filter((championship) =>
@@ -173,8 +177,9 @@ export const renderProfile = async (req, res) => {
   res.render("profile", {
     profile: {
       ...profile,
+      birthDateRaw: profile.birthDate,
       birthDate: formatDisplayDate(profile.birthDate),
-      roleBadge: isManagementProfile ? "Administrador" : "Jugador",
+      roleBadge: normalizedRole.includes("admin") ? "Administrador" : normalizedRole.includes("coach") ? "Coach" : "Jugador",
       isManagementProfile,
     },
     championships: profileChampionships,

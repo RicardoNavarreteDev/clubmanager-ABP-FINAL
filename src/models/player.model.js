@@ -11,6 +11,11 @@ const Player = sequelize.define(
       autoIncrement: true,
       primaryKey: true,
     },
+    clubId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      field: "club_id",
+    },
     userId: {
       type: DataTypes.INTEGER,
       allowNull: true,

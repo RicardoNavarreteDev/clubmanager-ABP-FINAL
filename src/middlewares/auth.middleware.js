@@ -1,10 +1,12 @@
 // Este archivo valida JWT en las rutas privadas de la API y deja la identidad basica en req.user.
 import jwt from "jsonwebtoken";
+import { getAuthTokenFromRequest } from "./web-auth.middleware.js";
 
 export const authenticateJwt = (req, res, next) => {
   const authorizationHeader = req.headers.authorization;
+  const cookieToken = getAuthTokenFromRequest(req);
 
-  if (!authorizationHeader) {
+  if (!authorizationHeader && !cookieToken) {
     res.status(401).json({
       status: "error",
       message: "Debes enviar un token de autenticacion.",
@@ -13,9 +15,9 @@ export const authenticateJwt = (req, res, next) => {
     return;
   }
 
-  const [scheme, token] = authorizationHeader.split(" ");
+  const [scheme, bearerToken] = authorizationHeader?.split(" ") ?? [];
 
-  if (scheme !== "Bearer" || !token) {
+  if (authorizationHeader && (scheme !== "Bearer" || !bearerToken)) {
     res.status(401).json({
       status: "error",
       message: "El header Authorization debe usar el formato Bearer <token>.",
@@ -25,6 +27,7 @@ export const authenticateJwt = (req, res, next) => {
   }
 
   try {
+    const token = bearerToken || cookieToken;
     const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decodedToken;
     next();

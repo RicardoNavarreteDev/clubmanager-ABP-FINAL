@@ -11,6 +11,11 @@ const Category = sequelize.define(
       autoIncrement: true,
       primaryKey: true,
     },
+    clubId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      field: "club_id",
+    },
     name: {
       type: DataTypes.STRING(60),
       allowNull: false,

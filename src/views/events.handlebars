@@ -1,7 +1,7 @@
 {{!-- Este archivo muestra la pagina de eventos con bloques de partidos jugados, proximos partidos y entrenamientos. --}}
 <header class="page-header">
   <h1>Eventos</h1>
-  <p>Partidos y entrenamientos del Club Prueba.</p>
+  <p>Partidos y entrenamientos de {{currentClub.name}}.</p>
 </header>
 
 <section class="events-filter-bar">
@@ -45,8 +45,8 @@
 
         <div class="event-scoreboard-grid">
           <div class="event-team-block">
-            <div class="event-team-badge event-team-badge-home">CP</div>
-            <h3>Club Prueba</h3>
+            <div class="event-team-badge event-team-badge-home">{{../clubInitials}}</div>
+            <h3>{{../currentClub.name}}</h3>
           </div>
 
           <div class="event-score-block">
@@ -68,6 +68,8 @@
           <span class="event-showcase-link">Ver detalle</span>
         </div>
       </article>
+    {{else}}
+      <article class="empty-state-card collection-empty-state"><h3>Sin partidos jugados</h3><p>Los resultados de {{currentClub.name}} apareceran aqui.</p></article>
     {{/each}}
   </div>
 </section>
@@ -147,6 +149,8 @@
           <span class="event-showcase-link">Ver detalle</span>
         </div>
       </article>
+    {{else}}
+      <article class="empty-state-card collection-empty-state"><h3>Sin proximos partidos</h3><p>La agenda competitiva aun esta vacia.</p></article>
     {{/each}}
   </div>
 </section>
@@ -210,6 +214,8 @@
           <span class="events-training-card-arrow">→</span>
         </div>
       </article>
+    {{else}}
+      <article class="empty-state-card collection-empty-state"><h3>Sin entrenamientos</h3><p>Las nuevas sesiones apareceran en esta seccion.</p></article>
     {{/each}}
   </div>
 </section>

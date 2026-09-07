@@ -1,350 +1,112 @@
-{{!-- Este archivo renderiza la portada principal del club con resumen, actividad y feed social. --}}
-<section class="home-hero-shell">
-  <div class="home-hero-main">
-    <header class="home-hero-header">
-      <div>
-        <h1>Bienvenido, {{currentViewer.name}}!</h1>
-        <p>Aqui tienes un resumen de lo que esta pasando en Club Prueba.</p>
-      </div>
-
-      <label class="home-season-select">
-        <select aria-label="Seleccionar temporada">
-          {{#each homeSeasonOptions}}
-            <option {{#if @first}}selected{{/if}}>{{this}}</option>
-          {{/each}}
-        </select>
-      </label>
-    </header>
-
-    <section class="home-stats-grid">
-      {{#each dashboardStats}}
-        <article class="home-stat-card" data-tone="{{tone}}">
-          <div class="home-stat-card-topbar">
-            <span class="home-stat-icon" aria-hidden="true">
-              {{#if isPlayersIcon}}
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="8" cy="9" r="3" />
-                  <circle cx="16.5" cy="8" r="2.5" />
-                  <path d="M3.5 18c1.2-2.8 3.8-4.5 6.5-4.5s5.3 1.7 6.5 4.5" />
-                  <path d="M14.5 15.5c.9-.9 2.1-1.5 3.5-1.5 1.6 0 3 .7 4 2" />
-                </svg>
-              {{/if}}
-              {{#if isCalendarIcon}}
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="3.5" y="5" width="17" height="15" rx="2" />
-                  <path d="M8 3.5V7" />
-                  <path d="M16 3.5V7" />
-                  <path d="M3.5 10h17" />
-                </svg>
-              {{/if}}
-              {{#if isTrophyIcon}}
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M8 4h8v3a4 4 0 0 1-8 0Z" />
-                  <path d="M9.5 13h5" />
-                  <path d="M12 10v9" />
-                  <path d="M7.5 22h9" />
-                  <path d="M8 5H5.5a2 2 0 0 0 0 4H8" />
-                  <path d="M16 5h2.5a2 2 0 0 1 0 4H16" />
-                </svg>
-              {{/if}}
-              {{#if isScheduleIcon}}
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="3.5" y="5" width="17" height="15" rx="2" />
-                  <path d="M8 3.5V7" />
-                  <path d="M16 3.5V7" />
-                  <path d="M3.5 10h17" />
-                </svg>
-              {{/if}}
-            </span>
-
-            <div>
-              <h2>{{title}}</h2>
-              <p class="home-stat-value">{{value}}</p>
-            </div>
-          </div>
-
-          <p class="home-stat-note">{{note}}</p>
-        </article>
-      {{/each}}
-    </section>
-
-    <section class="home-composer-card">
-      <div class="home-composer-header">
-        <img src="{{currentViewer.avatar}}" alt="Perfil de {{currentViewer.name}}" width="80">
-
-        <div>
-          <h2>Comparte una novedad</h2>
-          {{#if showManagementLinks}}
-            <p>Publica una noticia o anuncio para la comunidad del club.</p>
-          {{else}}
-            <p>Publica una novedad para la comunidad del club.</p>
-          {{/if}}
-        </div>
-      </div>
-
-      <textarea placeholder="Que esta pasando en Club Prueba?"></textarea>
-
-      <div class="home-composer-toolbar">
-        <div class="home-composer-tools" aria-hidden="true">
-          <span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="4" y="5" width="16" height="14" rx="2" />
-              <circle cx="9" cy="10" r="1.6" />
-              <path d="m20 15-4.5-4.5L7 19" />
-            </svg>
-          </span>
-          <span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="4" y="6" width="12" height="12" rx="2" />
-              <path d="m16 10 4-2.5v9L16 14" />
-            </svg>
-          </span>
-          <span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="8.5" />
-              <path d="M9 10h.01" />
-              <path d="M15 10h.01" />
-              <path d="M8.5 14c1.1 1.3 2.2 2 3.5 2s2.4-.7 3.5-2" />
-            </svg>
-          </span>
-        </div>
-
-        <div class="home-composer-actions">
-          {{#if showManagementLinks}}
-            <button type="button" class="home-composer-button home-composer-button-secondary">Crear anuncio</button>
-          {{/if}}
-          <button type="button" class="home-composer-button home-composer-button-primary">Publicar</button>
-        </div>
-      </div>
-    </section>
+<section class="club-home-hero">
+  <img src="/images/sports-login.svg" alt="Cancha deportiva de {{currentClub.sport}}">
+  <div class="club-home-hero-shade"></div>
+  <div class="club-home-hero-copy">
+    <p>{{currentClub.name}}</p>
+    <h1>Mas que un equipo,<br>una <span>familia</span></h1>
+    <strong>{{#if currentClub.description}}{{currentClub.description}}{{else}}Disciplina, juego en equipo y buena energia dentro y fuera de la cancha.{{/if}}</strong>
   </div>
-
 </section>
 
-<section class="home-feed-section">
-  <header class="home-feed-header">
-    <h2>Publicaciones y anuncios</h2>
-    <p>Enterate de lo que pasa en Club Prueba.</p>
-  </header>
+<section class="team-feed-composer" id="inicio-comunidad" data-feed-enabled="{{feedPersistenceEnabled}}">
+  <form data-feed-composer enctype="multipart/form-data">
+    <div class="team-feed-composer-main">
+      <img src="{{currentViewer.avatar}}" alt="Perfil de {{currentViewer.name}}">
+      <textarea name="content" rows="1" placeholder="Que quieres compartir con el equipo?" data-feed-content></textarea>
+    </div>
 
+    <input type="hidden" name="type" value="text" data-feed-type-input>
+    <input type="file" name="image" accept="image/jpeg,image/png,image/webp" data-feed-image-input hidden>
+
+    <div class="feed-composer-extra" data-feed-photo-panel hidden>
+      <span data-feed-photo-name>Selecciona una imagen para publicar.</span>
+    </div>
+    <div class="feed-composer-extra feed-poll-fields" data-feed-poll-panel hidden>
+      <input type="text" name="pollQuestion" placeholder="Pregunta de la encuesta">
+      <input type="text" data-poll-option placeholder="Opcion 1">
+      <input type="text" data-poll-option placeholder="Opcion 2">
+      <button type="button" data-add-poll-option>Agregar opcion</button>
+    </div>
+    <div class="feed-composer-extra feed-event-fields" data-feed-event-panel hidden>
+      <input type="text" name="eventTitle" placeholder="Nombre del evento">
+      <input type="datetime-local" name="eventStartAt">
+      <input type="text" name="eventLocation" placeholder="Lugar">
+    </div>
+
+    <div class="team-feed-composer-toolbar">
+      <div class="team-feed-tools">
+        <button type="button" data-feed-type="photo"><span aria-hidden="true">&#9638;</span> Foto</button>
+        <button type="button" data-feed-type="poll"><span aria-hidden="true">&#9636;</span> Encuesta</button>
+        <button type="button" data-feed-type="event"><span aria-hidden="true">&#9633;</span> Evento</button>
+        {{#if showManagementLinks}}<button type="button" data-feed-type="announcement"><span aria-hidden="true">!</span> Aviso</button>{{/if}}
+      </div>
+      <button type="submit" class="team-feed-publish">Publicar</button>
+    </div>
+    <p class="feed-form-status" data-feed-status aria-live="polite"></p>
+  </form>
+</section>
+
+{{#if hasNoActivity}}
+  <section class="home-first-steps">
+    <div><p class="public-eyebrow">Primeros pasos</p><h2>Tu club ya esta listo para comenzar.</h2></div>
+    <div class="home-first-step-links">
+      <a href="/gestion/categorias"><span>01</span> Crear otra categoria</a>
+      <a href="/gestion/invitaciones"><span>02</span> Invitar al equipo</a>
+      <a href="/campeonatos/nuevo"><span>03</span> Crear campeonato</a>
+      <a href="/gestion/partidos/nuevo"><span>04</span> Programar partido</a>
+    </div>
+  </section>
+{{/if}}
+
+<section class="team-feed-list" aria-label="Actividad del club">
   {{#each posts}}
-    <article class="home-feed-card">
-      <div class="home-feed-card-header">
-        <img src="{{avatar}}" alt="Avatar de {{author}}" width="80">
+    <article class="team-feed-post" data-feed-post="{{id}}">
+      <header class="team-feed-post-header">
+        <img src="{{authorAvatar}}" alt="Perfil de {{authorName}}">
+        <div><h2>{{authorName}} <span>{{authorRole}}</span></h2><p>{{displayDate}}</p></div>
+        <button type="button" aria-label="Opciones de publicacion">...</button>
+      </header>
 
-        <div class="home-feed-author-copy">
-          <div class="home-feed-author-line">
-            <h3>{{author}}</h3>
-            <span class="home-feed-role-badge" data-tone="{{roleTone}}">{{role}}</span>
-            <span class="home-feed-time-dot">•</span>
-            <p>{{displayDate}}</p>
-          </div>
+      {{#if isAnnouncement}}<p class="team-feed-announcement-label">Aviso del club</p>{{/if}}
+      {{#if content}}<p class="team-feed-post-content">{{content}}</p>{{/if}}
+      {{#if imageUrl}}<img class="team-feed-post-image" src="{{imageUrl}}" alt="Imagen compartida por {{authorName}}">{{/if}}
 
-          {{#if isAnnouncement}}
-            <p class="home-feed-card-kicker">Anuncio</p>
-          {{/if}}
-        </div>
+      {{#if isEvent}}
+        <div class="team-feed-event-card"><span>EVENTO</span><h3>{{event.title}}</h3><p>{{eventDate}}{{#if event.location}} · {{event.location}}{{/if}}</p></div>
+      {{/if}}
 
-        <button type="button" class="home-feed-more-button" aria-label="Mas opciones">•••</button>
+      {{#if isPoll}}
+        <form class="team-feed-poll" data-feed-poll-form data-post-id="{{id}}">
+          <h3>{{poll.question}}</h3>
+          {{#each poll.options}}
+            <label><input type="radio" name="optionId" value="{{id}}" {{#if selectedByCurrentUser}}checked{{/if}}><span>{{label}}</span><strong>{{percentage}}%</strong><i style="width: {{percentage}}%"></i></label>
+          {{/each}}
+          <button type="submit">Votar · {{poll.votesCount}} votos</button>
+        </form>
+      {{/if}}
+
+      <div class="team-feed-actions">
+        <button type="button" class="team-feed-like {{#if likedByCurrentUser}}active{{/if}}" data-feed-like data-post-id="{{id}}"><span aria-hidden="true">&#9829;</span> <b data-like-count>{{likesCount}}</b></button>
+        <button type="button" data-comments-toggle><span aria-hidden="true">&#9635;</span> {{commentsCount}}</button>
       </div>
 
-      <div class="home-feed-card-body">
-        <p class="home-feed-card-content">{{content}}</p>
-
-        {{#if isAnnouncement}}
-          <div class="home-feed-announcement-strip">
-            <div class="home-feed-announcement-item">
-              <span>Visibilidad</span>
-              <strong>Equipo completo</strong>
-            </div>
-            <div class="home-feed-announcement-item">
-              <span>Tipo</span>
-              <strong>Comunicado interno</strong>
-            </div>
-            <div class="home-feed-announcement-item">
-              <span>Estado</span>
-              <strong>Activo</strong>
-            </div>
-          </div>
+      <div class="team-feed-comments" data-comments-panel>
+        {{#each comments}}
+          <article class="team-feed-comment">
+            <img src="{{authorAvatar}}" alt="Perfil de {{authorName}}">
+            <div><strong>{{authorName}}</strong><span>{{displayDate}}</span><p>{{content}}</p><button type="button" data-reply-toggle>Responder</button></div>
+            <form data-feed-reply-form data-post-id="{{../id}}" data-comment-id="{{id}}" hidden><input name="content" placeholder="Escribe una respuesta" required><button>Enviar</button></form>
+            {{#each replies}}
+              <article class="team-feed-comment team-feed-reply"><img src="{{authorAvatar}}" alt=""><div><strong>{{authorName}}</strong><span>{{displayDate}}</span><p>{{content}}</p></div></article>
+            {{/each}}
+          </article>
+        {{/each}}
+        {{#if ../feedPersistenceEnabled}}
+          <form class="team-feed-comment-form" data-feed-comment-form data-post-id="{{id}}"><input name="content" placeholder="Escribe un comentario..." required><button>Enviar</button></form>
         {{/if}}
       </div>
-
-      <div class="home-feed-social-row">
-        <div class="feed-social-bar">
-          <button type="button" class="feed-social-button" data-feed-like-toggle>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M12 20.5s-6.5-3.99-8.56-7.16C1.54 10.46 2.2 6.9 5.3 5.48c2.2-1 4.3-.15 5.55 1.55 1.24-1.7 3.35-2.55 5.55-1.55 3.1 1.42 3.76 4.98 1.86 7.86C18.5 16.51 12 20.5 12 20.5Z" />
-            </svg>
-            <strong data-feed-like-count>{{likes}}</strong>
-          </button>
-
-          {{#unless isAnnouncement}}
-            <button type="button" class="feed-social-button feed-comments-trigger" data-modal-open="comments-modal-{{id}}">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M20 11.2c0 4.4-3.76 8-8.4 8-1.36 0-2.65-.3-3.78-.84L4 19.8l1.16-3.32A7.7 7.7 0 0 1 3.2 11.2c0-4.42 3.76-8 8.4-8s8.4 3.58 8.4 8Z" />
-              </svg>
-              <strong data-feed-comment-count>{{comments}}</strong>
-            </button>
-          {{/unless}}
-        </div>
-
-        <div class="home-feed-secondary-actions" aria-hidden="true">
-          <span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4.5h12a1.5 1.5 0 0 1 1.5 1.5v14l-7.5-4-7.5 4V6A1.5 1.5 0 0 1 6 4.5Z" /></svg>
-          </span>
-          <span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7" /><path d="M9 7h8v8" /></svg>
-          </span>
-        </div>
-      </div>
-
-      {{#unless isAnnouncement}}
-        {{#if commentPreviewList.length}}
-          <div class="feed-comments-preview home-feed-comments-preview">
-            <div class="home-feed-comments-stack">
-              {{#each commentPreviewList}}
-                <article class="home-feed-comment-line">
-                  <div class="home-feed-comment-line-header">
-                    <h4>{{author}}</h4>
-                    <span>{{role}}</span>
-                    <span class="home-feed-time-dot">•</span>
-                    <p>{{date}}</p>
-                  </div>
-
-                  <p class="home-feed-comment-line-content">{{content}}</p>
-                </article>
-              {{/each}}
-
-              {{#if remainingCommentsCount}}
-                <button type="button" class="home-feed-comments-more-button" data-modal-open="comments-modal-{{id}}">
-                  Ver los {{remainingCommentsCount}} comentarios restantes
-                </button>
-              {{/if}}
-            </div>
-          </div>
-        {{/if}}
-      {{/unless}}
     </article>
-
-    {{#unless isAnnouncement}}
-      <div class="modal-backdrop" data-modal="comments-modal-{{id}}" data-modal-archive hidden>
-        <div class="modal-panel comments-modal-panel" role="dialog" aria-modal="true" aria-labelledby="comments-modal-title-{{id}}">
-          <div class="modal-header" data-modal-archive-item>
-            <button type="button" class="modal-close-button" data-modal-close="comments-modal-{{id}}">×</button>
-            <h2 id="comments-modal-title-{{id}}">Comentarios de {{author}}</h2>
-          </div>
-
-          <div class="comments-modal-body" data-modal-archive-item>
-            <div class="comments-modal-layout">
-              <div class="comments-modal-post-card">
-                <div class="feed-header comments-modal-post-header">
-                  <img src="{{avatar}}" alt="Avatar de {{author}}" width="80">
-
-                  <div>
-                    <h3>{{author}}</h3>
-                    <p>{{role}} · {{date}}</p>
-                  </div>
-                </div>
-
-                <p class="comments-modal-post-content">{{content}}</p>
-
-                <div class="feed-social-bar comments-modal-social-bar">
-                  <button type="button" class="feed-social-button" data-feed-like-toggle>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                      <path d="M12 20.5s-6.5-3.99-8.56-7.16C1.54 10.46 2.2 6.9 5.3 5.48c2.2-1 4.3-.15 5.55 1.55 1.24-1.7 3.35-2.55 5.55-1.55 3.1 1.42 3.76 4.98 1.86 7.86C18.5 16.51 12 20.5 12 20.5Z" />
-                    </svg>
-                    <strong data-feed-like-count>{{likes}}</strong>
-                  </button>
-                </div>
-              </div>
-
-              <div class="comments-thread-shell">
-                <div class="comments-thread-list">
-                  {{#each commentThread}}
-                    <article class="comment-thread-card">
-                      <div class="comment-thread-header">
-                        <img src="{{avatar}}" alt="Avatar de {{author}}" width="80">
-
-                        <div>
-                          <h3>{{author}}</h3>
-                          <p>{{role}} · {{date}}</p>
-                        </div>
-                      </div>
-
-                      <p class="comment-thread-content">{{content}}</p>
-
-                      <div class="comment-thread-actions">
-                        <button type="button" class="comment-action-button" data-comment-like-toggle>
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                            <path d="M12 20.5s-6.5-3.99-8.56-7.16C1.54 10.46 2.2 6.9 5.3 5.48c2.2-1 4.3-.15 5.55 1.55 1.24-1.7 3.35-2.55 5.55-1.55 3.1 1.42 3.76 4.98 1.86 7.86C18.5 16.51 12 20.5 12 20.5Z" />
-                          </svg>
-                          <strong data-comment-like-count>{{likes}}</strong>
-                        </button>
-                        <button type="button" class="comment-action-button" data-comment-reply-toggle>
-                          Responder
-                        </button>
-                      </div>
-
-                      {{#if replies.length}}
-                        <button type="button" class="comment-inline-expand-button" data-comment-replies-toggle>
-                          Ver todas las respuestas ({{replies.length}})
-                        </button>
-
-                        <div class="comment-replies" data-comment-replies-panel hidden>
-                          {{#each replies}}
-                            <article class="comment-reply-card">
-                              <div class="comment-thread-header comment-reply-header">
-                                <img src="{{avatar}}" alt="Avatar de {{author}}" width="80">
-
-                                <div>
-                                  <h4>{{author}}</h4>
-                                  <p>{{role}} · {{date}}</p>
-                                </div>
-                              </div>
-
-                              <p class="comment-thread-content">{{content}}</p>
-
-                              <div class="comment-thread-actions">
-                                <button type="button" class="comment-action-button" data-comment-like-toggle>
-                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                    <path d="M12 20.5s-6.5-3.99-8.56-7.16C1.54 10.46 2.2 6.9 5.3 5.48c2.2-1 4.3-.15 5.55 1.55 1.24-1.7 3.35-2.55 5.55-1.55 3.1 1.42 3.76 4.98 1.86 7.86C18.5 16.51 12 20.5 12 20.5Z" />
-                                  </svg>
-                                  <strong data-comment-like-count>{{likes}}</strong>
-                                </button>
-                              </div>
-                            </article>
-                          {{/each}}
-                        </div>
-                      {{/if}}
-
-                      <form class="comment-reply-form" data-comment-reply-form hidden>
-                        <label class="form-field">
-                          <span>Responder comentario</span>
-                          <textarea placeholder="Escribe una respuesta breve"></textarea>
-                        </label>
-
-                        <div class="comment-reply-actions">
-                          <button type="submit" class="composer-actions-button-primary">Responder</button>
-                        </div>
-                      </form>
-                    </article>
-                  {{/each}}
-                </div>
-
-                <form class="comments-composer-form" data-comments-composer-form>
-                  <label class="form-field comments-composer-field">
-                    <textarea placeholder="Escribe tu comentario"></textarea>
-                  </label>
-
-                  <div class="comment-reply-actions">
-                    <button type="submit" class="composer-actions-button-primary">Publicar</button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    {{/unless}}
+  {{else}}
+    <article class="empty-state-card collection-empty-state"><h3>Aun no hay publicaciones</h3><p>Comparte arriba el primer mensaje de {{currentClub.name}}.</p></article>
   {{/each}}
 </section>

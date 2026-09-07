@@ -2,7 +2,7 @@
 import Role from "../../models/role.model.js";
 import { initModelAssociations } from "../../models/associations.js";
 
-const shouldUseDatabase = () => process.env.DB_READ_ROLES === "true";
+const shouldUseDatabase = () => process.env.DB_READ_ROLES !== "false";
 
 // Este mapeo deja los roles con la forma minima que consume la app.
 const mapRole = (role) => ({

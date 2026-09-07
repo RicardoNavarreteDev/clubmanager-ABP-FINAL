@@ -54,6 +54,7 @@ DB_PORT=5432
 DB_NAME=clubmanager
 DB_USER=clubmanager_app
 DB_PASSWORD=change_me
+APP_DEMO_MODE=true
 ```
 
 Flags de lectura desde base de datos:
@@ -73,6 +74,8 @@ DB_PROFILE_USER_ID=3
 ```
 
 Si alguno de esos flags esta en `false`, el modulo correspondiente puede seguir leyendo desde JSON o desactivar la lectura segun el caso.
+
+`APP_DEMO_MODE=true` conserva los datos de muestra para las cuentas seed de `Club Prueba`. Los clubes creados desde la landing comienzan siempre con un dashboard vacio. Usa `APP_DEMO_MODE=false` para ocultar la muestra en toda la instalacion. La instalacion admite un club en esta etapa.
 
 ## Ejecucion
 
@@ -152,11 +155,17 @@ Proyecto-ABP-M6/
 
 ## Rutas web principales
 
-- `/`: portada principal del club.
+- `/`: landing publica.
+- `/crear-club`: alta del club y del administrador fundador.
+- `/login`: inicio de sesion.
+- `/dashboard`: panel principal autenticado.
 - `/status`: estado del servidor y escritura en `logs/log.txt`.
 - `/jugadores`: vista de jugadores.
 - `/eventos`: vista de partidos y entrenamientos.
 - `/campeonatos`: vista de campeonatos.
+- `/campeonatos/nuevo`: alta de campeonatos para admin y coach.
+- `/gestion/categorias`: alta y listado de categorias.
+- `/gestion/partidos/nuevo`: alta de proximos partidos.
 - `/perfil`: vista de perfil del usuario cargado.
 
 Ejemplo de respuesta en `/status`:
@@ -179,7 +188,7 @@ Ejemplo de respuesta en `/status`:
 - `DELETE /api/users/:id`
 
 Nota:
-`POST /api/users` y `DELETE /api/users/:id` se mantuvieron para cubrir la consigna del modulo 7 y para pruebas administrativas del backend. El flujo real del producto no considera un alta libre de usuarios ni un borrado directo de cuentas desde la experiencia final del club; el ingreso real se resuelve con invitaciones y registro por token.
+`POST /api/users` y `DELETE /api/users/:id` se mantienen para pruebas administrativas del backend. El administrador fundador se registra publicamente al crear la instalacion del club; los usuarios posteriores ingresan mediante invitaciones y registro por token.
 
 Filtros disponibles:
 
@@ -218,19 +227,75 @@ Filtros disponibles:
 
 - `POST /api/auth/register`
 - `POST /api/auth/login`
+- `GET /api/auth/me`
+- `POST /api/auth/me/avatar`
+- `PUT /api/auth/me/profile`
+- `PUT /api/auth/me/email`
+- `PUT /api/auth/me/password`
+
+### Feed social
+
+- `GET /api/feed`
+- `POST /api/feed`
+- `POST /api/feed/:postId/likes`
+- `POST /api/feed/:postId/votes`
+- `POST /api/feed/:postId/comments`
+- `POST /api/feed/:postId/comments/:commentId/replies`
+
+El feed persistente admite texto, fotos, encuestas, eventos y avisos. Las fotos aceptan JPG, PNG o WEBP de hasta 4 MB. Los avisos requieren rol `admin` o `coach`.
+
+## Swagger
+
+- `GET /api-docs`
+
+La documentacion OpenAPI se expone con Swagger UI en `/api-docs`.
+
+## Autenticacion
+
+Las rutas privadas usan JWT en el header:
+
+```http
+Authorization: Bearer TU_TOKEN
+```
+
+Rutas protegidas principales:
+
+- `GET /api/auth/me`
+- `POST /api/auth/me/avatar`
+- `PUT /api/auth/me/profile`
+- `PUT /api/auth/me/email`
+- `PUT /api/auth/me/password`
+- `GET /api/users`
+- `POST /api/users`
+- `PUT /api/users/:id`
+- `DELETE /api/users/:id`
+- `PUT /api/players/:id`
+- `PATCH /api/players/:id/status`
+- `GET /api/invitations`
+- `GET /api/invitations/:id`
+- `POST /api/invitations`
+- `PATCH /api/invitations/:id/status`
 
 ## Flujo real de invitaciones
 
 El flujo actual del proyecto ya no depende del alta libre de usuarios.
 
-1. `admin` o `coach` crea una invitacion.
-2. Si la invitacion es para rol `player`, se crea una ficha deportiva en estado `invited`.
-3. La invitacion genera un `token` unico.
-4. El usuario entra al link de registro con ese `token`.
-5. `POST /api/auth/register` valida la invitacion y crea la cuenta.
-6. El sistema asigna el rol, vincula el `player`, cambia su estado a `active` y marca la invitacion como `accepted`.
+1. `admin` puede invitar `admin`, `coach` y `player`.
+2. `coach` puede invitar solo `player`.
+3. `player` no puede crear invitaciones.
+4. Se crea una invitacion con `email`, `name`, `roleId` y, si corresponde, `primaryCategoryId`.
+5. Si la invitacion es para rol `player`, se crea una ficha deportiva en estado `invited`.
+6. La invitacion genera un `token` unico.
+7. El usuario entra al link de registro con ese `token`.
+8. `POST /api/auth/register` valida la invitacion y crea la cuenta.
+9. El sistema asigna el rol, vincula el `player`, cambia su estado a `active` y marca la invitacion como `accepted`.
 
 Este flujo se ejecuta dentro de una transaccion para mantener consistencia entre `users`, `user_roles`, `players` e `invitations`.
+
+Regla de categoria:
+
+- si `roleId` corresponde a `player`, `primaryCategoryId` es obligatorio
+- si `roleId` corresponde a `admin` o `coach`, `primaryCategoryId` puede ir vacio
 
 ## Ejemplos de uso
 
@@ -286,6 +351,81 @@ Content-Type: application/json
 }
 ```
 
+### Obtener sesion autenticada
+
+```http
+GET /api/auth/me
+Authorization: Bearer TU_TOKEN
+```
+
+### Subir avatar del usuario autenticado
+
+```http
+POST /api/auth/me/avatar
+Authorization: Bearer TU_TOKEN
+Content-Type: multipart/form-data
+```
+
+Campo esperado:
+
+- `avatar`: archivo `jpg`, `jpeg`, `png` o `webp`
+
+Restricciones:
+
+- tamano maximo de `2 MB`
+- se guarda en `public/uploads/avatars/`
+- la ruta publica final se persiste en `User.avatar`
+- si el usuario tiene ficha `Player`, tambien se sincroniza `Player.avatar`
+
+### Actualizar perfil del usuario autenticado
+
+```http
+PUT /api/auth/me/profile
+Authorization: Bearer TU_TOKEN
+Content-Type: application/json
+```
+
+```json
+{
+  "displayName": "Usuario Actualizado",
+  "bio": "Bio actualizada",
+  "location": "Santiago",
+  "birthDate": "2000-01-02"
+}
+```
+
+### Actualizar correo del usuario autenticado
+
+```http
+PUT /api/auth/me/email
+Authorization: Bearer TU_TOKEN
+Content-Type: application/json
+```
+
+```json
+{
+  "currentEmail": "user@clubmanager.dev",
+  "newEmail": "user.nuevo@clubmanager.dev",
+  "confirmEmail": "user.nuevo@clubmanager.dev"
+}
+```
+
+### Actualizar password del usuario autenticado
+
+```http
+PUT /api/auth/me/password
+Authorization: Bearer TU_TOKEN
+Content-Type: application/json
+```
+
+```json
+{
+  "currentPassword": "secreta123",
+  "newPassword": "nuevaSecreta123",
+  "confirmPassword": "nuevaSecreta123"
+}
+```
+
 ## Validacion manual recomendada
 
 Rutas web:
@@ -307,10 +447,18 @@ Rutas API:
 - `GET /api/players`
 - `PUT /api/players/:id`
 - `PATCH /api/players/:id/status`
+- `GET /api/invitations`
+- `GET /api/invitations/:id`
 - `POST /api/invitations`
+- `PATCH /api/invitations/:id/status`
 - `GET /api/invitations/token/:token`
 - `POST /api/auth/register`
 - `POST /api/auth/login`
+- `GET /api/auth/me`
+- `POST /api/auth/me/avatar` exitoso
+- `POST /api/auth/me/avatar` con archivo invalido
+- `GET /api/does-not-exist` para validar `404` JSON
+- `GET /api-docs`
 
 ## Registro en archivo plano
 
@@ -330,6 +478,9 @@ Ejemplo:
 - Se conservaron vistas renderizadas con `Handlebars` y se sumo una API REST sobre la misma app Express.
 - El registro real de jugadores ya no es libre: depende de invitaciones con `token`.
 - Se implemento transaccionalidad en el registro para mantener consistencia entre invitaciones, usuarios, roles y jugadores.
+- Se incorporo `multer` para manejar upload de avatares con validacion de tipo y tamano.
+- Se dejo `Swagger UI` montado en `/api-docs` para documentar la API final.
+- Las rutas `/api/*` no encontradas ahora responden `404` JSON consistente.
 
 ## Evidencias
 
@@ -406,6 +557,10 @@ Actualmente el proyecto ya cuenta con:
 - modulo API de `players`
 - modulo API de `invitations`
 - registro y login basados en invitacion
+- obtencion de sesion autenticada con `GET /api/auth/me`
+- upload de avatar con `POST /api/auth/me/avatar`
+- documentacion Swagger disponible en `/api-docs`
+- manejo de `404` JSON para rutas API inexistentes
 - persistencia simple en archivo plano para `/status`
 
 ## Proyeccion
@@ -413,7 +568,6 @@ Actualmente el proyecto ya cuenta con:
 Los siguientes pasos naturales del proyecto son:
 
 - reemplazar el hash temporal por `bcrypt` o `bcryptjs`
-- agregar `JWT`
-- proteger rutas privadas por rol
 - separar experiencia de panel para `admin`, `coach` y `player`
-- evolucionar a una landing publica con creacion de club y admin fundador
+- agregar limpieza de archivos de avatar antiguos al reemplazar imagen
+- evolucionar el modelo de una instalacion por club hacia aislamiento multi-club

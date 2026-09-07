@@ -563,6 +563,9 @@ function closeModal(modal) {
   });
 }
 
+window.openModal = openModal;
+window.closeModal = closeModal;
+
 document.addEventListener("click", (event) => {
   const settingsToggle = event.target.closest("[data-settings-menu-toggle]");
   if (settingsToggle) {

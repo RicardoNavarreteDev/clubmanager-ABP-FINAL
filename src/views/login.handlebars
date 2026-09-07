@@ -1,0 +1,55 @@
+<main class="auth-public-page">
+  <a class="auth-back-link" href="/">&#8592; Volver</a>
+  <section class="auth-split-shell">
+    <div class="auth-login-panel">
+      <a class="public-brand" href="/">
+        <span class="public-brand-mark">CM</span>
+        <span>ClubManager</span>
+      </a>
+
+      <div class="auth-login-content">
+        <header>
+          <p class="public-eyebrow">Bienvenido de vuelta</p>
+          <h1>Inicia sesion</h1>
+          <span>Entra a tu espacio deportivo para continuar.</span>
+        </header>
+
+        {{#if loginError}}
+          <div class="web-alert web-alert-error">{{loginError}}</div>
+        {{/if}}
+
+        <form class="public-auth-form" action="/login" method="post">
+          <label class="public-field">
+            <span>Correo</span>
+            <input type="email" name="email" value="{{loginForm.email}}" placeholder="tu@club.cl" required autocomplete="email">
+          </label>
+          <label class="public-field">
+            <span>Password</span>
+            <input type="password" name="password" placeholder="Tu password" required autocomplete="current-password">
+          </label>
+          <div class="auth-form-meta">
+            <label><input type="checkbox" name="remember"> Recordarme</label>
+            <span>Acceso seguro</span>
+          </div>
+          <button type="submit" class="public-button public-button-primary auth-login-submit">Entrar al panel</button>
+        </form>
+      </div>
+
+      <p class="auth-help-copy">Necesitas acceso? Solicita una invitacion al administrador de tu club.</p>
+    </div>
+
+    <div class="auth-sport-panel">
+      <img src="/images/sports-login.svg" alt="Cancha deportiva al atardecer">
+      <div class="auth-sport-overlay"></div>
+      <div class="auth-sport-copy">
+        <span>Tu equipo. Tu temporada.</span>
+        <h2>Todo empieza con una buena organizacion.</h2>
+        <p>Gestiona el presente de tu club y prepara lo que viene.</p>
+      </div>
+      <div class="auth-sport-quote">
+        <strong>Una sola plataforma</strong>
+        <span>Jugadores, eventos y comunidad conectados.</span>
+      </div>
+    </div>
+  </section>
+</main>

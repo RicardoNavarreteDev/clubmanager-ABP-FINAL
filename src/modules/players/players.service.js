@@ -15,6 +15,7 @@ const ensureDatabaseEnabled = () => {
 // Este mapeo deja el mismo shape tanto si el jugador vino de Sequelize como si vino desde JSON.
 const mapPlayer = (player) => ({
   id: player.id,
+  clubId: player.clubId ?? null,
   userId: player.userId,
   name: player.name,
   position: player.position,
@@ -32,10 +33,14 @@ const mapPlayer = (player) => ({
 
 const mapPlayerListItem = (player) => ({
   id: player.id,
+  clubId: player.clubId ?? null,
   name: player.name,
   position: player.position,
   number: player.number,
   avatar: player.avatar,
+  bio: player.bio,
+  location: player.location,
+  birthDate: player.birthDate,
   team: player.team,
   rosterStatus: player.rosterStatus,
   primaryCategoryId: player.primaryCategoryId,
@@ -86,6 +91,10 @@ export const getPlayers = async (filters = {}) => {
     where.rosterStatus = filters.rosterStatus;
   }
 
+  if (filters.clubId) {
+    where.clubId = filters.clubId;
+  }
+
   // Ordenamos por id para mantener una salida estable y consistente con los JSON semilla.
   const players = await Player.findAll({
     where,
@@ -96,12 +105,13 @@ export const getPlayers = async (filters = {}) => {
   return players.map((player) => mapPlayerListItem(player));
 };
 
-export const getPlayerById = async (id) => {
+export const getPlayerById = async (id, clubId = null) => {
   ensureDatabaseEnabled();
 
   initModelAssociations();
 
-  const player = await Player.findByPk(id, {
+  const player = await Player.findOne({
+    where: { id, ...(clubId ? { clubId } : {}) },
     include: [
       { association: "primaryCategory" },
       { association: "user" },
@@ -111,12 +121,13 @@ export const getPlayerById = async (id) => {
   return player ? mapPlayerDetail(player) : null;
 };
 
-export const updatePlayer = async (id, payload) => {
+export const updatePlayer = async (id, payload, clubId = null) => {
   ensureDatabaseEnabled();
 
   initModelAssociations();
 
-  const player = await Player.findByPk(id, {
+  const player = await Player.findOne({
+    where: { id, ...(clubId ? { clubId } : {}) },
     include: [
       { association: "primaryCategory" },
       { association: "user" },
@@ -142,12 +153,13 @@ export const updatePlayer = async (id, payload) => {
   return mapPlayerDetail(player);
 };
 
-export const updatePlayerStatus = async (id, rosterStatus) => {
+export const updatePlayerStatus = async (id, rosterStatus, clubId = null) => {
   ensureDatabaseEnabled();
 
   initModelAssociations();
 
-  const player = await Player.findByPk(id, {
+  const player = await Player.findOne({
+    where: { id, ...(clubId ? { clubId } : {}) },
     include: [
       { association: "primaryCategory" },
       { association: "user" },
