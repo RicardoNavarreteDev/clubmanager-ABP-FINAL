@@ -49,14 +49,14 @@
             </button>
 
             <div class="profile-settings-menu-wrap">
-              <button type="button" class="profile-settings-button" data-settings-menu-toggle aria-label="Configuracion de cuenta" aria-haspopup="menu" aria-expanded="false">
+              <button type="button" class="profile-settings-button" data-settings-menu-toggle aria-label="Configuracion de cuenta" aria-expanded="false" aria-controls="settings-menu">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                   <circle cx="12" cy="12" r="3.2" />
                   <path d="M19.4 15a1.2 1.2 0 0 0 .24 1.32l.04.04a1.45 1.45 0 0 1-2.05 2.05l-.04-.04a1.2 1.2 0 0 0-1.32-.24 1.2 1.2 0 0 0-.73 1.1V19.5A1.5 1.5 0 0 1 14 21h-4a1.5 1.5 0 0 1-1.5-1.5v-.08a1.2 1.2 0 0 0-.73-1.1 1.2 1.2 0 0 0-1.32.24l-.04.04a1.45 1.45 0 1 1-2.05-2.05l.04-.04a1.2 1.2 0 0 0 .24-1.32 1.2 1.2 0 0 0-1.1-.73H3.5A1.5 1.5 0 0 1 2 13v-2a1.5 1.5 0 0 1 1.5-1.5h.08a1.2 1.2 0 0 0 1.1-.73 1.2 1.2 0 0 0-.24-1.32l-.04-.04A1.45 1.45 0 1 1 6.45 5.4l.04.04a1.2 1.2 0 0 0 1.32.24h.01a1.2 1.2 0 0 0 .69-1.08V4.5A1.5 1.5 0 0 1 10 3h4a1.5 1.5 0 0 1 1.5 1.5v.08a1.2 1.2 0 0 0 .73 1.1 1.2 1.2 0 0 0 1.32-.24l.04-.04a1.45 1.45 0 0 1 2.05 2.05l-.04.04a1.2 1.2 0 0 0-.24 1.32v.01a1.2 1.2 0 0 0 1.08.69h.08A1.5 1.5 0 0 1 22 11v2a1.5 1.5 0 0 1-1.5 1.5h-.08a1.2 1.2 0 0 0-1.02.5Z" />
                 </svg>
               </button>
 
-              <div class="profile-settings-menu" data-settings-menu hidden>
+              <div class="profile-settings-menu" data-settings-menu hidden id="settings-menu">
                 <button type="button" class="profile-settings-menu-item" data-modal-open="password-modal">Cambiar contrasena</button>
                 <button type="button" class="profile-settings-menu-item" data-modal-open="email-modal">Cambiar correo</button>
               </div>
@@ -221,12 +221,12 @@
 <div class="modal-backdrop" data-modal="profile-modal" data-modal-archive hidden>
   <div class="modal-panel profile-modal-panel" role="dialog" aria-modal="true" aria-labelledby="profile-modal-title">
     <div class="modal-header" data-modal-archive-item>
-      <button type="button" class="modal-close-button" data-modal-close="profile-modal">×</button>
+      <button type="button" class="modal-close-button" data-modal-close="profile-modal" aria-label="Cerrar dialogo Editar perfil">×</button>
       <h2 id="profile-modal-title">Editar perfil</h2>
       <button type="submit" class="modal-save-button" form="profile-update-form">Guardar</button>
     </div>
 
-    <div class="modal-banner" data-modal-archive-item></div>
+    <div class="modal-banner" data-modal-archive-item aria-hidden="true"></div>
 
     <div class="modal-avatar-row" data-modal-archive-item>
       <img class="modal-avatar" src="{{profile.avatar}}" alt="Avatar de {{profile.name}}">
@@ -246,7 +246,7 @@
 
       <label class="form-field">
         <span>Nombre</span>
-        <input type="text" name="displayName" value="{{profile.name}}">
+        <input type="text" name="displayName" value="{{profile.name}}" autocomplete="name">
         <small class="form-error-text" data-field-error="displayName"></small>
       </label>
 
@@ -264,7 +264,7 @@
 
       <label class="form-field">
         <span>Fecha de nacimiento</span>
-        <input type="date" name="birthDate" value="{{profile.birthDateRaw}}">
+        <input type="date" name="birthDate" value="{{profile.birthDateRaw}}" autocomplete="bday">
         <small class="form-error-text" data-field-error="birthDate"></small>
       </label>
     </form>
@@ -274,7 +274,7 @@
 <div class="modal-backdrop" data-modal="password-modal" data-modal-archive hidden>
   <div class="modal-panel settings-modal-panel" role="dialog" aria-modal="true" aria-labelledby="password-modal-title">
     <div class="modal-header" data-modal-archive-item>
-      <button type="button" class="modal-close-button" data-modal-close="password-modal">×</button>
+      <button type="button" class="modal-close-button" data-modal-close="password-modal" aria-label="Cerrar dialogo Cambiar contrasena">×</button>
       <h2 id="password-modal-title">Cambiar contrasena</h2>
       <button type="submit" class="modal-save-button" form="password-form">Guardar</button>
     </div>
@@ -306,12 +306,12 @@
   </div>
 </div>
 
-<input type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" data-avatar-file-input hidden>
+<input type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" data-avatar-file-input hidden aria-label="Subir foto de perfil JPG PNG WEBP hasta 2 MB">
 
 <div class="modal-backdrop" data-modal="email-modal" data-modal-archive hidden>
   <div class="modal-panel settings-modal-panel" role="dialog" aria-modal="true" aria-labelledby="email-modal-title">
     <div class="modal-header" data-modal-archive-item>
-      <button type="button" class="modal-close-button" data-modal-close="email-modal">×</button>
+      <button type="button" class="modal-close-button" data-modal-close="email-modal" aria-label="Cerrar dialogo Cambiar correo">×</button>
       <h2 id="email-modal-title">Cambiar correo</h2>
       <button type="submit" class="modal-save-button" form="email-form">Guardar</button>
     </div>

@@ -57,6 +57,11 @@ export const uploadAvatar = (req, res, next) => {
       return;
     }
 
+    if (error instanceof multer.MulterError) {
+      next(createHttpError(error.message || "Archivo invalido.", 400));
+      return;
+    }
+
     next(error);
   });
 };

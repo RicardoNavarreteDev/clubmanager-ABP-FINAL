@@ -75,6 +75,7 @@ export const renderInvitationsManagement = async (req, res) => {
   }));
 
   res.render("invitations", {
+    pageTitle: "Invitaciones",
     roles: visibleRoles,
     categories,
     invitations: normalizedInvitations,

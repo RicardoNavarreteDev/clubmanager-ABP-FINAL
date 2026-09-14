@@ -48,7 +48,7 @@
 
           <label class="form-field" data-invitation-category-field>
             <span>Categoria deportiva</span>
-            <select name="primaryCategoryId" data-invitation-category-select>
+            <select name="primaryCategoryId" data-invitation-category-select aria-describedby="cat-hint">
               <option value="">Sin categoria</option>
               {{#each categories}}
                 <option value="{{id}}">{{name}}</option>
@@ -60,7 +60,7 @@
 
         <div class="invitation-permission-note">
           <span aria-hidden="true">i</span>
-          <p>La categoria es obligatoria para jugadores. Los entrenadores pueden invitar jugadores y los administradores cualquier rol.</p>
+          <p id="cat-hint">La categoria es obligatoria para jugadores. Los entrenadores pueden invitar jugadores y los administradores cualquier rol.</p>
         </div>
 
         <button type="submit" class="modal-save-button auth-submit-button invitation-submit-button">Crear invitacion <span aria-hidden="true">&#8594;</span></button>
@@ -106,12 +106,12 @@
                 <label class="form-field compact-form-field">
                   <span>Cambiar estado</span>
                   <select name="status">
-                    <option value="pending">pending</option>
-                    <option value="cancelled">cancelled</option>
-                    <option value="expired">expired</option>
+                    <option value="pending">Pendiente</option>
+                    <option value="cancelled">Cancelada</option>
+                    <option value="expired">Expirada</option>
                   </select>
                 </label>
-                <button type="submit" class="home-composer-button home-composer-button-secondary invitation-update-button">Actualizar</button>
+                <button type="submit" class="home-composer-button home-composer-button-secondary invitation-update-button" aria-label="Actualizar estado de invitación para {{email}}">Actualizar</button>
                 <p class="form-status-message compact-status-message" data-form-status aria-live="polite"></p>
               </form>
             {{/if}}
@@ -120,7 +120,7 @@
         {{#unless invitations}}
           <div class="invitation-empty-state">
             <span aria-hidden="true">&#9993;</span>
-            <h3>Aun no hay invitaciones</h3>
+            <h2>Aun no hay invitaciones</h2>
             <p>La primera invitacion que generes aparecera aqui.</p>
           </div>
         {{/unless}}

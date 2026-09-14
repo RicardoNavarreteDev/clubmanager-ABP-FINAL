@@ -2,6 +2,7 @@
 import Category from "./category.model.js";
 import Championship from "./championship.model.js";
 import Club from "./club.model.js";
+import ClubMembership from "./club-membership.model.js";
 import Invitation from "./invitation.model.js";
 import Match from "./match.model.js";
 import Player from "./player.model.js";
@@ -24,6 +25,11 @@ export function initModelAssociations() {
 
   Club.hasMany(User, { foreignKey: "club_id", as: "users" });
   User.belongsTo(Club, { foreignKey: "club_id", as: "club" });
+  User.hasMany(ClubMembership, { foreignKey: "user_id", as: "memberships" });
+  ClubMembership.belongsTo(User, { foreignKey: "user_id", as: "member" });
+  Club.hasMany(ClubMembership, { foreignKey: "club_id", as: "memberships" });
+  ClubMembership.belongsTo(Club, { foreignKey: "club_id", as: "club" });
+  ClubMembership.belongsTo(Role, { foreignKey: "role_id", as: "role" });
 
   Club.hasMany(Category, { foreignKey: { name: "clubId", field: "club_id" }, as: "categories" });
   Category.belongsTo(Club, { foreignKey: { name: "clubId", field: "club_id" }, as: "club" });

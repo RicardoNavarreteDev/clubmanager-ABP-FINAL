@@ -6,7 +6,7 @@
 
 <section class="championships-filter-bar">
   {{#each championshipFilters}}
-    <button type="button" class="championship-filter-chip {{#if isActive}}active{{/if}}" data-tone="{{tone}}">{{label}}</button>
+    <button type="button" class="championship-filter-chip {{#if isActive}}active{{/if}}" data-tone="{{tone}}" aria-pressed="{{#if isActive}}true{{else}}false{{/if}}">{{label}}</button>
   {{/each}}
 </section>
 
@@ -14,7 +14,6 @@
   {{#each championships}}
     <article
       class="championship-card championship-card-compact"
-      data-modal-open="championship-detail-modal"
       data-championship-modal-trigger
       data-championship-name="{{name}}"
       data-championship-season="{{season}}"
@@ -96,7 +95,7 @@
     </article>
   {{else}}
     <article class="empty-state-card collection-empty-state">
-      <h3>Todavia no hay campeonatos</h3>
+      <h2>Todavia no hay campeonatos</h2>
       <p>Cuando configures la primera competencia aparecera en esta seccion.</p>
     </article>
   {{/each}}
@@ -138,8 +137,8 @@
 <div class="modal-backdrop" data-modal="championship-detail-modal" data-modal-archive hidden>
   <div class="modal-panel championship-detail-modal-panel" role="dialog" aria-modal="true" aria-labelledby="championship-detail-title">
     <div class="modal-header" data-modal-archive-item>
-      <button type="button" class="modal-close-button" data-modal-close="championship-detail-modal">×</button>
-      <h2 id="championship-detail-title">Detalle del campeonato</h2>
+      <button type="button" class="modal-close-button" data-modal-close="championship-detail-modal" aria-label="Cerrar diálogo Detalle del campeonato">×</button>
+      <h2 id="championship-detail-title" tabindex="-1">Detalle del campeonato</h2>
       <button type="button" class="modal-save-button event-detail-close-button" data-modal-close="championship-detail-modal">Cerrar</button>
     </div>
 

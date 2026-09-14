@@ -1,5 +1,27 @@
 import { unlink } from "node:fs/promises";
-import { sendSuccess } from "../../shared/responses/api-response.js";
+import { sendError, sendSuccess } from "../../shared/responses/api-response.js";
+
+const resolveErrorStatus = (error) => {
+  if (Number.isInteger(error?.statusCode)) {
+    return error.statusCode;
+  }
+
+  const message = error?.message ?? "";
+
+  if (message.includes("no encontrado") || message.includes("no encontrada")) {
+    return 404;
+  }
+
+  if (message.includes("obligatorio") || message.includes("debe") || message.includes("Debes")) {
+    return 400;
+  }
+
+  if (message.includes("ya existe") || message.includes("desactivada")) {
+    return 409;
+  }
+
+  return 500;
+};
 import {
   addComment,
   createPost as createPostRecord,
@@ -20,7 +42,7 @@ export const listFeed = async (req, res, next) => {
     const result = await listFeedRecords(req.user.userId, validateFeedQuery(req.query));
     return sendSuccess(res, "Feed obtenido correctamente", result);
   } catch (error) {
-    return next(error);
+    return sendError(res, error.message || "No se pudo obtener el feed", resolveErrorStatus(error));
   }
 };
 
@@ -32,7 +54,7 @@ export const createPost = async (req, res, next) => {
     return sendSuccess(res, "Publicacion creada correctamente", post, 201);
   } catch (error) {
     if (req.file?.path) await unlink(req.file.path).catch(() => null);
-    return next(error);
+    return sendError(res, error.message || "No se pudo crear la publicacion", resolveErrorStatus(error));
   }
 };
 
@@ -41,7 +63,7 @@ export const toggleLike = async (req, res, next) => {
     const result = await togglePostLike(req.user.userId, validateId(req.params.postId, "postId"));
     return sendSuccess(res, "Reaccion actualizada correctamente", result);
   } catch (error) {
-    return next(error);
+    return sendError(res, error.message || "No se pudo actualizar la reaccion", resolveErrorStatus(error));
   }
 };
 
@@ -52,7 +74,7 @@ export const createComment = async (req, res, next) => {
     const comment = await addComment(req.user.userId, postId, content);
     return sendSuccess(res, "Comentario creado correctamente", comment, 201);
   } catch (error) {
-    return next(error);
+    return sendError(res, error.message || "No se pudo crear el comentario", resolveErrorStatus(error));
   }
 };
 
@@ -64,7 +86,7 @@ export const createReply = async (req, res, next) => {
     const comment = await addComment(req.user.userId, postId, content, commentId);
     return sendSuccess(res, "Respuesta creada correctamente", comment, 201);
   } catch (error) {
-    return next(error);
+    return sendError(res, error.message || "No se pudo crear la respuesta", resolveErrorStatus(error));
   }
 };
 
@@ -75,6 +97,6 @@ export const vote = async (req, res, next) => {
     const poll = await voteInPoll(req.user.userId, postId, optionId);
     return sendSuccess(res, "Voto registrado correctamente", poll);
   } catch (error) {
-    return next(error);
+    return sendError(res, error.message || "No se pudo registrar el voto", resolveErrorStatus(error));
   }
 };

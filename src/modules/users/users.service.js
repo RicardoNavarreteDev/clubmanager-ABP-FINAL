@@ -1,8 +1,8 @@
 // Este archivo concentra el acceso a datos del modulo de usuarios sobre Sequelize.
-import { createHash } from "node:crypto";
 import { Op } from "sequelize";
 import User from "../../models/user.model.js";
 import { initModelAssociations } from "../../models/associations.js";
+import { hashPassword } from "../../shared/security/password.js";
 
 const shouldUseDatabase = () => process.env.DB_READ_USERS === "true";
 
@@ -12,12 +12,12 @@ const ensureDatabaseEnabled = () => {
   }
 };
 
-// Por ahora usamos un hash simple con crypto nativo para no agregar dependencias antes del modulo de auth.
-const hashPassword = (password) => createHash("sha256").update(password).digest("hex");
+
 
 // Este mapeo expone nombres de campos consistentes con el resto de la app y oculta detalles del modelo.
 const mapUser = (user) => ({
   id: user.id,
+  clubId: user.clubId,
   email: user.email,
   displayName: user.displayName,
   avatar: user.avatar,
@@ -30,7 +30,9 @@ const mapUser = (user) => ({
   updatedAt: user.updatedAt,
 });
 
-export const getUsers = async (filters = {}) => {
+const escapeLikeWildcards = (value) => String(value).replace(/[%_\\]/g, (match) => `\\${match}`);
+
+export const getUsers = async (filters = {}, scope = {}) => {
   ensureDatabaseEnabled();
 
   initModelAssociations();
@@ -39,13 +41,13 @@ export const getUsers = async (filters = {}) => {
 
   if (filters.email) {
     where.email = {
-      [Op.iLike]: `%${filters.email}%`,
+      [Op.iLike]: `%${escapeLikeWildcards(filters.email)}%`,
     };
   }
 
   if (filters.displayName) {
     where.displayName = {
-      [Op.iLike]: `%${filters.displayName}%`,
+      [Op.iLike]: `%${escapeLikeWildcards(filters.displayName)}%`,
     };
   }
 
@@ -53,21 +55,39 @@ export const getUsers = async (filters = {}) => {
     where.isActive = filters.isActive;
   }
 
+  if (scope.clubId !== undefined && scope.clubId !== null) {
+    where.clubId = scope.clubId;
+  }
+
+  const page = Number.isInteger(scope.page) && scope.page > 0 ? scope.page : 1;
+  const limit = Number.isInteger(scope.limit) && scope.limit > 0 ? Math.min(scope.limit, 50) : 20;
+  const offset = (page - 1) * limit;
+
   const users = await User.findAll({
     where,
     order: [["id", "ASC"]],
+    limit,
+    offset,
   });
 
   return users.map((user) => mapUser(user));
 };
 
-export const getUserById = async (id) => {
+export const getUserById = async (id, scope = {}) => {
   ensureDatabaseEnabled();
 
   initModelAssociations();
 
   const user = await User.findByPk(id);
-  return user ? mapUser(user) : null;
+  if (!user) {
+    return null;
+  }
+
+  if (scope.clubId !== undefined && scope.clubId !== null && user.clubId !== scope.clubId) {
+    return null;
+  }
+
+  return mapUser(user);
 };
 
 export const getUserByEmail = async (email) => {
@@ -82,15 +102,16 @@ export const getUserByEmail = async (email) => {
   return user ? mapUser(user) : null;
 };
 
-export const createUser = async (payload) => {
+export const createUser = async (payload, scope = {}) => {
   ensureDatabaseEnabled();
 
   initModelAssociations();
 
   const user = await User.create({
+    clubId: payload.clubId ?? scope.clubId ?? null,
     email: payload.email,
     displayName: payload.displayName,
-    passwordHash: hashPassword(payload.password),
+    passwordHash: await hashPassword(payload.password),
     avatar: payload.avatar ?? null,
     bio: payload.bio ?? null,
     location: payload.location ?? null,
@@ -103,7 +124,7 @@ export const createUser = async (payload) => {
   return mapUser(user);
 };
 
-export const updateUser = async (id, payload) => {
+export const updateUser = async (id, payload, scope = {}) => {
   ensureDatabaseEnabled();
 
   initModelAssociations();
@@ -111,6 +132,10 @@ export const updateUser = async (id, payload) => {
   const user = await User.findByPk(id);
 
   if (!user) {
+    return null;
+  }
+
+  if (scope.clubId !== undefined && scope.clubId !== null && user.clubId !== scope.clubId) {
     return null;
   }
 
@@ -125,7 +150,7 @@ export const updateUser = async (id, payload) => {
   };
 
   if (payload.password) {
-    nextValues.passwordHash = hashPassword(payload.password);
+    nextValues.passwordHash = await hashPassword(payload.password);
   }
 
   await user.update(nextValues);
@@ -133,7 +158,7 @@ export const updateUser = async (id, payload) => {
   return mapUser(user);
 };
 
-export const deleteUser = async (id) => {
+export const deleteUser = async (id, scope = {}) => {
   ensureDatabaseEnabled();
 
   initModelAssociations();
@@ -141,6 +166,10 @@ export const deleteUser = async (id) => {
   const user = await User.findByPk(id);
 
   if (!user) {
+    return false;
+  }
+
+  if (scope.clubId !== undefined && scope.clubId !== null && user.clubId !== scope.clubId) {
     return false;
   }
 

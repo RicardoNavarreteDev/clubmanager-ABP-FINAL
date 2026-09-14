@@ -3,7 +3,7 @@ const swaggerSpec = {
   info: {
     title: "ClubManager API",
     version: "1.0.0",
-    description: "API REST del proyecto ClubManager para autenticacion, usuarios, jugadores e invitaciones.",
+    description: "API REST del proyecto ClubManager para autenticacion, usuarios, jugadores, invitaciones y feed social. Spec manual mantenido en src/config/swagger.js.",
   },
   servers: [
     {
@@ -16,6 +16,7 @@ const swaggerSpec = {
     { name: "Users", description: "Gestion administrativa de usuarios" },
     { name: "Players", description: "Consulta y actualizacion de jugadores" },
     { name: "Invitations", description: "Invitaciones para ingreso al club" },
+    { name: "Feed", description: "Feed social persistente del club" },
   ],
   components: {
     securitySchemes: {
@@ -162,6 +163,37 @@ const swaggerSpec = {
             enum: ["pending", "accepted", "expired", "cancelled"],
             example: "cancelled",
           },
+        },
+      },
+      CreatePostPayload: {
+        type: "object",
+        required: ["type", "content"],
+        properties: {
+          type: {
+            type: "string",
+            enum: ["text", "photo", "poll", "event", "announcement"],
+            example: "text",
+          },
+          content: { type: "string", example: "Gran entrenamiento de hoy" },
+          pollOptions: {
+            type: "array",
+            items: { type: "string" },
+            example: ["Opcion A", "Opcion B"],
+          },
+        },
+      },
+      CommentPayload: {
+        type: "object",
+        required: ["content"],
+        properties: {
+          content: { type: "string", example: "Buen partido equipo" },
+        },
+      },
+      VotePayload: {
+        type: "object",
+        required: ["optionId"],
+        properties: {
+          optionId: { type: "integer", example: 1 },
         },
       },
     },
@@ -516,6 +548,130 @@ const swaggerSpec = {
         responses: {
           200: { description: "Estado actualizado" },
           404: { description: "Invitacion no encontrada" },
+        },
+      },
+    },
+    "/api/feed": {
+      get: {
+        tags: ["Feed"],
+        summary: "Listar feed del club con paginacion",
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { in: "query", name: "page", schema: { type: "integer", default: 1 } },
+          { in: "query", name: "limit", schema: { type: "integer", default: 20 } },
+        ],
+        responses: {
+          200: { description: "Feed obtenido" },
+          401: { description: "Token invalido o ausente" },
+        },
+      },
+      post: {
+        tags: ["Feed"],
+        summary: "Crear publicacion (texto, foto, encuesta, evento o aviso)",
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            "multipart/form-data": {
+              schema: {
+                type: "object",
+                required: ["type", "content"],
+                properties: {
+                  type: {
+                    type: "string",
+                    enum: ["text", "photo", "poll", "event", "announcement"],
+                  },
+                  content: { type: "string" },
+                  pollOptions: {
+                    type: "array",
+                    items: { type: "string" },
+                  },
+                  image: { type: "string", format: "binary" },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          201: { description: "Publicacion creada" },
+          400: { description: "Payload invalido" },
+          401: { description: "Token invalido o ausente" },
+          413: { description: "Imagen demasiado grande (max 4 MB)" },
+        },
+      },
+    },
+    "/api/feed/{postId}/likes": {
+      post: {
+        tags: ["Feed"],
+        summary: "Alternar like en una publicacion",
+        security: [{ bearerAuth: [] }],
+        parameters: [{ in: "path", name: "postId", required: true, schema: { type: "integer" } }],
+        responses: {
+          200: { description: "Reaccion actualizada" },
+          404: { description: "Publicacion no encontrada" },
+        },
+      },
+    },
+    "/api/feed/{postId}/votes": {
+      post: {
+        tags: ["Feed"],
+        summary: "Votar en una encuesta",
+        security: [{ bearerAuth: [] }],
+        parameters: [{ in: "path", name: "postId", required: true, schema: { type: "integer" } }],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/VotePayload" },
+            },
+          },
+        },
+        responses: {
+          200: { description: "Voto registrado" },
+          404: { description: "Publicacion u opcion no encontrada" },
+        },
+      },
+    },
+    "/api/feed/{postId}/comments": {
+      post: {
+        tags: ["Feed"],
+        summary: "Comentar una publicacion",
+        security: [{ bearerAuth: [] }],
+        parameters: [{ in: "path", name: "postId", required: true, schema: { type: "integer" } }],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/CommentPayload" },
+            },
+          },
+        },
+        responses: {
+          201: { description: "Comentario creado" },
+          404: { description: "Publicacion no encontrada" },
+        },
+      },
+    },
+    "/api/feed/{postId}/comments/{commentId}/replies": {
+      post: {
+        tags: ["Feed"],
+        summary: "Responder un comentario",
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { in: "path", name: "postId", required: true, schema: { type: "integer" } },
+          { in: "path", name: "commentId", required: true, schema: { type: "integer" } },
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/CommentPayload" },
+            },
+          },
+        },
+        responses: {
+          201: { description: "Respuesta creada" },
+          404: { description: "Publicacion o comentario no encontrado" },
         },
       },
     },

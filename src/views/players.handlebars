@@ -9,7 +9,7 @@
     <article class="player-card">
       <div class="player-card-profile">
         <div class="player-card-portrait">
-          <img src="{{displayAvatar}}" alt="Avatar de {{name}}" width="80">
+          <img src="{{displayAvatar}}" alt="Avatar de {{name}}" width="80" height="80" loading="lazy" decoding="async">
         </div>
 
         <div class="player-card-copy">
@@ -137,7 +137,7 @@
     </article>
   {{else}}
     <article class="empty-state-card collection-empty-state">
-      <h3>El plantel aun esta vacio</h3>
+      <h2>El plantel aun esta vacio</h2>
       <p>Los jugadores apareceran aqui cuando acepten sus invitaciones.</p>
       {{#if showManagementLinks}}<a class="public-button public-button-primary" href="/gestion/invitaciones">Invitar jugador</a>{{/if}}
     </article>
@@ -148,7 +148,7 @@
   <div class="modal-backdrop" data-modal="edit-player-modal" data-modal-archive hidden>
     <div class="modal-panel settings-modal-panel" role="dialog" aria-modal="true" aria-labelledby="edit-player-modal-title">
       <div class="modal-header" data-modal-archive-item>
-        <button type="button" class="modal-close-button" data-modal-close="edit-player-modal">×</button>
+        <button type="button" class="modal-close-button" data-modal-close="edit-player-modal" aria-label="Cerrar diálogo Editar jugador">×</button>
         <h2 id="edit-player-modal-title">Editar jugador</h2>
         <button type="submit" class="modal-save-button" form="edit-player-form">Guardar</button>
       </div>
@@ -199,7 +199,7 @@
   <div class="modal-backdrop" data-modal="player-status-modal" data-modal-archive hidden>
     <div class="modal-panel settings-modal-panel" role="dialog" aria-modal="true" aria-labelledby="player-status-modal-title">
       <div class="modal-header" data-modal-archive-item>
-        <button type="button" class="modal-close-button" data-modal-close="player-status-modal">×</button>
+        <button type="button" class="modal-close-button" data-modal-close="player-status-modal" aria-label="Cerrar diálogo Cambiar estado del jugador">×</button>
         <h2 id="player-status-modal-title">Cambiar estado del jugador</h2>
         <button type="submit" class="modal-save-button" form="player-status-form">Guardar</button>
       </div>
@@ -216,10 +216,10 @@
         <label class="form-field">
           <span>Nuevo estado</span>
           <select name="rosterStatus" required>
-            <option value="invited">invited</option>
-            <option value="active">active</option>
+            <option value="invited">Invitado</option>
+            <option value="active">Activo</option>
             {{#if isAdmin}}
-              <option value="inactive">inactive</option>
+              <option value="inactive">Inactivo</option>
             {{/if}}
           </select>
           <small class="form-help-text">Solo admin puede dejar un jugador en estado inactive.</small>
@@ -230,24 +230,28 @@
   </div>
 {{/if}}
 
-<section class="players-pagination-card">
+<nav class="players-pagination-card" aria-label="Paginación de jugadores">
   <div class="players-pagination-controls">
     {{#if pagination.hasPreviousPage}}
-      <a class="pagination-link" href="{{pagination.previousPageHref}}">Anterior</a>
+      <a class="pagination-link" href="{{pagination.previousPageHref}}" rel="prev">Anterior</a>
     {{else}}
-      <span class="pagination-link pagination-link-disabled">Anterior</span>
+      <span class="pagination-link pagination-link-disabled" aria-disabled="true">Anterior</span>
     {{/if}}
 
     <div class="pagination-pages">
       {{#each pagination.pages}}
-        <a class="pagination-page {{#if isCurrent}}active{{/if}}" href="{{href}}">{{number}}</a>
+        {{#if isCurrent}}
+          <a class="pagination-page active" href="{{href}}" aria-current="page" aria-label="Página {{number}} de jugadores">{{number}}</a>
+        {{else}}
+          <a class="pagination-page" href="{{href}}" aria-label="Página {{number}} de jugadores">{{number}}</a>
+        {{/if}}
       {{/each}}
     </div>
 
     {{#if pagination.hasNextPage}}
-      <a class="pagination-link" href="{{pagination.nextPageHref}}">Siguiente</a>
+      <a class="pagination-link" href="{{pagination.nextPageHref}}" rel="next">Siguiente</a>
     {{else}}
-      <span class="pagination-link pagination-link-disabled">Siguiente</span>
+      <span class="pagination-link pagination-link-disabled" aria-disabled="true">Siguiente</span>
     {{/if}}
   </div>
-</section>
+</nav>

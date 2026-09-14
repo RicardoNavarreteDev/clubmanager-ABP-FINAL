@@ -11,13 +11,22 @@ function setSidebarCollapsed(collapsed) {
 }
 
 if (sidebarCollapseButton) {
-  const storedPreference = window.localStorage.getItem(sidebarStorageKey);
+  let storedPreference = null;
+  try {
+    storedPreference = window.localStorage.getItem(sidebarStorageKey);
+  } catch {
+    storedPreference = null;
+  }
   setSidebarCollapsed(storedPreference === "true" && window.innerWidth > 768);
 
   sidebarCollapseButton.addEventListener("click", () => {
     const collapsed = !document.body.classList.contains("sidebar-collapsed");
     setSidebarCollapsed(collapsed);
-    window.localStorage.setItem(sidebarStorageKey, String(collapsed));
+    try {
+      window.localStorage.setItem(sidebarStorageKey, String(collapsed));
+    } catch {
+      // Sin almacenamiento disponible, se mantiene solo en memoria.
+    }
   });
 
   window.addEventListener("resize", () => {

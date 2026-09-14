@@ -1,109 +1,105 @@
-<div class="landing-shell">
-  <header class="landing-nav">
-    <a class="public-brand" href="/" aria-label="ClubManager, inicio">
-      <span class="public-brand-mark">CM</span>
+<main class="auth-entry">
+  <section class="auth-entry-intro" aria-labelledby="auth-entry-title">
+    <a class="auth-entry-brand" href="/" aria-label="ClubManager, inicio">
+      <span class="auth-entry-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
       <span>ClubManager</span>
     </a>
-    <nav class="landing-nav-links" aria-label="Navegacion publica">
-      <a href="#funciones">Funciones</a>
-      <a href="#como-funciona">Como funciona</a>
-    </nav>
-    <div class="landing-nav-actions">
-      {{#if isAuthenticated}}
-        <a class="public-button public-button-ghost" href="/dashboard">Ir al panel</a>
-      {{else}}
-        <a class="public-button public-button-ghost" href="/login">Iniciar sesion</a>
-        {{#unless hasConfiguredClub}}
-          <a class="public-button public-button-primary" href="/crear-club">Crear mi club</a>
-        {{/unless}}
-      {{/if}}
+
+    <div class="auth-entry-copy">
+      <p>Gestión deportiva</p>
+      <h1 id="auth-entry-title">Tu club,<br>en un solo lugar.</h1>
+      <span>Organiza el equipo, los eventos y cada nueva temporada.</span>
     </div>
-  </header>
+  </section>
 
-  <main>
-    <section class="landing-hero">
-      <div class="landing-hero-copy">
-        <p class="public-eyebrow">Todo tu club en un solo lugar</p>
-        <h1>Gestion deportiva clara para equipos que quieren avanzar.</h1>
-        <p class="landing-hero-lead">Organiza jugadores, entrenamientos, partidos e invitaciones sin perder tiempo entre planillas y mensajes dispersos.</p>
-        <div class="landing-hero-actions">
-          {{#if hasConfiguredClub}}
-            <a class="public-button public-button-primary" href="/login">Entrar a ClubManager</a>
-          {{else}}
-            <a class="public-button public-button-primary" href="/crear-club">Crear club gratis</a>
-          {{/if}}
-          <a class="public-text-link" href="#funciones">Conocer la aplicacion <span aria-hidden="true">&#8594;</span></a>
-        </div>
-        <div class="landing-trust-row">
-          <span>Panel por roles</span>
-          <span>Invitaciones seguras</span>
-          <span>Listo para movil</span>
-        </div>
-      </div>
+  <section class="auth-entry-panel">
+    <div class="auth-entry-card">
+      <nav class="auth-tabs" aria-label="Acceso a ClubManager">
+        <button type="button" class="auth-tab is-active" data-auth-tab="login" aria-selected="true">Iniciar sesión</button>
+        <button type="button" class="auth-tab" data-auth-tab="register" aria-selected="false">Registrarse</button>
+      </nav>
 
-      <div class="landing-product-frame" aria-label="Vista previa del dashboard">
-        <div class="landing-product-sidebar">
-          <span class="landing-mini-logo">CM</span>
-          <span class="landing-mini-nav active"></span>
-          <span class="landing-mini-nav"></span>
-          <span class="landing-mini-nav"></span>
-          <span class="landing-mini-nav"></span>
-        </div>
-        <div class="landing-product-content">
-          <div class="landing-product-heading">
-            <div><span></span><strong></strong></div>
-            <i></i>
-          </div>
-          <div class="landing-preview-stats">
-            <article><span>Jugadores</span><strong>24</strong><i></i></article>
-            <article><span>Eventos</span><strong>08</strong><i></i></article>
-            <article><span>Victorias</span><strong>12</strong><i></i></article>
-          </div>
-          <div class="landing-preview-grid">
-            <article class="landing-preview-feed"><span></span><strong></strong><p></p><p></p><p></p></article>
-            <article class="landing-preview-event"><small>PROXIMO PARTIDO</small><strong>Viernes, 19:30</strong><div><i>CM</i><b>VS</b><i>AT</i></div></article>
-          </div>
-        </div>
-      </div>
-    </section>
+      <section class="auth-pane is-active" data-auth-pane="login">
+        <header class="auth-pane-header">
+          <p>Bienvenido de nuevo</p>
+          <h2>Accede a tu cuenta</h2>
+        </header>
 
-    <section class="landing-features" id="funciones">
-      <header class="landing-section-header">
-        <p class="public-eyebrow">Menos administracion, mas equipo</p>
-        <h2>Lo esencial para dirigir el dia a dia.</h2>
-      </header>
-      <div class="landing-feature-grid">
-        <article><span>01</span><h3>Plantel organizado</h3><p>Perfiles, categorias y estado de cada jugador en una vista facil de revisar.</p></article>
-        <article><span>02</span><h3>Calendario deportivo</h3><p>Partidos, campeonatos y entrenamientos conectados con tu operacion.</p></article>
-        <article><span>03</span><h3>Comunidad informada</h3><p>Anuncios y novedades para que todos sepan lo que ocurre dentro del club.</p></article>
-      </div>
-    </section>
+        {{#if landingError}}<div class="auth-alert" role="alert">{{landingError}}</div>{{/if}}
 
-    <section class="landing-process" id="como-funciona">
-      <div>
-        <p class="public-eyebrow">Empieza en minutos</p>
-        <h2>Crea la base. Invita al equipo. Empieza a gestionar.</h2>
-      </div>
-      <ol>
-        <li><span>1</span><div><strong>Crea tu club</strong><p>Registra la identidad deportiva y tu cuenta administradora.</p></div></li>
-        <li><span>2</span><div><strong>Invita a tu gente</strong><p>Entrenadores y jugadores completan su acceso mediante invitacion.</p></div></li>
-        <li><span>3</span><div><strong>Activa el panel</strong><p>Agrega categorias, eventos y campeonatos a medida que creces.</p></div></li>
-      </ol>
-    </section>
+        <form class="auth-entry-form" action="/login" method="post">
+          <label>
+            <span>Correo electrónico</span>
+            <input type="email" name="email" placeholder="tu@correo.com" required autocomplete="email">
+          </label>
+          <label>
+            <span>Contraseña</span>
+            <input type="password" name="password" placeholder="Tu contraseña" required autocomplete="current-password">
+          </label>
+          <button class="auth-submit" type="submit">Iniciar sesión</button>
+        </form>
 
-    <section class="landing-final-cta">
-      <p class="public-eyebrow">Tu proxima temporada empieza aqui</p>
-      <h2>Un panel que se adapta al ritmo de tu club.</h2>
-      {{#if hasConfiguredClub}}
-        <a class="public-button public-button-light" href="/login">Iniciar sesion</a>
-      {{else}}
-        <a class="public-button public-button-light" href="/crear-club">Crear mi club</a>
-      {{/if}}
-    </section>
-  </main>
+        <p class="auth-switch-copy">¿No tienes una cuenta? <button type="button" data-auth-show="register">Regístrate</button></p>
+      </section>
 
-  <footer class="landing-footer">
-    <a class="public-brand" href="/"><span class="public-brand-mark">CM</span><span>ClubManager</span></a>
-    <p>Gestion deportiva con foco en las personas.</p>
-  </footer>
-</div>
+      <section class="auth-pane" data-auth-pane="register" hidden>
+        <header class="auth-pane-header">
+          <p>Empieza ahora</p>
+          <h2>Crea tu cuenta y club</h2>
+        </header>
+
+        {{#if landingError}}<div class="auth-alert" role="alert">{{landingError}}</div>{{/if}}
+
+        <form class="auth-entry-form auth-register-form" action="/crear-club" method="post">
+          <label>
+            <span>Nombre completo</span>
+            <input type="text" name="ownerName" required autocomplete="name">
+          </label>
+          <label>
+            <span>Correo electrónico</span>
+            <input type="email" name="email" required autocomplete="email">
+          </label>
+          <label>
+            <span>Contraseña</span>
+            <input type="password" name="password" minlength="8" required autocomplete="new-password">
+          </label>
+          <label>
+            <span>Confirmar contraseña</span>
+            <input type="password" name="confirmPassword" minlength="8" required autocomplete="new-password">
+          </label>
+          <label>
+            <span>Nombre del club</span>
+            <input type="text" name="clubName" required>
+          </label>
+          <label>
+            <span>Deporte</span>
+            <input type="text" name="sport" placeholder="Ej. Básquetbol" required>
+          </label>
+          <label>
+            <span>Primera categoría</span>
+            <input type="text" name="categoryName" placeholder="Ej. Adulto" required>
+          </label>
+          <label>
+            <span>Género</span>
+            <select name="categoryGenderScope" required>
+              <option value="mixto">Mixto</option>
+              <option value="femenino">Femenino</option>
+              <option value="masculino">Masculino</option>
+            </select>
+          </label>
+          <label>
+            <span>Edad mínima</span>
+            <input type="number" name="categoryMinAge" min="0" value="0" required>
+          </label>
+          <label>
+            <span>Edad máxima <small>(opcional)</small></span>
+            <input type="number" name="categoryMaxAge" min="0">
+          </label>
+          <button class="auth-submit auth-register-submit" type="submit">Crear cuenta</button>
+        </form>
+
+        <p class="auth-switch-copy">¿Ya tienes una cuenta? <button type="button" data-auth-show="login">Inicia sesión</button></p>
+      </section>
+    </div>
+  </section>
+</main>

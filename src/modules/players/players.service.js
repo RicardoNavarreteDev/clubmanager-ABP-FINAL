@@ -95,11 +95,22 @@ export const getPlayers = async (filters = {}) => {
     where.clubId = filters.clubId;
   }
 
+  const escapeLikeWildcards = (value) => String(value).replace(/[%_\\]/g, (match) => `\\${match}`);
+  if (where.name?.[Op.iLike]) {
+    where.name[Op.iLike] = `%${escapeLikeWildcards(filters.name)}%`;
+  }
+
+  const page = Number.isInteger(filters.page) && filters.page > 0 ? filters.page : 1;
+  const limit = Number.isInteger(filters.limit) && filters.limit > 0 ? Math.min(filters.limit, 50) : 50;
+  const offset = (page - 1) * limit;
+
   // Ordenamos por id para mantener una salida estable y consistente con los JSON semilla.
   const players = await Player.findAll({
     where,
     include: [{ association: "primaryCategory" }],
     order: [["id", "ASC"]],
+    limit,
+    offset,
   });
 
   return players.map((player) => mapPlayerListItem(player));

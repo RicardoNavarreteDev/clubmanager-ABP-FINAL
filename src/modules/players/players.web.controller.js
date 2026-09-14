@@ -88,6 +88,7 @@ export const renderPlayers = async (req, res) => {
   });
 
   res.render("players", {
+    pageTitle: "Jugadores",
     players: paginatedPlayers,
     pagination: {
       currentPage: safeCurrentPage,

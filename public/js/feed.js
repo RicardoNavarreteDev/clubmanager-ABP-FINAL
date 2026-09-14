@@ -45,6 +45,7 @@
     const input = document.createElement("input");
     input.type = "text";
     input.placeholder = `Opcion ${options.length + 1}`;
+    input.setAttribute("aria-label", `Opción ${options.length + 1} de la encuesta`);
     input.dataset.pollOption = "";
     composer.querySelector("[data-add-poll-option]").before(input);
   });
@@ -74,20 +75,29 @@
     try {
       const result = await request(`/api/feed/${button.dataset.postId}/likes`, { method: "POST" });
       button.classList.toggle("active", result.liked);
+      button.setAttribute("aria-pressed", String(Boolean(result.liked)));
       button.querySelector("[data-like-count]").textContent = result.likesCount;
+      button.setAttribute("aria-label", `Me gusta, ${result.likesCount} me gusta`);
     } catch (error) {
-      window.alert(error.message);
+      const status = composer?.querySelector("[data-feed-status]");
+      if (status) {
+        status.textContent = error.message;
+      }
     }
   }));
 
   document.querySelectorAll("[data-comments-toggle]").forEach((button) => button.addEventListener("click", () => {
     const panel = button.closest("[data-feed-post]")?.querySelector("[data-comments-panel]");
-    panel?.classList.toggle("open");
+    const isOpen = panel?.classList.toggle("open");
+    button.setAttribute("aria-expanded", String(Boolean(isOpen)));
   }));
 
   document.querySelectorAll("[data-reply-toggle]").forEach((button) => button.addEventListener("click", () => {
     const form = button.closest(".team-feed-comment")?.querySelector(":scope > [data-feed-reply-form]");
-    if (form) form.hidden = !form.hidden;
+    if (form) {
+      form.hidden = !form.hidden;
+      button.setAttribute("aria-expanded", String(!form.hidden));
+    }
   }));
 
   document.querySelectorAll("[data-feed-comment-form], [data-feed-reply-form]").forEach((form) => form.addEventListener("submit", async (event) => {
@@ -100,7 +110,10 @@
       await request(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ content: form.elements.content.value }) });
       window.location.reload();
     } catch (error) {
-      window.alert(error.message);
+      const status = composer?.querySelector("[data-feed-status]");
+      if (status) {
+        status.textContent = error.message;
+      }
     }
   }));
 
@@ -112,7 +125,10 @@
       await request(`/api/feed/${form.dataset.postId}/votes`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ optionId: selected.value }) });
       window.location.reload();
     } catch (error) {
-      window.alert(error.message);
+      const status = composer?.querySelector("[data-feed-status]");
+      if (status) {
+        status.textContent = error.message;
+      }
     }
   }));
 })();

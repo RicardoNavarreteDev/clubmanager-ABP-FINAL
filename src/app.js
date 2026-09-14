@@ -1,6 +1,9 @@
 // Este archivo configura Express, las vistas, los estaticos y el montaje de rutas.
 import express from "express";
 import morgan from "morgan";
+import helmet from "helmet";
+import cors from "cors";
+import rateLimit from "express-rate-limit";
 import { engine } from "express-handlebars";
 import swaggerUi from "swagger-ui-express";
 import jwt from "jsonwebtoken";
@@ -47,18 +50,40 @@ const guestViewer = {
 };
 
 const app = express();
+app.disable("x-powered-by");
+app.use(helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false }));
+app.use(cors({ origin: false }));
 app.use(morgan('dev'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: "1mb" }));
+app.use(express.urlencoded({ extended: true, limit: "1mb" }));
+
+const apiLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 300, standardHeaders: true, legacyHeaders: false });
+const authLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 30, standardHeaders: true, legacyHeaders: false });
+app.use("/api/", apiLimiter);
+app.use(["/api/auth/login", "/api/auth/register"], authLimiter);
 
 app.engine('handlebars', engine());
 app.set('view engine', 'handlebars');
 
 // Servimos archivos publicos como CSS, imagenes o JS del navegador.
-app.use(express.static(path.join(__dirname, '../public')));
+app.use(express.static(path.join(__dirname, '../public'), { dotfiles: "deny", index: false }));
 app.set('views', path.join(__dirname, 'views'));
 
 app.use(async (req, res, next) => {
+  // La API no necesita widgets globales ni sesión de vistas.
+  if (req.path.startsWith("/api")) {
+    try {
+      const apiToken = getAuthTokenFromRequest(req);
+      req.authToken = apiToken;
+      req.authSession = null;
+    } catch {
+      req.authToken = null;
+      req.authSession = null;
+    }
+    next();
+    return;
+  }
+
   try {
     const authToken = getAuthTokenFromRequest(req);
     let authSession = null;
@@ -66,7 +91,7 @@ app.use(async (req, res, next) => {
     if (authToken) {
       try {
         const decodedToken = jwt.verify(authToken, process.env.JWT_SECRET);
-        authSession = await getAuthenticatedSession(decodedToken.userId);
+        authSession = await getAuthenticatedSession(decodedToken.userId, decodedToken.clubId);
       } catch {
         authSession = null;
       }
@@ -77,9 +102,11 @@ app.use(async (req, res, next) => {
     const clubId = authSession?.user?.clubId ?? null;
     const sportsScope = clubId ? { clubId } : undefined;
     const shouldLoadSportsData = Boolean(clubId) || shouldShowDemoData;
-    const matches = shouldLoadSportsData ? await getMatches(sportsScope) : [];
-    const trainings = shouldShowDemoData ? await getTrainings() : [];
-    const categories = shouldLoadSportsData ? await getCategories(sportsScope) : [];
+    const [matches, trainings, categories] = await Promise.all([
+      shouldLoadSportsData ? getMatches(sportsScope).catch(() => []) : Promise.resolve([]),
+      shouldShowDemoData ? getTrainings().catch(() => []) : Promise.resolve([]),
+      shouldLoadSportsData ? getCategories(sportsScope).catch(() => []) : Promise.resolve([]),
+    ]);
     const currentViewer = authSession
       ? await getCurrentViewerContext(authSession)
       : guestViewer;
@@ -118,6 +145,7 @@ app.use(async (req, res, next) => {
     res.locals.isPlayer = currentViewer.isPlayer;
     res.locals.showManagementLinks = currentViewer.showManagementLinks;
     res.locals.currentClub = currentClub;
+    res.locals.availableClubs = authSession?.user?.clubs ?? [];
     res.locals.clubInitials = currentClub.name
       .split(/\s+/)
       .filter(Boolean)
@@ -127,6 +155,10 @@ app.use(async (req, res, next) => {
       .toUpperCase();
     res.locals.isDemoMode = isDemoMode;
     res.locals.shouldShowDemoData = shouldShowDemoData;
+    res.locals.canonicalUrl = req.path;
+    // Solo la landing es indexable; el resto del layout público es transaccional.
+    res.locals.metaRobots = req.path === "/" ? "index,follow" : "noindex,nofollow";
+    res.locals.pageDescription = "ClubManager: gestión deportiva simple para clubes, jugadores, eventos y campeonatos.";
     next();
   } catch (error) {
     next(error);
@@ -188,16 +220,19 @@ app.use((error, req, res, next) => {
     return;
   }
 
+  res.set("X-Robots-Tag", "noindex,nofollow");
   res.status(error.statusCode || 500).render("500", {
     layout: "public",
     pageTitle: "Error",
+    metaRobots: "noindex,nofollow",
     message: error.message || "Error interno del servidor",
   });
 });
 
 // Si ninguna ruta coincide, respondemos con la vista 404.
 app.use((req, res) => {
-  res.status(404).render("404", { layout: "public", pageTitle: "Pagina no encontrada" });
+  res.set("X-Robots-Tag", "noindex,nofollow");
+  res.status(404).render("404", { layout: "public", pageTitle: "Pagina no encontrada", metaRobots: "noindex,nofollow" });
 });
 
 export default app;

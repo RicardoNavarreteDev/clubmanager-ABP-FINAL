@@ -36,7 +36,7 @@ const resolveErrorStatus = (message) => {
 export const listUsers = async (req, res, next) => {
   try {
     const filters = validateUserFilters(req.query);
-    const users = await getUsers(filters);
+    const users = await getUsers(filters, { clubId: req.user?.clubId ?? null });
 
     // Antes de responder limpiamos el hash para no exponer datos sensibles del usuario.
     const safeUsers = users.map((user) => sanitizeUser(user));
@@ -50,7 +50,7 @@ export const listUsers = async (req, res, next) => {
 export const getUserById = async (req, res, next) => {
   try {
     const userId = validateUserId(req.params.id);
-    const user = await getUserByIdRecord(userId);
+    const user = await getUserByIdRecord(userId, { clubId: req.user?.clubId ?? null });
 
     if (!user) {
       return sendError(res, "Usuario no encontrado", 404);
@@ -71,7 +71,7 @@ export const createUser = async (req, res, next) => {
       return sendError(res, "Ya existe un usuario con ese email", 409);
     }
 
-    const createdUser = await createUserRecord(payload);
+    const createdUser = await createUserRecord(payload, { clubId: req.user?.clubId ?? null });
     return sendSuccess(res, "Usuario creado correctamente", sanitizeUser(createdUser), 201);
   } catch (error) {
     return sendError(res, error.message || "No se pudo crear el usuario", resolveErrorStatus(error.message || ""));
@@ -82,7 +82,7 @@ export const updateUser = async (req, res, next) => {
   try {
     const userId = validateUserId(req.params.id);
     const payload = validateUpdateUserPayload(req.body);
-    const updatedUser = await updateUserRecord(userId, payload);
+    const updatedUser = await updateUserRecord(userId, payload, { clubId: req.user?.clubId ?? null });
 
     if (!updatedUser) {
       return sendError(res, "Usuario no encontrado", 404);
@@ -97,7 +97,7 @@ export const updateUser = async (req, res, next) => {
 export const deleteUser = async (req, res, next) => {
   try {
     const userId = validateUserId(req.params.id);
-    const wasDeleted = await deleteUserRecord(userId);
+    const wasDeleted = await deleteUserRecord(userId, { clubId: req.user?.clubId ?? null });
 
     if (!wasDeleted) {
       return sendError(res, "Usuario no encontrado", 404);

@@ -129,6 +129,7 @@ export const renderChampionships = async (req, res) => {
   });
 
   res.render("championships", {
+    pageTitle: "Campeonatos",
     championships: championshipsWithPlayersCount,
     championshipFilters: [
       { label: "Todos", isActive: true, tone: "all" },

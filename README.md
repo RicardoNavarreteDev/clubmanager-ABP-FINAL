@@ -16,8 +16,9 @@ Esta version incluye:
 - migraciones con `Umzug`
 - modelos y relaciones con `Sequelize`
 - arquitectura modular por dominio en `src/modules/`
-- API REST para `users`, `players`, `invitations` y `auth`
+- API REST para `users`, `players`, `invitations`, `auth` y `feed`
 - flujo real de invitaciones para el registro de jugadores
+- uploads con `multer` para avatares, fotos del feed y logo del club
 
 ## Requisitos
 
@@ -35,8 +36,18 @@ Esta version incluye:
 npm install
 ```
 
-3. Crear el archivo `.env` a partir de `.env.example`.
-4. Crear la base de datos en PostgreSQL.
+3. Crear el archivo `.env` a partir de `.env.example`:
+
+```bash
+cp .env.example .env
+```
+
+4. Crear la base de datos en PostgreSQL:
+
+```sql
+CREATE DATABASE clubmanager;
+```
+
 5. Ejecutar migraciones:
 
 ```bash
@@ -53,9 +64,14 @@ DB_HOST=localhost
 DB_PORT=5432
 DB_NAME=clubmanager
 DB_USER=clubmanager_app
-DB_PASSWORD=change_me
+JWT_SECRET=cambia_esta_clave_por_una_de_al_menos_32_caracteres
+JWT_EXPIRES_IN=1d
+NODE_ENV=development
+DB_SSL=false
 APP_DEMO_MODE=true
 ```
+
+`JWT_SECRET` firma los tokens y `JWT_EXPIRES_IN` define su vigencia (por defecto `1d`). Sin `JWT_SECRET` la API responde `500` al verificar el token.
 
 Flags de lectura desde base de datos:
 
@@ -116,25 +132,39 @@ El entrypoint real del servidor es `src/server.js` y la configuracion de Express
 ## Estructura del proyecto
 
 ```text
-Proyecto-ABP-M6/
+Proyecto-ABP-final/
 ├── logs/
 │   └── log.txt
 ├── public/
 │   ├── css/
 │   ├── images/
-│   └── js/
+│   ├── js/
+│   └── uploads/
+│       ├── avatars/
+│       ├── clubs/
+│       └── posts/
 ├── src/
 │   ├── app.js
 │   ├── server.js
 │   ├── config/
+│   │   ├── db.js
+│   │   └── swagger.js
 │   ├── database/
 │   ├── middlewares/
+│   │   ├── auth.middleware.js
+│   │   ├── web-auth.middleware.js
+│   │   ├── api-error.middleware.js
+│   │   ├── avatar-upload.middleware.js
+│   │   ├── club-logo-upload.middleware.js
+│   │   └── post-image-upload.middleware.js
 │   ├── models/
 │   ├── modules/
 │   │   ├── auth/
 │   │   ├── championships/
 │   │   ├── categories/
+│   │   ├── clubs/
 │   │   ├── events/
+│   │   ├── feed/
 │   │   ├── home/
 │   │   ├── invitations/
 │   │   ├── matches/
@@ -147,6 +177,8 @@ Proyecto-ABP-M6/
 │   │   ├── trainings/
 │   │   └── users/
 │   ├── shared/
+│   │   ├── data/
+│   │   └── responses/
 │   └── views/
 ├── .env.example
 ├── package.json
@@ -248,7 +280,7 @@ El feed persistente admite texto, fotos, encuestas, eventos y avisos. Las fotos 
 
 - `GET /api-docs`
 
-La documentacion OpenAPI se expone con Swagger UI en `/api-docs`.
+La documentacion OpenAPI se expone con Swagger UI en `/api-docs`. El spec es manual y se mantiene en `src/config/swagger.js` (no usa anotaciones `@openapi`): cubre `Auth`, `Users`, `Players`, `Invitations` y `Feed` con esquemas `bearerAuth`, payloads y códigos `200/201/400/401/403/404/409/413`.
 
 ## Autenticacion
 
@@ -258,7 +290,7 @@ Las rutas privadas usan JWT en el header:
 Authorization: Bearer TU_TOKEN
 ```
 
-Rutas protegidas principales:
+Rutas protegidas principales (24 con `authenticateJwt`):
 
 - `GET /api/auth/me`
 - `POST /api/auth/me/avatar`
@@ -275,6 +307,14 @@ Rutas protegidas principales:
 - `GET /api/invitations/:id`
 - `POST /api/invitations`
 - `PATCH /api/invitations/:id/status`
+- `GET /api/feed`
+- `POST /api/feed`
+- `POST /api/feed/:postId/likes`
+- `POST /api/feed/:postId/votes`
+- `POST /api/feed/:postId/comments`
+- `POST /api/feed/:postId/comments/:commentId/replies`
+
+El token se guarda en cookie HttpOnly `clubmanager_token` para las vistas y también se acepta como `Authorization: Bearer` para clientes externos. Las rutas `/api/users`, `/api/invitations` y `PUT/PATCH /api/players` además exigen rol `admin` o `coach`.
 
 ## Flujo real de invitaciones
 
@@ -357,6 +397,16 @@ Content-Type: application/json
 GET /api/auth/me
 Authorization: Bearer TU_TOKEN
 ```
+
+### Subida de archivos
+
+| Caso | Endpoint | Campo | Tipos | Max | Destino | Vinculo DB |
+|---|---|---|---|---|---|---|
+| Avatar usuario | `POST /api/auth/me/avatar` (JWT) | `avatar` | `jpg, jpeg, png, webp` | `2 MB` | `public/uploads/avatars/` | `User.avatar` + sync `Player.avatar` |
+| Foto feed | `POST /api/feed` (JWT) | `image` | `jpg, jpeg, png, webp` | `4 MB` | `public/uploads/posts/` | `Post.imageUrl` |
+| Logo club | `POST /crear-club` (web publica) | `logo` | `jpg, jpeg, png, webp` | `2 MB` | `public/uploads/clubs/` | `Club.logo` |
+
+Tipo invalido responde `400` y exceso de tamano `413`. En `/crear-club` el error de multer se guarda en `req.clubLogoUploadError` y la vista lo muestra sin perder el formulario; si hay archivo parcial se elimina con `unlink`.
 
 ### Subir avatar del usuario autenticado
 
@@ -457,8 +507,14 @@ Rutas API:
 - `GET /api/auth/me`
 - `POST /api/auth/me/avatar` exitoso
 - `POST /api/auth/me/avatar` con archivo invalido
+- `POST /api/auth/me/avatar` con archivo >2 MB para validar `413`
+- `GET /api/feed?page=1&limit=20`
+- `POST /api/feed` texto
+- `POST /api/feed` con imagen >4 MB para validar `413`
+- `POST /api/feed/:postId/likes`
+- `POST /api/feed/:postId/comments`
 - `GET /api/does-not-exist` para validar `404` JSON
-- `GET /api-docs`
+- `GET /api-docs` (verificar tags Auth/Users/Players/Invitations/Feed)
 
 ## Registro en archivo plano
 
@@ -478,9 +534,15 @@ Ejemplo:
 - Se conservaron vistas renderizadas con `Handlebars` y se sumo una API REST sobre la misma app Express.
 - El registro real de jugadores ya no es libre: depende de invitaciones con `token`.
 - Se implemento transaccionalidad en el registro para mantener consistencia entre invitaciones, usuarios, roles y jugadores.
-- Se incorporo `multer` para manejar upload de avatares con validacion de tipo y tamano.
-- Se dejo `Swagger UI` montado en `/api-docs` para documentar la API final.
+- Se incorporo `multer` para uploads con validacion de tipo y tamano: avatares `2 MB`, fotos feed `4 MB`, logos club `2 MB`.
+- Passwords con `bcryptjs` (costo 10) y migración progresiva desde `sha256` legacy en el login.
+- Seguridad HTTP con `helmet`, `CORS` cerrado, `rate-limit` global y estricto en login/registro, cookie `HttpOnly + SameSite=Lax + Secure en prod`.
+- Se dejo `Swagger UI` montado en `/api-docs` con spec manual en `src/config/swagger.js` para `Auth/Users/Players/Invitations/Feed`.
 - Las rutas `/api/*` no encontradas ahora responden `404` JSON consistente.
+- CRUD distribuido por dominio: `users` tiene `GET/POST/PUT/DELETE` completo; `players` usa `GET/PUT/PATCH` porque nace por invitación; `invitations` usa `GET/POST/PATCH` con borrado lógico; `feed` usa `GET/POST` inmutable. Entre módulos se cubren todos los verbos sin forzar operaciones sin sentido de negocio.
+- Respuestas API unificadas en `{status, message, data}` vía `sendSuccess/sendError` en `src/shared/responses/api-response.js`; `api-error.middleware.js` queda como red para errores no controlados en `/api`.
+- Rutas protegidas por valor de negocio: sesión propia, gestión `admin/coach` y feed del club; el registro/login y `GET /invitations/token/:token` quedan públicos para el flujo de invitación.
+- Token en cookie HttpOnly `clubmanager_token` para vistas y `Authorization: Bearer` para clientes externos; `JWT_EXPIRES_IN` y `AUTH_COOKIE_MAX_AGE` alineados a `24h`.
 
 ## Evidencias
 
@@ -554,12 +616,13 @@ Actualmente el proyecto ya cuenta con:
 - migraciones y seeds
 - modelos y relaciones con Sequelize
 - CRUD completo para `users`
-- modulo API de `players`
-- modulo API de `invitations`
+- modulo API de `players` (`GET/PUT/PATCH`)
+- modulo API de `invitations` (`GET/POST/PATCH` + pública `GET /token/:token`)
+- modulo API de `feed` persistente (`GET/POST` + likes/votos/comentarios)
 - registro y login basados en invitacion
 - obtencion de sesion autenticada con `GET /api/auth/me`
-- upload de avatar con `POST /api/auth/me/avatar`
-- documentacion Swagger disponible en `/api-docs`
+- uploads: avatar `POST /api/auth/me/avatar`, foto feed `POST /api/feed`, logo `POST /crear-club`
+- documentacion Swagger en `/api-docs` con tags `Auth/Users/Players/Invitations/Feed`
 - manejo de `404` JSON para rutas API inexistentes
 - persistencia simple en archivo plano para `/status`
 

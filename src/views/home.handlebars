@@ -1,5 +1,5 @@
 <section class="club-home-hero">
-  <img src="/images/sports-login.svg" alt="Cancha deportiva de {{currentClub.sport}}">
+  <img src="/images/sports-login.svg" alt="Cancha deportiva de {{currentClub.sport}}" width="1200" height="400" fetchpriority="high" decoding="async">
   <div class="club-home-hero-shade"></div>
   <div class="club-home-hero-copy">
     <p>{{currentClub.name}}</p>
@@ -11,26 +11,27 @@
 <section class="team-feed-composer" id="inicio-comunidad" data-feed-enabled="{{feedPersistenceEnabled}}">
   <form data-feed-composer enctype="multipart/form-data">
     <div class="team-feed-composer-main">
-      <img src="{{currentViewer.avatar}}" alt="Perfil de {{currentViewer.name}}">
-      <textarea name="content" rows="1" placeholder="Que quieres compartir con el equipo?" data-feed-content></textarea>
+      <img src="{{currentViewer.avatar}}" alt="Perfil de {{currentViewer.name}}" width="48" height="48" loading="lazy" decoding="async">
+      <label class="sr-only" for="feed-content">Qué quieres compartir con el equipo</label>
+      <textarea id="feed-content" name="content" rows="1" placeholder="Que quieres compartir con el equipo?" data-feed-content aria-label="Qué quieres compartir con el equipo"></textarea>
     </div>
 
     <input type="hidden" name="type" value="text" data-feed-type-input>
-    <input type="file" name="image" accept="image/jpeg,image/png,image/webp" data-feed-image-input hidden>
+    <input type="file" name="image" accept="image/jpeg,image/png,image/webp" data-feed-image-input hidden aria-label="Subir imagen para la publicación">
 
     <div class="feed-composer-extra" data-feed-photo-panel hidden>
-      <span data-feed-photo-name>Selecciona una imagen para publicar.</span>
+      <span data-feed-photo-name aria-live="polite">Selecciona una imagen para publicar.</span>
     </div>
     <div class="feed-composer-extra feed-poll-fields" data-feed-poll-panel hidden>
-      <input type="text" name="pollQuestion" placeholder="Pregunta de la encuesta">
-      <input type="text" data-poll-option placeholder="Opcion 1">
-      <input type="text" data-poll-option placeholder="Opcion 2">
+      <input type="text" name="pollQuestion" placeholder="Pregunta de la encuesta" aria-label="Pregunta de la encuesta">
+      <input type="text" data-poll-option placeholder="Opcion 1" aria-label="Opción 1 de la encuesta">
+      <input type="text" data-poll-option placeholder="Opcion 2" aria-label="Opción 2 de la encuesta">
       <button type="button" data-add-poll-option>Agregar opcion</button>
     </div>
     <div class="feed-composer-extra feed-event-fields" data-feed-event-panel hidden>
-      <input type="text" name="eventTitle" placeholder="Nombre del evento">
-      <input type="datetime-local" name="eventStartAt">
-      <input type="text" name="eventLocation" placeholder="Lugar">
+      <input type="text" name="eventTitle" placeholder="Nombre del evento" aria-label="Nombre del evento">
+      <input type="datetime-local" name="eventStartAt" aria-label="Fecha y hora del evento">
+      <input type="text" name="eventLocation" placeholder="Lugar" aria-label="Lugar del evento">
     </div>
 
     <div class="team-feed-composer-toolbar">
@@ -86,27 +87,27 @@
       {{/if}}
 
       <div class="team-feed-actions">
-        <button type="button" class="team-feed-like {{#if likedByCurrentUser}}active{{/if}}" data-feed-like data-post-id="{{id}}"><span aria-hidden="true">&#9829;</span> <b data-like-count>{{likesCount}}</b></button>
-        <button type="button" data-comments-toggle><span aria-hidden="true">&#9635;</span> {{commentsCount}}</button>
+        <button type="button" class="team-feed-like {{#if likedByCurrentUser}}active{{/if}}" data-feed-like data-post-id="{{id}}" aria-pressed="{{#if likedByCurrentUser}}true{{else}}false{{/if}}" aria-label="Me gusta, {{likesCount}} me gusta"><span aria-hidden="true">&#9829;</span> <b data-like-count>{{likesCount}}</b></button>
+        <button type="button" data-comments-toggle aria-expanded="false" aria-label="Comentarios, {{commentsCount}} comentarios"><span aria-hidden="true">&#9635;</span> {{commentsCount}}</button>
       </div>
 
       <div class="team-feed-comments" data-comments-panel>
         {{#each comments}}
           <article class="team-feed-comment">
-            <img src="{{authorAvatar}}" alt="Perfil de {{authorName}}">
-            <div><strong>{{authorName}}</strong><span>{{displayDate}}</span><p>{{content}}</p><button type="button" data-reply-toggle>Responder</button></div>
-            <form data-feed-reply-form data-post-id="{{../id}}" data-comment-id="{{id}}" hidden><input name="content" placeholder="Escribe una respuesta" required><button>Enviar</button></form>
+            <img src="{{authorAvatar}}" alt="Perfil de {{authorName}}" width="40" height="40" loading="lazy" decoding="async">
+            <div><strong>{{authorName}}</strong><span>{{displayDate}}</span><p>{{content}}</p><button type="button" data-reply-toggle aria-expanded="false" aria-label="Responder a {{authorName}}">Responder</button></div>
+            <form data-feed-reply-form data-post-id="{{../id}}" data-comment-id="{{id}}" hidden><input name="content" placeholder="Escribe una respuesta" required aria-label="Respuesta a {{authorName}}"><button aria-label="Enviar respuesta a {{authorName}}">Enviar</button></form>
             {{#each replies}}
-              <article class="team-feed-comment team-feed-reply"><img src="{{authorAvatar}}" alt=""><div><strong>{{authorName}}</strong><span>{{displayDate}}</span><p>{{content}}</p></div></article>
+              <article class="team-feed-comment team-feed-reply"><img src="{{authorAvatar}}" alt="Perfil de {{authorName}}" width="40" height="40" loading="lazy" decoding="async"><div><strong>{{authorName}}</strong><span>{{displayDate}}</span><p>{{content}}</p></div></article>
             {{/each}}
           </article>
         {{/each}}
         {{#if ../feedPersistenceEnabled}}
-          <form class="team-feed-comment-form" data-feed-comment-form data-post-id="{{id}}"><input name="content" placeholder="Escribe un comentario..." required><button>Enviar</button></form>
+          <form class="team-feed-comment-form" data-feed-comment-form data-post-id="{{id}}"><input name="content" placeholder="Escribe un comentario..." required aria-label="Escribe un comentario en la publicación de {{authorName}}"><button aria-label="Enviar comentario en la publicación de {{authorName}}">Enviar</button></form>
         {{/if}}
       </div>
     </article>
   {{else}}
-    <article class="empty-state-card collection-empty-state"><h3>Aun no hay publicaciones</h3><p>Comparte arriba el primer mensaje de {{currentClub.name}}.</p></article>
+    <article class="empty-state-card collection-empty-state"><h2>Aun no hay publicaciones</h2><p>Comparte arriba el primer mensaje de {{currentClub.name}}.</p></article>
   {{/each}}
 </section>

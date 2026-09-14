@@ -9,7 +9,6 @@ import { initModelAssociations } from "../../models/associations.js";
 import Player from "../../models/player.model.js";
 import PlayerCategory from "../../models/player-category.model.js";
 import Role from "../../models/role.model.js";
-import User from "../../models/user.model.js";
 
 const shouldUseDatabase = () => process.env.DB_READ_INVITATIONS === "true";
 
@@ -105,11 +104,21 @@ export const getInvitations = async (filters = {}) => {
     where.clubId = filters.clubId;
   }
 
+  if (where.email?.[Op.iLike]) {
+    where.email[Op.iLike] = `%${String(filters.email).replace(/[%_\\]/g, (match) => `\\${match}`)}%`;
+  }
+
+  const page = Number.isInteger(filters.page) && filters.page > 0 ? filters.page : 1;
+  const limit = Number.isInteger(filters.limit) && filters.limit > 0 ? Math.min(filters.limit, 50) : 50;
+  const offset = (page - 1) * limit;
+
   // Ordenamos por id para mantener un orden estable al revisar invitaciones.
   const invitations = await Invitation.findAll({
     where,
     include: buildInvitationIncludes(),
     order: [["id", "ASC"]],
+    limit,
+    offset,
   });
 
   return invitations.map((invitation) => mapInvitationDetail(invitation));
@@ -151,22 +160,9 @@ export const createInvitation = async (payload, inviterRoles = [], clubId = null
   }
 
   const createdInvitation = await sequelize.transaction(async (transaction) => {
-    const existingUser = await User.findOne({
-      where: {
-        email: {
-          [Op.iLike]: payload.email,
-        },
-      },
-      transaction,
-      lock: transaction.LOCK.UPDATE,
-    });
-
-    if (existingUser) {
-      throw new Error("Ya existe un usuario registrado con ese email.");
-    }
-
     const existingInvitation = await Invitation.findOne({
       where: {
+        clubId,
         email: {
           [Op.iLike]: payload.email,
         },
@@ -182,9 +178,6 @@ export const createInvitation = async (payload, inviterRoles = [], clubId = null
       throw new Error("Ya existe una invitacion pendiente para ese email.");
     }
 
-    if (existingInvitation?.status === "accepted") {
-      throw new Error("Ese email ya tiene una invitacion aceptada y no se puede invitar de nuevo.");
-    }
 
     const role = await Role.findByPk(payload.roleId, { transaction });
 

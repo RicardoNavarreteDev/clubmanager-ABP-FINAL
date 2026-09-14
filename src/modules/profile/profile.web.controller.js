@@ -175,6 +175,7 @@ export const renderProfile = async (req, res) => {
     };
 
   res.render("profile", {
+    pageTitle: "Perfil",
     profile: {
       ...profile,
       birthDateRaw: profile.birthDate,

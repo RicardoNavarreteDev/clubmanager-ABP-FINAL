@@ -19,7 +19,8 @@ const upload = multer({
     },
     filename: (req, file, cb) => {
       const extension = path.extname(file.originalname).toLowerCase();
-      cb(null, `post-${req.user.userId}-${Date.now()}-${randomUUID()}${extension}`);
+      const safeExtension = allowedExtensions.has(extension) ? extension : ".jpg";
+      cb(null, `post-${req.user.userId}-${Date.now()}-${randomUUID()}${safeExtension}`);
     },
   }),
   limits: { fileSize: 4 * 1024 * 1024 },
@@ -41,6 +42,10 @@ export const uploadPostImage = (req, res, next) => {
     }
     if (error instanceof multer.MulterError && error.code === "LIMIT_FILE_SIZE") {
       next(createHttpError("La imagen supera el tamano maximo permitido de 4 MB.", 413));
+      return;
+    }
+    if (error instanceof multer.MulterError) {
+      next(createHttpError(error.message || "Archivo invalido.", 400));
       return;
     }
     next(error);

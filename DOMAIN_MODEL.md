@@ -8,9 +8,10 @@ Este archivo resume las decisiones tomadas para que la transicion desde JSON hac
 
 ## Reglas de negocio ya definidas
 
-- El sistema actual trabaja con un solo club por instalacion.
-- La primera cuenta publica crea el club y recibe el rol `admin` fundador.
-- Una vez creado el club, las cuentas posteriores ingresan mediante invitacion.
+- Una cuenta puede crear y administrar varios clubes.
+- Cada usuario accede a un club mediante una membresía con rol propio; el panel opera sobre un club activo.
+- La cuenta que crea un club recibe la membresía `admin` propietaria de ese club.
+- Las invitaciones solo otorgan acceso al club que las emitió; una cuenta puede aceptar invitaciones de varios clubes.
 - Las categorias del club las definen `admin` o `coach`.
 - Un jugador debe pertenecer al menos a una categoria.
 - Un jugador puede pertenecer a varias categorias.
@@ -130,7 +131,7 @@ Estados definidos:
 
 ### Relaciones clave
 
-- `clubs` 1:N `users`
+- `users` N:M `clubs` mediante `club_memberships`
 - `users` 1:1 `players`
 - `users` N:M `roles`
 - `players` N:M `categories`

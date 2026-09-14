@@ -20,6 +20,7 @@
     form?.querySelectorAll(".is-invalid").forEach((field) => {
       field.classList.remove("is-invalid");
       field.removeAttribute("aria-invalid");
+      field.removeAttribute("aria-describedby");
     });
   };
 
@@ -27,14 +28,25 @@
     const field = form?.elements?.namedItem(fieldName);
     const errorElement = form?.querySelector(`[data-field-error="${fieldName}"]`);
 
+    if (errorElement && !errorElement.id) {
+      errorElement.id = `err-${fieldName}-${form.id || "form"}`;
+    }
+
     if (field instanceof HTMLElement) {
       field.classList.add("is-invalid");
       field.setAttribute("aria-invalid", "true");
+      if (errorElement?.id) {
+        field.setAttribute("aria-describedby", errorElement.id);
+      }
     }
 
     if (errorElement) {
       errorElement.textContent = message;
     }
+  };
+
+  const focusFirstInvalidField = (form) => {
+    form?.querySelector("[aria-invalid='true']")?.focus({ preventScroll: true });
   };
 
   const setStatusMessage = (form, message, tone = "") => {
@@ -43,7 +55,11 @@
       return;
     }
 
-    statusElement.textContent = message;
+    statusElement.setAttribute("role", tone === "error" ? "alert" : "status");
+    statusElement.textContent = "";
+    window.requestAnimationFrame(() => {
+      statusElement.textContent = message;
+    });
     statusElement.dataset.tone = tone;
   };
 

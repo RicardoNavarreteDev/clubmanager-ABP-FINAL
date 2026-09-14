@@ -31,7 +31,7 @@ const renderRegisterView = (res, overrides = {}) => res.render("register", {
 });
 
 export const renderLogin = (req, res) => {
-  renderLoginView(res);
+  res.redirect("/?modal=login");
 };
 
 export const handleLogin = async (req, res) => {
@@ -41,12 +41,8 @@ export const handleLogin = async (req, res) => {
     setAuthCookie(res, session.token);
     res.redirect("/dashboard");
   } catch (error) {
-    renderLoginView(res.status(401), {
-      loginError: error.message || "No se pudo iniciar sesion.",
-      loginForm: {
-        email: req.body.email ?? "",
-      },
-    });
+    const message = encodeURIComponent(error.message || "No se pudo iniciar sesion.");
+    res.redirect(`/?modal=login&error=${message}`);
   }
 };
 

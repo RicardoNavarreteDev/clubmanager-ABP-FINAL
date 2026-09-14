@@ -11,9 +11,9 @@
         <h1>El primer paso para ordenar tu club.</h1>
         <p>Crea la cuenta administradora y deja lista la identidad que vera todo tu equipo.</p>
       </div>
-      <div class="founder-progress" aria-label="Proceso de configuracion">
-        <span class="active">1</span><i></i><span>2</span><i></i><span>3</span>
-      </div>
+      <ol class="founder-progress" aria-label="Proceso de configuración">
+        <li aria-current="step"><span class="active">1</span></li><li aria-hidden="true"><i></i></li><li><span>2</span></li><li aria-hidden="true"><i></i></li><li><span>3</span></li>
+      </ol>
     </div>
 
     <div class="founder-form-panel">
@@ -32,7 +32,7 @@
         </header>
 
         {{#if createClubError}}
-          <div class="web-alert web-alert-error">{{createClubError}}</div>
+          <div class="web-alert web-alert-error" role="alert">{{createClubError}}</div>
         {{/if}}
 
         <form class="founder-form" action="/crear-club" method="post" enctype="multipart/form-data">
@@ -54,9 +54,9 @@
               <label class="public-field founder-field-wide"><span>Ciudad o ubicacion</span><input type="text" name="location" value="{{createClubForm.location}}"></label>
               <label class="public-field founder-field-wide"><span>Descripcion</span><textarea name="description" rows="3" placeholder="Cuenta brevemente que identifica a tu club">{{createClubForm.description}}</textarea></label>
               <label class="club-logo-field founder-field-wide">
-                <span class="club-logo-preview" data-logo-preview>CM</span>
+                <span class="club-logo-preview" data-logo-preview aria-hidden="true">CM</span>
                 <span><strong>Logo del club</strong><small>JPG, PNG o WEBP. Maximo 2 MB.</small></span>
-                <input type="file" name="logo" accept="image/jpeg,image/png,image/webp" data-logo-input>
+                <input type="file" name="logo" accept="image/jpeg,image/png,image/webp" data-logo-input aria-label="Logo del club JPG PNG WEBP hasta 2 MB">
               </label>
             </div>
           </fieldset>

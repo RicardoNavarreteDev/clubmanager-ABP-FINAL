@@ -23,7 +23,8 @@ const storage = multer.diskStorage({
   },
   filename: (req, file, cb) => {
     const extension = path.extname(file.originalname).toLowerCase();
-    cb(null, `club-${Date.now()}-${randomUUID()}${extension}`);
+    const safeExtension = allowedExtensions.has(extension) ? extension : ".jpg";
+    cb(null, `club-${Date.now()}-${randomUUID()}${safeExtension}`);
   },
 });
 

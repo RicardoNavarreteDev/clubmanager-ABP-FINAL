@@ -1,54 +1,46 @@
 <main class="auth-public-page">
-  <a class="auth-back-link" href="/">&#8592; Volver</a>
   <section class="auth-split-shell">
-    <div class="auth-login-panel">
-      <a class="public-brand" href="/">
-        <span class="public-brand-mark">CM</span>
+    <section class="auth-sport-panel">
+      <img src="/images/loginFinal.png" alt="Equipo de básquetbol reunido antes de un partido">
+      <div class="auth-sport-overlay"></div>
+      <a class="auth-panel-brand" href="/">
+        <img src="/favicon.svg" alt="">
         <span>ClubManager</span>
       </a>
-
+      <p class="auth-panel-kicker">Tu equipo. Siempre contigo</p>
+      <div class="auth-sport-copy">
+        <h2>Disciplina<br>hoy, mejores<br>resultados<br>mañana.</h2>
+        <i aria-hidden="true"></i>
+      </div>
+      <ul class="auth-sports-list" aria-label="Deportes disponibles"><li>◉<span>Básquetbol</span></li><li>◌<span>Fútbol</span></li><li>◉<span>Vóleibol</span></li><li>⌁<span>Hockey</span></li><li>•••<span>Y más</span></li></ul>
+    </section>
+    <div class="auth-login-panel">
       <div class="auth-login-content">
-        <header>
-          <p class="public-eyebrow">Bienvenido de vuelta</p>
-          <h1>Inicia sesion</h1>
-          <span>Entra a tu espacio deportivo para continuar.</span>
-        </header>
+        <header><h1>Accede a tu cuenta</h1><span>Bienvenido a ClubManager</span></header>
 
         {{#if loginError}}
-          <div class="web-alert web-alert-error">{{loginError}}</div>
+          <div class="web-alert web-alert-error" role="alert" id="login-error">{{loginError}}</div>
         {{/if}}
 
         <form class="public-auth-form" action="/login" method="post">
-          <label class="public-field">
-            <span>Correo</span>
-            <input type="email" name="email" value="{{loginForm.email}}" placeholder="tu@club.cl" required autocomplete="email">
+          <label class="public-field auth-email-field">
+            <span>Correo electrónico</span>
+            <input type="email" name="email" value="{{loginForm.email}}" placeholder="tu@correo.com" required autocomplete="email">
           </label>
           <label class="public-field">
-            <span>Password</span>
-            <input type="password" name="password" placeholder="Tu password" required autocomplete="current-password">
+            <span>Contraseña</span>
+            <input type="password" name="password" placeholder="Tu contraseña" required autocomplete="current-password">
           </label>
           <div class="auth-form-meta">
             <label><input type="checkbox" name="remember"> Recordarme</label>
-            <span>Acceso seguro</span>
+            <a href="mailto:soporte@clubmanager.local">¿Olvidaste tu contraseña?</a>
           </div>
-          <button type="submit" class="public-button public-button-primary auth-login-submit">Entrar al panel</button>
+          <button type="submit" class="public-button public-button-primary auth-login-submit">Iniciar sesión</button>
         </form>
-      </div>
-
-      <p class="auth-help-copy">Necesitas acceso? Solicita una invitacion al administrador de tu club.</p>
-    </div>
-
-    <div class="auth-sport-panel">
-      <img src="/images/sports-login.svg" alt="Cancha deportiva al atardecer">
-      <div class="auth-sport-overlay"></div>
-      <div class="auth-sport-copy">
-        <span>Tu equipo. Tu temporada.</span>
-        <h2>Todo empieza con una buena organizacion.</h2>
-        <p>Gestiona el presente de tu club y prepara lo que viene.</p>
-      </div>
-      <div class="auth-sport-quote">
-        <strong>Una sola plataforma</strong>
-        <span>Jugadores, eventos y comunidad conectados.</span>
+        <div class="auth-divider"><span>o</span></div>
+        <button class="auth-provider" type="button"><b class="google-mark">G</b> Continuar con Google</button>
+        <button class="auth-provider" type="button"><b class="apple-mark">●</b> Continuar con Apple</button>
+        <p class="auth-register-note">¿No tienes una cuenta? <a href="/crear-club">Regístrate aquí</a></p>
       </div>
     </div>
   </section>

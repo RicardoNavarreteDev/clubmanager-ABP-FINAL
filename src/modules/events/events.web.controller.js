@@ -133,6 +133,7 @@ export const renderEvents = async (req, res) => {
   const pendingMatches = matchesWithChampionship.filter((match) => match.status === "upcoming");
 
   res.render("events", {
+    pageTitle: "Eventos",
     playedMatches,
     pendingMatches,
     trainings: trainingsWithCategory,

@@ -1,6 +1,30 @@
 // Este archivo maneja la sesion web basada en JWT guardado en cookies del navegador.
 const AUTH_COOKIE_NAME = "clubmanager_token";
-const AUTH_COOKIE_MAX_AGE = 1000 * 60 * 60 * 24;
+const DEFAULT_AUTH_COOKIE_MAX_AGE = 1000 * 60 * 60 * 24;
+
+const parseExpiresInToMs = (value, fallback) => {
+  if (value === undefined || value === null || value === "") {
+    return fallback;
+  }
+
+  const numeric = Number(value);
+  if (Number.isFinite(numeric)) {
+    return numeric * 1000;
+  }
+
+  const match = String(value).trim().match(/^(\d+)\s*([smhd])$/i);
+  if (!match) {
+    return fallback;
+  }
+
+  const amount = Number(match[1]);
+  const unit = match[2].toLowerCase();
+  const multipliers = { s: 1000, m: 60 * 1000, h: 60 * 60 * 1000, d: 24 * 60 * 60 * 1000 };
+
+  return amount * multipliers[unit];
+};
+
+export const getAuthCookieMaxAge = () => parseExpiresInToMs(process.env.JWT_EXPIRES_IN, DEFAULT_AUTH_COOKIE_MAX_AGE);
 
 const parseCookieHeader = (cookieHeader = "") => cookieHeader
   .split(";")
@@ -64,7 +88,8 @@ export const setAuthCookie = (res, token) => {
     httpOnly: true,
     path: "/",
     sameSite: "Lax",
-    maxAge: AUTH_COOKIE_MAX_AGE,
+    secure: process.env.NODE_ENV === "production",
+    maxAge: getAuthCookieMaxAge(),
   });
 };
 
@@ -73,6 +98,7 @@ export const clearAuthCookie = (res) => {
     httpOnly: true,
     path: "/",
     sameSite: "Lax",
+    secure: process.env.NODE_ENV === "production",
     maxAge: 0,
   });
 };

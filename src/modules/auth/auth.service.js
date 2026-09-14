@@ -1,8 +1,9 @@
 // Este archivo concentra la logica de negocio del registro y login basados en invitaciones.
-import { createHash } from "node:crypto";
 import jwt from "jsonwebtoken";
+import { hashPassword, verifyPassword } from "../../shared/security/password.js";
 import sequelize from "../../config/db.js";
 import Club from "../../models/club.model.js";
+import ClubMembership from "../../models/club-membership.model.js";
 import Category from "../../models/category.model.js";
 import Invitation from "../../models/invitation.model.js";
 import { initModelAssociations } from "../../models/associations.js";
@@ -10,8 +11,6 @@ import Player from "../../models/player.model.js";
 import Role from "../../models/role.model.js";
 import UserRole from "../../models/user-role.model.js";
 import User from "../../models/user.model.js";
-
-const hashPassword = (password) => createHash("sha256").update(password).digest("hex");
 
 // Firmamos un token chico con la identidad basica del usuario para resolver sesion y permisos en rutas privadas.
 const signAuthToken = ({ userId, email, roles, clubId }) => jwt.sign(
@@ -23,13 +22,13 @@ const signAuthToken = ({ userId, email, roles, clubId }) => jwt.sign(
   },
   process.env.JWT_SECRET,
   {
-    expiresIn: process.env.JWT_EXPIRES_IN,
+    expiresIn: process.env.JWT_EXPIRES_IN ?? "1d",
   },
 );
 
-const mapAuthUser = (user) => ({
+const mapAuthUser = (user, membership = null) => ({
   id: user.id,
-  clubId: user.clubId,
+  clubId: membership?.clubId ?? user.clubId,
   email: user.email,
   displayName: user.displayName,
   avatar: user.avatar,
@@ -41,19 +40,20 @@ const mapAuthUser = (user) => ({
   updatedAt: user.updatedAt,
 });
 
-const mapAuthenticatedProfile = (user) => ({
+const mapAuthenticatedProfile = (user, membership = null) => ({
   user: {
-    ...mapAuthUser(user),
-    roles: (user.roles ?? []).map((role) => ({ id: role.id, name: role.name })),
-    club: user.club
+    ...mapAuthUser(user, membership),
+    roles: membership?.role ? [{ id: membership.role.id, name: membership.role.name }] : [],
+    clubs: (user.memberships ?? []).map((entry) => ({ id: entry.clubId, name: entry.club?.name, sport: entry.club?.sport, logo: entry.club?.logo, role: entry.role?.name, isOwner: entry.isOwner })),
+    club: membership?.club
       ? {
-          id: user.club.id,
-          name: user.club.name,
-          sport: user.club.sport,
-          location: user.club.location,
-          description: user.club.description,
-          logo: user.club.logo,
-          createdAt: user.club.createdAt,
+          id: membership.club.id,
+          name: membership.club.name,
+          sport: membership.club.sport,
+          location: membership.club.location,
+          description: membership.club.description,
+          logo: membership.club.logo,
+          createdAt: membership.club.createdAt,
         }
       : null,
   },
@@ -89,32 +89,24 @@ const buildInvitationIncludes = () => ([
 const buildUserIncludes = () => ([
   { association: "roles" },
   { association: "club" },
+  { association: "memberships", include: [{ association: "club" }, { association: "role" }] },
   {
     association: "player",
     include: [{ association: "primaryCategory" }],
   },
 ]);
 
-export const registerFounder = async (payload) => {
+export const registerFounder = async (payload, ownerUserId = null) => {
   initModelAssociations();
 
   const registeredSession = await sequelize.transaction(async (transaction) => {
-    const existingClub = await Club.findByPk(1, {
-      transaction,
-      lock: transaction.LOCK.UPDATE,
-    });
-
-    if (existingClub) {
-      throw new Error("Esta instalacion ya tiene un club configurado.");
-    }
-
     const existingUser = await User.findOne({
-      where: { email: payload.email },
+      where: ownerUserId ? { id: ownerUserId } : { email: payload.email },
       transaction,
       lock: transaction.LOCK.UPDATE,
     });
 
-    if (existingUser) {
+    if (existingUser && !ownerUserId) {
       throw new Error("Ya existe un usuario registrado con ese correo.");
     }
 
@@ -130,7 +122,6 @@ export const registerFounder = async (payload) => {
     const now = new Date();
     const club = await Club.create(
       {
-        id: 1,
         name: payload.clubName,
         sport: payload.sport,
         location: payload.location,
@@ -153,12 +144,12 @@ export const registerFounder = async (payload) => {
       { transaction },
     );
 
-    const user = await User.create(
+    const user = existingUser ?? await User.create(
       {
         clubId: club.id,
         email: payload.email,
         displayName: payload.ownerName,
-        passwordHash: hashPassword(payload.password),
+        passwordHash: await hashPassword(payload.password),
         avatar: null,
         bio: `Administrador fundador de ${club.name}.`,
         location: payload.location,
@@ -170,10 +161,10 @@ export const registerFounder = async (payload) => {
       { transaction },
     );
 
-    await UserRole.create(
-      { userId: user.id, roleId: adminRole.id },
-      { transaction },
-    );
+    if (!existingUser) {
+      await UserRole.create({ userId: user.id, roleId: adminRole.id }, { transaction });
+    }
+    await ClubMembership.create({ userId: user.id, clubId: club.id, roleId: adminRole.id, isOwner: true, createdAt: now, updatedAt: now }, { transaction });
 
     return User.findByPk(user.id, {
       include: buildUserIncludes(),
@@ -184,22 +175,27 @@ export const registerFounder = async (payload) => {
   return mapRegisteredSession(registeredSession);
 };
 
-const mapRegisteredSession = (user) => {
-  const roleNames = (user.roles ?? []).map((role) => role.name);
+const mapRegisteredSession = (user, activeClubId = null) => {
+  const requestedMembership = (user.memberships ?? []).find((entry) => entry.clubId === activeClubId);
+  const membership = requestedMembership ?? user.memberships?.[0] ?? null;
+  if (activeClubId && !requestedMembership) {
+    throw new Error("No tienes acceso al club seleccionado.");
+  }
+  const roleNames = membership?.role ? [membership.role.name] : [];
   const token = signAuthToken({
     userId: user.id,
     email: user.email,
     roles: roleNames,
-    clubId: user.clubId,
+    clubId: membership?.clubId ?? null,
   });
 
   return {
     token,
-    ...mapAuthenticatedProfile(user),
+    ...mapAuthenticatedProfile(user, membership),
   };
 };
 
-export const getAuthenticatedSession = async (userId) => {
+export const getAuthenticatedSession = async (userId, activeClubId = null) => {
   initModelAssociations();
 
   const user = await User.findByPk(userId, {
@@ -214,7 +210,7 @@ export const getAuthenticatedSession = async (userId) => {
     throw new Error("La cuenta del usuario esta inactiva.");
   }
 
-  return mapRegisteredSession(user);
+  return mapRegisteredSession(user, activeClubId);
 };
 
 export const registerWithInvitation = async (payload) => {
@@ -250,37 +246,32 @@ export const registerWithInvitation = async (payload) => {
       lock: transaction.LOCK.UPDATE,
     });
 
-    if (existingUser) {
-      throw new Error("Ya existe un usuario registrado con ese email.");
-    }
-
     const club = invitationWithRelations.clubId
       ? await Club.findByPk(invitationWithRelations.clubId, { transaction })
       : await Club.findByPk(1, { transaction });
-    const user = await User.create(
-      {
-        clubId: club?.id ?? null,
-        email: invitation.email,
-        displayName: payload.name,
-        passwordHash: hashPassword(payload.password),
-        avatar: payload.avatar ?? null,
-        bio: payload.bio ?? null,
-        location: null,
-        birthDate: payload.birthDate,
-        isActive: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      { transaction },
-    );
+    const now = new Date();
+    const user = existingUser ?? await User.create({
+      clubId: club?.id ?? null,
+      email: invitation.email,
+      displayName: payload.name,
+      passwordHash: await hashPassword(payload.password),
+      avatar: payload.avatar ?? null,
+      bio: payload.bio ?? null,
+      location: null,
+      birthDate: payload.birthDate,
+      isActive: true,
+      createdAt: now,
+      updatedAt: now,
+    }, { transaction });
 
-    await UserRole.create(
-      {
-        userId: user.id,
-        roleId: invitationWithRelations.roleId,
-      },
-      { transaction },
-    );
+    const existingMembership = await ClubMembership.findOne({ where: { userId: user.id, clubId: club.id }, transaction });
+    if (existingMembership) {
+      throw new Error("Ya perteneces a este club.");
+    }
+    await ClubMembership.create({ userId: user.id, clubId: club.id, roleId: invitationWithRelations.roleId, isOwner: false, createdAt: now, updatedAt: now }, { transaction });
+    if (!existingUser) {
+      await UserRole.create({ userId: user.id, roleId: invitationWithRelations.roleId }, { transaction });
+    }
 
     if (invitationWithRelations.playerId) {
       const player = await Player.findByPk(invitationWithRelations.playerId, {
@@ -339,12 +330,19 @@ export const loginWithCredentials = async (payload) => {
     throw new Error("Credenciales invalidas.");
   }
 
-  if (user.passwordHash !== hashPassword(payload.password)) {
+  const verification = await verifyPassword(payload.password, user.passwordHash);
+
+  if (!verification.ok) {
     throw new Error("Credenciales invalidas.");
   }
 
   if (!user.isActive) {
     throw new Error("La cuenta del usuario esta inactiva.");
+  }
+
+  // Migración progresiva: cuentas legacy sha256 se re-hashean a bcrypt en el login.
+  if (verification.needsRehash) {
+    await user.update({ passwordHash: await hashPassword(payload.password), updatedAt: new Date() }).catch(() => {});
   }
 
   return mapRegisteredSession(user);
@@ -497,20 +495,38 @@ export const updateAuthenticatedUserEmail = async (userId, payload) => {
 };
 
 export const updateAuthenticatedUserPassword = async (userId, payload) => {
-  const user = await User.findByPk(userId);
+  initModelAssociations();
 
-  if (!user) {
-    throw new Error("El usuario autenticado no existe.");
-  }
+  const updated = await sequelize.transaction(async (transaction) => {
+    const user = await User.findByPk(userId, {
+      transaction,
+      lock: transaction.LOCK.UPDATE,
+    });
 
-  if (user.passwordHash !== hashPassword(payload.currentPassword)) {
-    throw new Error("La password actual no coincide con la registrada.");
-  }
+    if (!user) {
+      throw new Error("El usuario autenticado no existe.");
+    }
 
-  await user.update({
-    passwordHash: hashPassword(payload.newPassword),
-    updatedAt: new Date(),
+    if (!user.isActive) {
+      throw new Error("La cuenta del usuario esta inactiva.");
+    }
+
+    const verification = await verifyPassword(payload.currentPassword, user.passwordHash);
+
+    if (!verification.ok) {
+      throw new Error("La password actual no coincide con la registrada.");
+    }
+
+    await user.update(
+      {
+        passwordHash: await hashPassword(payload.newPassword),
+        updatedAt: new Date(),
+      },
+      { transaction },
+    );
+
+    return true;
   });
 
-  return true;
+  return updated;
 };
