@@ -57,9 +57,9 @@ export const authenticateJwt = async (req, res, next) => {
       return;
     }
 
-    const membership = (user.memberships ?? []).find((entry) => entry.clubId === decodedToken.clubId) ?? user.memberships?.[0];
+    const membership = (user.memberships ?? []).find((entry) => entry.clubId === decodedToken.clubId);
     if (!membership) {
-      throw new Error("El usuario no pertenece a un club.");
+      throw new Error("El token no corresponde a una membresia activa.");
     }
     req.user = {
       userId: user.id,

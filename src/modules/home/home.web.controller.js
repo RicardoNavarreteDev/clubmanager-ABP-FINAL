@@ -84,7 +84,7 @@ export const renderHome = async (req, res) => {
 
   let posts;
   if (usesPersistentClubData) {
-    const feed = await listFeed(req.authSession.user.id, { page: 1, limit: 30 });
+    const feed = await listFeed(req.authSession.user.id, clubId, { page: 1, limit: 30 });
     posts = feed.posts.map(mapPersistentPost);
   } else {
     posts = (await getPosts()).map(mapDemoPost);

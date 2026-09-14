@@ -13,7 +13,7 @@ const Invitation = sequelize.define(
     },
     clubId: {
       type: DataTypes.INTEGER,
-      allowNull: true,
+      allowNull: false,
       field: "club_id",
     },
     email: {

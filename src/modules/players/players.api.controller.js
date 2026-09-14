@@ -12,9 +12,8 @@ import {
   validateUpdatePlayerPayload,
 } from "./players.validation.js";
 import { sendError, sendSuccess } from "../../shared/responses/api-response.js";
-import { getAuthenticatedSession } from "../auth/auth.service.js";
 
-const getCurrentClubId = async (req) => (await getAuthenticatedSession(req.user.userId)).user.clubId;
+const getCurrentClubId = (req) => req.user.clubId;
 
 const resolveErrorStatus = (message) => {
   if (message.includes("no encontrado")) {
@@ -35,7 +34,7 @@ const resolveErrorStatus = (message) => {
 export const listPlayers = async (req, res) => {
   try {
     const filters = validatePlayerFilters(req.query);
-    const clubId = await getCurrentClubId(req);
+    const clubId = getCurrentClubId(req);
     const players = await getPlayers({ ...filters, clubId });
     return sendSuccess(res, "Jugadores obtenidos correctamente", players);
   } catch (error) {
@@ -46,7 +45,7 @@ export const listPlayers = async (req, res) => {
 export const getPlayerById = async (req, res) => {
   try {
     const playerId = validatePlayerId(req.params.id);
-    const clubId = await getCurrentClubId(req);
+    const clubId = getCurrentClubId(req);
     const player = await getPlayerByIdRecord(playerId, clubId);
 
     if (!player) {
@@ -63,7 +62,7 @@ export const updatePlayer = async (req, res) => {
   try {
     const playerId = validatePlayerId(req.params.id);
     const payload = validateUpdatePlayerPayload(req.body);
-    const clubId = await getCurrentClubId(req);
+    const clubId = getCurrentClubId(req);
     const updatedPlayer = await updatePlayerRecord(playerId, payload, clubId);
 
     if (!updatedPlayer) {
@@ -86,7 +85,7 @@ export const patchPlayerStatus = async (req, res) => {
       return sendError(res, "Solo un admin puede dejar a un jugador en estado inactive.", 403);
     }
 
-    const clubId = await getCurrentClubId(req);
+    const clubId = getCurrentClubId(req);
     const updatedPlayer = await updatePlayerStatus(playerId, payload.rosterStatus, clubId);
 
     if (!updatedPlayer) {

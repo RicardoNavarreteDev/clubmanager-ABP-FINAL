@@ -75,7 +75,7 @@ export const activateClub = async (req, res) => {
   try {
     const session = await getAuthenticatedSession(req.authSession.user.id, Number(req.params.clubId));
     setAuthCookie(res, session.token);
-    res.redirect(req.get("referer") || "/dashboard");
+    res.redirect("/dashboard");
   } catch {
     res.redirect("/dashboard");
   }

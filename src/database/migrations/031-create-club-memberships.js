@@ -1,4 +1,4 @@
-// Habilita cuentas multi-club y elimina el entorno previo para iniciar desde cero.
+// Habilita cuentas multi-club sin eliminar datos creados por los usuarios.
 import { DataTypes } from "sequelize";
 
 export async function up({ context: queryInterface }) {
@@ -14,11 +14,57 @@ export async function up({ context: queryInterface }) {
     }, { transaction });
     await queryInterface.addConstraint("club_memberships", { fields: ["user_id", "club_id"], type: "unique", name: "club_memberships_user_club_unique", transaction });
     await queryInterface.addIndex("club_memberships", ["club_id"], { name: "club_memberships_club_id_idx", transaction });
-    // Petición explícita: comenzar sin cuentas, clubes ni datos asociados de pruebas.
-    await queryInterface.sequelize.query("TRUNCATE TABLE users, clubs RESTART IDENTITY CASCADE;", { transaction });
+
+    await queryInterface.sequelize.query(
+      `
+        INSERT INTO club_memberships (user_id, club_id, role_id, is_owner, created_at, updated_at)
+        SELECT DISTINCT ON (users.id, users.club_id)
+          users.id,
+          users.club_id,
+          user_roles.role_id,
+          roles.name = 'admin',
+          NOW(),
+          NOW()
+        FROM users
+        JOIN user_roles ON user_roles.user_id = users.id
+        JOIN roles ON roles.id = user_roles.role_id
+        WHERE users.club_id IS NOT NULL
+        ORDER BY users.id, users.club_id, user_roles.role_id;
+      `,
+      { transaction },
+    );
+
+    // Las cuentas demo antiguas no pertenecen a un club y usaban passwords conocidas.
+    await queryInterface.sequelize.query(
+      `
+        UPDATE players
+        SET user_id = NULL
+        WHERE user_id IN (
+          SELECT id
+          FROM users
+          WHERE club_id IS NULL
+            AND (id, email) IN (
+              (1, 'admin@clubmanager.dev'),
+              (2, 'coach@clubmanager.dev'),
+              (3, 'ricardo@clubmanager.dev')
+            )
+        );
+
+        DELETE FROM users
+        WHERE club_id IS NULL
+          AND (id, email) IN (
+            (1, 'admin@clubmanager.dev'),
+            (2, 'coach@clubmanager.dev'),
+            (3, 'ricardo@clubmanager.dev')
+          );
+      `,
+      { transaction },
+    );
   });
 }
 
 export async function down({ context: queryInterface }) {
-  await queryInterface.dropTable("club_memberships");
+  await queryInterface.sequelize.transaction(async (transaction) => {
+    await queryInterface.dropTable("club_memberships", { transaction });
+  });
 }

@@ -11,14 +11,22 @@ import { initFeedAssociations } from "./feed.associations.js";
 const httpError = (message, statusCode) => Object.assign(new Error(message), { statusCode });
 const rolePriority = ["admin", "coach", "player"];
 
-const authorInclude = () => ({
+const authorInclude = (clubId) => ({
   model: User,
   as: "author",
   attributes: ["id", "displayName", "avatar"],
-  include: [{ association: "roles", attributes: ["name"], through: { attributes: [] } }],
+  include: [{
+    association: "memberships",
+    where: { clubId },
+    required: false,
+    attributes: ["clubId"],
+    include: [{ association: "role", attributes: ["name"] }],
+  }],
 });
 
-const getRoleNames = (author) => (author?.roles ?? []).map((role) => role.name);
+const getRoleNames = (author) => (author?.memberships ?? [])
+  .map((membership) => membership.role?.name)
+  .filter(Boolean);
 
 const mapAuthor = (author) => {
   if (!author) return null;
@@ -103,26 +111,32 @@ const mapPost = (instance, userId) => {
   };
 };
 
-const getActor = async (userId, transaction) => {
+const getActor = async (userId, clubId, transaction) => {
   initFeedAssociations();
   const user = await User.findByPk(userId, {
-    attributes: ["id", "clubId", "isActive"],
-    include: [{ association: "roles", attributes: ["name"], through: { attributes: [] } }],
+    attributes: ["id", "isActive"],
+    include: [{
+      association: "memberships",
+      where: { clubId },
+      required: true,
+      include: [{ association: "role", attributes: ["name"] }],
+    }],
     transaction,
   });
   if (!user || !user.isActive) throw httpError("El usuario autenticado no existe o esta inactivo.", 401);
-  if (!user.clubId) throw httpError("El usuario autenticado no pertenece a un club.", 403);
-  return user;
+  const membership = user.memberships?.[0];
+  if (!membership) throw httpError("El usuario autenticado no pertenece al club activo.", 403);
+  return { id: user.id, clubId: membership.clubId, memberships: [membership] };
 };
 
-const feedIncludes = () => [
-  authorInclude(),
+const feedIncludes = (clubId) => [
+  authorInclude(clubId),
   { model: PostLike, as: "likes", attributes: ["userId"] },
   {
     model: PostComment,
     as: "comments",
     attributes: ["id", "postId", "authorId", "parentId", "content", "createdAt", "updatedAt"],
-    include: [authorInclude()],
+    include: [authorInclude(clubId)],
   },
   {
     model: PostPoll,
@@ -150,20 +164,20 @@ const getScopedPost = async (postId, actor, options = {}) => {
 const getFullPost = async (postId, actor) => {
   const post = await Post.findOne({
     where: { id: postId, clubId: actor.clubId },
-    include: feedIncludes(),
+    include: feedIncludes(actor.clubId),
   });
   if (!post) throw httpError("Publicacion no encontrada.", 404);
   return mapPost(post, actor.id);
 };
 
-export const listFeed = async (userId, { page, limit }) => {
-  const actor = await getActor(userId);
+export const listFeed = async (userId, clubId, { page, limit }) => {
+  const actor = await getActor(userId, clubId);
   const where = { clubId: actor.clubId };
   const [total, posts] = await Promise.all([
     Post.count({ where }),
     Post.findAll({
       where,
-      include: feedIncludes(),
+      include: feedIncludes(actor.clubId),
       order: [["createdAt", "DESC"], ["id", "DESC"]],
       limit,
       offset: (page - 1) * limit,
@@ -175,8 +189,8 @@ export const listFeed = async (userId, { page, limit }) => {
   };
 };
 
-export const createPost = async (userId, payload) => {
-  const actor = await getActor(userId);
+export const createPost = async (userId, clubId, payload) => {
+  const actor = await getActor(userId, clubId);
   const roleNames = getRoleNames(actor);
   if (payload.type === "announcement" && !roleNames.some((role) => role === "admin" || role === "coach")) {
     throw httpError("Solo admin o coach pueden crear anuncios.", 403);
@@ -217,8 +231,8 @@ export const createPost = async (userId, payload) => {
   return getFullPost(postId, actor);
 };
 
-export const togglePostLike = async (userId, postId) => {
-  const actor = await getActor(userId);
+export const togglePostLike = async (userId, clubId, postId) => {
+  const actor = await getActor(userId, clubId);
   const liked = await sequelize.transaction(async (transaction) => {
     await getScopedPost(postId, actor, { transaction, lock: transaction.LOCK.UPDATE });
     const existing = await PostLike.findOne({ where: { postId, userId: actor.id }, transaction });
@@ -232,13 +246,13 @@ export const togglePostLike = async (userId, postId) => {
   return { liked, likesCount: await PostLike.count({ where: { postId } }) };
 };
 
-const loadComment = async (commentId) => {
-  const comment = await PostComment.findByPk(commentId, { include: [authorInclude()] });
+const loadComment = async (commentId, clubId) => {
+  const comment = await PostComment.findByPk(commentId, { include: [authorInclude(clubId)] });
   return mapComment(comment.toJSON());
 };
 
-export const addComment = async (userId, postId, content, parentId = null) => {
-  const actor = await getActor(userId);
+export const addComment = async (userId, clubId, postId, content, parentId = null) => {
+  const actor = await getActor(userId, clubId);
   const commentId = await sequelize.transaction(async (transaction) => {
     await getScopedPost(postId, actor, { transaction });
     if (parentId) {
@@ -257,11 +271,11 @@ export const addComment = async (userId, postId, content, parentId = null) => {
     }, { transaction });
     return comment.id;
   });
-  return loadComment(commentId);
+  return loadComment(commentId, actor.clubId);
 };
 
-export const voteInPoll = async (userId, postId, optionId) => {
-  const actor = await getActor(userId);
+export const voteInPoll = async (userId, clubId, postId, optionId) => {
+  const actor = await getActor(userId, clubId);
   await sequelize.transaction(async (transaction) => {
     await getScopedPost(postId, actor, { transaction, lock: transaction.LOCK.UPDATE });
     const poll = await PostPoll.findOne({ where: { postId }, transaction, lock: transaction.LOCK.UPDATE });

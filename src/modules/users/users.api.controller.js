@@ -30,6 +30,10 @@ const resolveErrorStatus = (message) => {
     return 409;
   }
 
+  if (message.includes("propietaria") || message.includes("varios clubes")) {
+    return 409;
+  }
+
   return 500;
 };
 
@@ -82,6 +86,9 @@ export const updateUser = async (req, res, next) => {
   try {
     const userId = validateUserId(req.params.id);
     const payload = validateUpdateUserPayload(req.body);
+    if (payload.password) {
+      return sendError(res, "Cada usuario debe cambiar su password desde su perfil.", 403);
+    }
     const updatedUser = await updateUserRecord(userId, payload, { clubId: req.user?.clubId ?? null });
 
     if (!updatedUser) {

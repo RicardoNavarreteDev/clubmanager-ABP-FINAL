@@ -99,7 +99,7 @@ const buildUserIncludes = () => ([
 export const registerFounder = async (payload, ownerUserId = null) => {
   initModelAssociations();
 
-  const registeredSession = await sequelize.transaction(async (transaction) => {
+  const registeredResult = await sequelize.transaction(async (transaction) => {
     const existingUser = await User.findOne({
       where: ownerUserId ? { id: ownerUserId } : { email: payload.email },
       transaction,
@@ -166,13 +166,14 @@ export const registerFounder = async (payload, ownerUserId = null) => {
     }
     await ClubMembership.create({ userId: user.id, clubId: club.id, roleId: adminRole.id, isOwner: true, createdAt: now, updatedAt: now }, { transaction });
 
-    return User.findByPk(user.id, {
+    const registeredUser = await User.findByPk(user.id, {
       include: buildUserIncludes(),
       transaction,
     });
+    return { user: registeredUser, clubId: club.id };
   });
 
-  return mapRegisteredSession(registeredSession);
+  return mapRegisteredSession(registeredResult.user, registeredResult.clubId);
 };
 
 const mapRegisteredSession = (user, activeClubId = null) => {
@@ -216,7 +217,7 @@ export const getAuthenticatedSession = async (userId, activeClubId = null) => {
 export const registerWithInvitation = async (payload) => {
   initModelAssociations();
 
-  const registeredSession = await sequelize.transaction(async (transaction) => {
+  const registeredResult = await sequelize.transaction(async (transaction) => {
     const invitation = await Invitation.findOne({
       where: { token: payload.token },
       transaction,
@@ -246,9 +247,21 @@ export const registerWithInvitation = async (payload) => {
       lock: transaction.LOCK.UPDATE,
     });
 
-    const club = invitationWithRelations.clubId
-      ? await Club.findByPk(invitationWithRelations.clubId, { transaction })
-      : await Club.findByPk(1, { transaction });
+    if (!invitationWithRelations.clubId) {
+      throw new Error("La invitacion no esta asociada a un club.");
+    }
+
+    const club = await Club.findByPk(invitationWithRelations.clubId, { transaction });
+    if (!club) {
+      throw new Error("El club de la invitacion no existe.");
+    }
+
+    if (existingUser) {
+      const verification = await verifyPassword(payload.password, existingUser.passwordHash);
+      if (!verification.ok) {
+        throw new Error("Credenciales invalidas.");
+      }
+    }
     const now = new Date();
     const user = existingUser ?? await User.create({
       clubId: club?.id ?? null,
@@ -309,13 +322,14 @@ export const registerWithInvitation = async (payload) => {
       { transaction },
     );
 
-    return User.findByPk(user.id, {
+    const registeredUser = await User.findByPk(user.id, {
       include: buildUserIncludes(),
       transaction,
     });
+    return { user: registeredUser, clubId: club.id };
   });
 
-  return mapRegisteredSession(registeredSession);
+  return mapRegisteredSession(registeredResult.user, registeredResult.clubId);
 };
 
 export const loginWithCredentials = async (payload) => {

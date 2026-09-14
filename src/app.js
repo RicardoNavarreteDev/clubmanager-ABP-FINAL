@@ -225,7 +225,9 @@ app.use((error, req, res, next) => {
     layout: "public",
     pageTitle: "Error",
     metaRobots: "noindex,nofollow",
-    message: error.message || "Error interno del servidor",
+    message: process.env.NODE_ENV === "production"
+      ? "Error interno del servidor"
+      : error.message || "Error interno del servidor",
   });
 });
 

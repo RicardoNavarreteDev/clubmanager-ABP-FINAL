@@ -11,4 +11,3 @@ Disallow: /gestion/
 Disallow: /login
 Disallow: /registro
 Disallow: /status
-Sitemap: https://clubmanager.example/sitemap.xml

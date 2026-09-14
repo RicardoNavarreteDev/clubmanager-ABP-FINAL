@@ -7,6 +7,12 @@ npm-debug.log*
 logs/*.txt
 !logs/.gitkeep
 skills-lock.json
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+coverage/
+*.tmp
 public/uploads/avatars/*.jpg
 public/uploads/avatars/*.jpeg
 public/uploads/avatars/*.png

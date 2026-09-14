@@ -68,7 +68,7 @@ export const login = async (req, res) => {
 
 export const me = async (req, res) => {
   try {
-    const session = await getAuthenticatedSession(req.user.userId);
+    const session = await getAuthenticatedSession(req.user.userId, req.user.clubId);
     return sendSuccess(res, "Usuario autenticado obtenido correctamente", session);
   } catch (error) {
     return sendError(res, error.message || "No se pudo obtener la sesion autenticada", resolveErrorStatus(error.message || ""));

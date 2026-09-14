@@ -82,7 +82,7 @@ const swaggerSpec = {
         type: "object",
         required: ["token", "name", "birthDate", "password", "confirmPassword", "position"],
         properties: {
-          token: { type: "string", example: "seed-invite-player-001" },
+          token: { type: "string", example: "token_aleatorio_recibido_en_la_invitacion" },
           name: { type: "string", example: "Jugador Prueba" },
           birthDate: { type: "string", format: "date", example: "1999-04-20" },
           password: { type: "string", example: "secreta123" },
@@ -414,6 +414,7 @@ const swaggerSpec = {
       get: {
         tags: ["Players"],
         summary: "Listar jugadores",
+        security: [{ bearerAuth: [] }],
         parameters: [
           { in: "query", name: "name", schema: { type: "string" } },
           { in: "query", name: "primaryCategoryId", schema: { type: "integer" } },
@@ -428,6 +429,7 @@ const swaggerSpec = {
       get: {
         tags: ["Players"],
         summary: "Obtener jugador por id",
+        security: [{ bearerAuth: [] }],
         parameters: [{ in: "path", name: "id", required: true, schema: { type: "integer" } }],
         responses: {
           200: { description: "Jugador encontrado" },
