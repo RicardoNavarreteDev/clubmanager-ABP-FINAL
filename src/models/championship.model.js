@@ -11,6 +11,11 @@ const Championship = sequelize.define(
       autoIncrement: true,
       primaryKey: true,
     },
+    clubId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      field: "club_id",
+    },
     name: {
       type: DataTypes.STRING(120),
       allowNull: false,

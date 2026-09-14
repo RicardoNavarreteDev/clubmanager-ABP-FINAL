@@ -13,8 +13,8 @@ const router = Router();
 
 router.get("/", authenticateJwt, authorizeRoles("admin", "coach"), listUsers);
 router.get("/:id", authenticateJwt, authorizeRoles("admin", "coach"), getUserById);
-router.post("/", authenticateJwt, authorizeRoles("admin", "coach"), createUser);
-router.put("/:id", authenticateJwt, authorizeRoles("admin", "coach"), updateUser);
-router.delete("/:id", authenticateJwt, authorizeRoles("admin", "coach"), deleteUser);
+router.post("/", authenticateJwt, authorizeRoles("admin"), createUser);
+router.put("/:id", authenticateJwt, authorizeRoles("admin"), updateUser);
+router.delete("/:id", authenticateJwt, authorizeRoles("admin"), deleteUser);
 
 export default router;

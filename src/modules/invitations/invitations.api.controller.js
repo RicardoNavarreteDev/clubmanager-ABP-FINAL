@@ -24,6 +24,10 @@ const resolveErrorStatus = (message) => {
     return 400;
   }
 
+  if (message.includes("solo pasan a accepted")) {
+    return 400;
+  }
+
   if (message.includes("desactivada")) {
     return 409;
   }
@@ -32,13 +36,17 @@ const resolveErrorStatus = (message) => {
     return 409;
   }
 
+  if (message.includes("No tienes permisos")) {
+    return 403;
+  }
+
   return 500;
 };
 
 export const listInvitations = async (req, res) => {
   try {
     const filters = validateInvitationFilters(req.query);
-    const invitations = await getInvitations(filters);
+    const invitations = await getInvitations({ ...filters, clubId: req.user.clubId });
     return sendSuccess(res, "Invitaciones obtenidas correctamente", invitations);
   } catch (error) {
     return sendError(res, error.message || "No se pudieron obtener las invitaciones", resolveErrorStatus(error.message || ""));
@@ -48,7 +56,7 @@ export const listInvitations = async (req, res) => {
 export const getInvitationById = async (req, res) => {
   try {
     const invitationId = validateInvitationId(req.params.id);
-    const invitation = await getInvitationByIdRecord(invitationId);
+    const invitation = await getInvitationByIdRecord(invitationId, req.user.clubId);
 
     if (!invitation) {
       return sendError(res, "Invitacion no encontrada", 404);
@@ -78,7 +86,7 @@ export const getInvitationByToken = async (req, res) => {
 export const createInvitation = async (req, res) => {
   try {
     const payload = validateCreateInvitationPayload(req.body);
-    const invitation = await createInvitationRecord(payload);
+    const invitation = await createInvitationRecord(payload, req.user.roles ?? [], req.user.clubId);
     return sendSuccess(res, "Invitacion creada correctamente", invitation, 201);
   } catch (error) {
     return sendError(res, error.message || "No se pudo crear la invitacion", resolveErrorStatus(error.message || ""));
@@ -89,7 +97,7 @@ export const patchInvitationStatus = async (req, res) => {
   try {
     const invitationId = validateInvitationId(req.params.id);
     const payload = validateInvitationStatusPayload(req.body);
-    const invitation = await updateInvitationStatus(invitationId, payload.status);
+    const invitation = await updateInvitationStatus(invitationId, payload.status, req.user.clubId);
 
     if (!invitation) {
       return sendError(res, "Invitacion no encontrada", 404);

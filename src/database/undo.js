@@ -5,12 +5,12 @@ import migrator from "./migrator.js";
 try {
   await sequelize.authenticate();
 
-  const migration = await migrator.down();
+  const migrations = await migrator.down();
 
-  if (!migration) {
+  if (migrations.length === 0) {
     console.log("No hay migraciones para revertir.");
   } else {
-    console.log(`Migración revertida: ${migration.name}`);
+    console.log(`Migracion revertida: ${migrations[0].name}`);
   }
 } catch (error) {
   console.error("Error al revertir migración:", error.message);

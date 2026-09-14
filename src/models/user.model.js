@@ -11,6 +11,11 @@ const User = sequelize.define(
       autoIncrement: true,
       primaryKey: true,
     },
+    clubId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      field: "club_id",
+    },
     email: {
       type: DataTypes.STRING(160),
       allowNull: false,

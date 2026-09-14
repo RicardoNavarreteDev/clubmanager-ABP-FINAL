@@ -2,12 +2,13 @@
 import { randomBytes } from "node:crypto";
 import { Op } from "sequelize";
 import sequelize from "../../config/db.js";
+import Club from "../../models/club.model.js";
+import Category from "../../models/category.model.js";
 import Invitation from "../../models/invitation.model.js";
 import { initModelAssociations } from "../../models/associations.js";
 import Player from "../../models/player.model.js";
 import PlayerCategory from "../../models/player-category.model.js";
 import Role from "../../models/role.model.js";
-import User from "../../models/user.model.js";
 
 const shouldUseDatabase = () => process.env.DB_READ_INVITATIONS === "true";
 
@@ -28,6 +29,7 @@ const buildInvitationIncludes = () => ([
 // Este mapeo deja las invitaciones con nombres de campo consistentes para el resto de la app.
 const mapInvitation = (invitation) => ({
   id: invitation.id,
+  clubId: invitation.clubId ?? null,
   email: invitation.email,
   name: invitation.name,
   roleId: invitation.roleId,
@@ -65,6 +67,18 @@ const mapInvitationDetail = (invitation) => ({
     : null,
 });
 
+const validateInvitationPermissions = (inviterRoles, targetRoleName) => {
+  if (inviterRoles.includes("admin")) {
+    return;
+  }
+
+  if (inviterRoles.includes("coach") && targetRoleName === "player") {
+    return;
+  }
+
+  throw new Error("No tienes permisos para invitar usuarios con ese rol.");
+};
+
 export const getInvitations = async (filters = {}) => {
   ensureDatabaseEnabled();
 
@@ -86,22 +100,37 @@ export const getInvitations = async (filters = {}) => {
     where.status = filters.status;
   }
 
+  if (filters.clubId) {
+    where.clubId = filters.clubId;
+  }
+
+  if (where.email?.[Op.iLike]) {
+    where.email[Op.iLike] = `%${String(filters.email).replace(/[%_\\]/g, (match) => `\\${match}`)}%`;
+  }
+
+  const page = Number.isInteger(filters.page) && filters.page > 0 ? filters.page : 1;
+  const limit = Number.isInteger(filters.limit) && filters.limit > 0 ? Math.min(filters.limit, 50) : 50;
+  const offset = (page - 1) * limit;
+
   // Ordenamos por id para mantener un orden estable al revisar invitaciones.
   const invitations = await Invitation.findAll({
     where,
     include: buildInvitationIncludes(),
     order: [["id", "ASC"]],
+    limit,
+    offset,
   });
 
   return invitations.map((invitation) => mapInvitationDetail(invitation));
 };
 
-export const getInvitationById = async (id) => {
+export const getInvitationById = async (id, clubId = null) => {
   ensureDatabaseEnabled();
 
   initModelAssociations();
 
-  const invitation = await Invitation.findByPk(id, {
+  const invitation = await Invitation.findOne({
+    where: { id, ...(clubId ? { clubId } : {}) },
     include: buildInvitationIncludes(),
   });
 
@@ -121,28 +150,19 @@ export const getInvitationByToken = async (token) => {
   return invitation ? mapInvitationDetail(invitation) : null;
 };
 
-export const createInvitation = async (payload) => {
+export const createInvitation = async (payload, inviterRoles = [], clubId = null) => {
   ensureDatabaseEnabled();
 
   initModelAssociations();
 
+  if (!clubId) {
+    throw new Error("Tu usuario no esta asociado a un club.");
+  }
+
   const createdInvitation = await sequelize.transaction(async (transaction) => {
-    const existingUser = await User.findOne({
-      where: {
-        email: {
-          [Op.iLike]: payload.email,
-        },
-      },
-      transaction,
-      lock: transaction.LOCK.UPDATE,
-    });
-
-    if (existingUser) {
-      throw new Error("Ya existe un usuario registrado con ese email.");
-    }
-
     const existingInvitation = await Invitation.findOne({
       where: {
+        clubId,
         email: {
           [Op.iLike]: payload.email,
         },
@@ -158,9 +178,6 @@ export const createInvitation = async (payload) => {
       throw new Error("Ya existe una invitacion pendiente para ese email.");
     }
 
-    if (existingInvitation?.status === "accepted") {
-      throw new Error("Ese email ya tiene una invitacion aceptada y no se puede invitar de nuevo.");
-    }
 
     const role = await Role.findByPk(payload.roleId, { transaction });
 
@@ -168,7 +185,31 @@ export const createInvitation = async (payload) => {
       throw new Error("El rol indicado para la invitacion no existe.");
     }
 
+    validateInvitationPermissions(inviterRoles, role.name);
+
     let playerId = payload.playerId;
+    const club = await Club.findByPk(clubId, { transaction });
+
+    if (!club) {
+      throw new Error("El club del usuario no existe.");
+    }
+
+    if (payload.primaryCategoryId) {
+      const category = await Category.findOne({
+        where: { id: payload.primaryCategoryId, clubId },
+        transaction,
+      });
+      if (!category) {
+        throw new Error("La categoria seleccionada no pertenece a tu club.");
+      }
+    }
+
+    if (playerId) {
+      const player = await Player.findOne({ where: { id: playerId, clubId }, transaction });
+      if (!player) {
+        throw new Error("El jugador seleccionado no pertenece a tu club.");
+      }
+    }
 
     // Si la invitacion es para un jugador y aun no existe ficha deportiva, la dejamos creada en estado invited.
     if (role.name === "player" && !playerId) {
@@ -179,6 +220,7 @@ export const createInvitation = async (payload) => {
       const player = await Player.create(
         {
           userId: null,
+          clubId,
           name: payload.name,
           position: null,
           number: null,
@@ -186,7 +228,7 @@ export const createInvitation = async (payload) => {
           bio: null,
           location: null,
           birthDate: null,
-          team: "Club Prueba",
+          team: club.name,
           rosterStatus: "invited",
           primaryCategoryId: payload.primaryCategoryId,
           createdAt: new Date(),
@@ -208,6 +250,7 @@ export const createInvitation = async (payload) => {
 
     const invitation = await Invitation.create(
       {
+        clubId,
         email: payload.email,
         name: payload.name,
         roleId: payload.roleId,
@@ -232,17 +275,22 @@ export const createInvitation = async (payload) => {
   return mapInvitationDetail(createdInvitation);
 };
 
-export const updateInvitationStatus = async (id, status) => {
+export const updateInvitationStatus = async (id, status, clubId = null) => {
   ensureDatabaseEnabled();
 
   initModelAssociations();
 
-  const invitation = await Invitation.findByPk(id, {
+  const invitation = await Invitation.findOne({
+    where: { id, ...(clubId ? { clubId } : {}) },
     include: buildInvitationIncludes(),
   });
 
   if (!invitation) {
     return null;
+  }
+
+  if (status === "accepted") {
+    throw new Error("Las invitaciones solo pasan a accepted desde el registro con token.");
   }
 
   await invitation.update({

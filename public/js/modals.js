@@ -8,6 +8,107 @@ if (window.gsap && window.Flip && window.CustomEase) {
 }
 
 const modalArchiveDuration = 0.6;
+let modalScrollLockCount = 0;
+
+function prefersReducedMotion() {
+  return Boolean(window.matchMedia?.("(prefers-reduced-motion: reduce)").matches);
+}
+
+function hasGsap() {
+  return Boolean(window.gsap);
+}
+
+function hasFlip() {
+  return Boolean(window.Flip);
+}
+
+function lockModalScroll() {
+  modalScrollLockCount += 1;
+  document.body.style.overflow = "hidden";
+}
+
+function unlockModalScroll() {
+  modalScrollLockCount = Math.max(0, modalScrollLockCount - 1);
+  if (modalScrollLockCount === 0) {
+    document.body.style.overflow = "";
+  }
+}
+
+function getFocusableElements(panel) {
+  if (!panel) {
+    return [];
+  }
+
+  return Array.from(
+    panel.querySelectorAll(
+      'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])',
+    ),
+  ).filter((element) => !element.hasAttribute("hidden") && element.getClientRects().length > 0);
+}
+
+function focusFirstElement(panel) {
+  if (!panel) {
+    return;
+  }
+
+  if (!panel.hasAttribute("tabindex")) {
+    panel.setAttribute("tabindex", "-1");
+  }
+
+  const focusables = getFocusableElements(panel);
+  const heading = panel.querySelector("h2[id], h2");
+  if (heading && !focusables.length) {
+    if (!heading.hasAttribute("tabindex")) {
+      heading.setAttribute("tabindex", "-1");
+    }
+    heading.focus({ preventScroll: true });
+    return;
+  }
+
+  (focusables[0] ?? panel).focus({ preventScroll: true });
+}
+
+function handleModalTabTrap(event) {
+  if (event.key !== "Tab") {
+    return;
+  }
+
+  const openModalElement = document.querySelector('.modal-backdrop:not([hidden])');
+  if (!openModalElement) {
+    return;
+  }
+
+  const panel = getModalPanel(openModalElement);
+  const focusables = getFocusableElements(panel);
+  if (!focusables.length) {
+    event.preventDefault();
+    panel?.focus({ preventScroll: true });
+    return;
+  }
+
+  const first = focusables[0];
+  const last = focusables[focusables.length - 1];
+
+  if (event.shiftKey && document.activeElement === first) {
+    event.preventDefault();
+    last.focus();
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault();
+    first.focus();
+  }
+}
+
+function showModalBasic(modal, panel) {
+  modal.hidden = false;
+  lockModalScroll();
+  focusFirstElement(panel);
+}
+
+function getCurrentViewerFromDom() {
+  const name = document.querySelector(".sidebar-profile .profile-name")?.textContent?.trim() || "Tu comentario";
+  const avatar = document.querySelector(".sidebar-profile img")?.getAttribute("src") || "/images/avatars/profile.svg";
+  return { name, avatar };
+}
 
 function getMobileNavToggle() {
   return document.querySelector("[data-mobile-nav-toggle]");
@@ -178,7 +279,12 @@ function setStatusMessage(form, message, tone = "") {
     return;
   }
 
-  statusElement.textContent = message;
+  statusElement.setAttribute("role", tone === "error" ? "alert" : "status");
+  // Limpia antes para que el lector anuncie aunque el texto se repita.
+  statusElement.textContent = "";
+  window.requestAnimationFrame(() => {
+    statusElement.textContent = message;
+  });
   statusElement.dataset.tone = tone;
 }
 
@@ -196,6 +302,7 @@ function clearFieldErrors(form) {
   invalidFields.forEach((field) => {
     field.classList.remove("is-invalid");
     field.removeAttribute("aria-invalid");
+    field.removeAttribute("aria-describedby");
   });
 }
 
@@ -203,14 +310,25 @@ function setFieldError(form, fieldName, message) {
   const input = form?.elements?.namedItem(fieldName);
   const errorElement = form?.querySelector(`[data-field-error="${fieldName}"]`);
 
+  if (errorElement && !errorElement.id) {
+    errorElement.id = `err-${fieldName}-${form.id || "form"}`;
+  }
+
   if (input instanceof HTMLElement) {
     input.classList.add("is-invalid");
     input.setAttribute("aria-invalid", "true");
+    if (errorElement?.id) {
+      input.setAttribute("aria-describedby", errorElement.id);
+    }
   }
 
   if (errorElement) {
     errorElement.textContent = message;
   }
+}
+
+function focusFirstInvalidField(form) {
+  form?.querySelector("[aria-invalid='true']")?.focus({ preventScroll: true });
 }
 
 function setFormSavingState(form, isSaving) {
@@ -335,6 +453,7 @@ function validateSettingsForm(form) {
 
 function handleSettingsFormSubmit(form) {
   if (!validateSettingsForm(form)) {
+    focusFirstInvalidField(form);
     return;
   }
 
@@ -393,12 +512,14 @@ function toggleSettingsMenu() {
 
 function cleanupModal(modal, panel) {
   modal.hidden = true;
-  gsap.set(modal, { clearProps: "all" });
-  gsap.set(panel, { clearProps: "all" });
+  if (hasGsap()) {
+    gsap.set(modal, { clearProps: "all" });
+    gsap.set(panel, { clearProps: "all" });
 
-  const archiveElements = getModalArchiveElements(modal);
-  if (archiveElements?.length) {
-    gsap.set(archiveElements, { clearProps: "all" });
+    const archiveElements = getModalArchiveElements(modal);
+    if (archiveElements?.length) {
+      gsap.set(archiveElements, { clearProps: "all" });
+    }
   }
 
   const form = getModalForm(modal);
@@ -413,6 +534,9 @@ function cleanupModal(modal, panel) {
 
   delete panel.dataset.flipId;
   delete modal._originButton;
+  unlockModalScroll();
+  document.removeEventListener("keydown", handleModalTabTrap, true);
+  originButton?.focus?.({ preventScroll: true });
 }
 
 function openModal(modal, originButton) {
@@ -424,25 +548,40 @@ function openModal(modal, originButton) {
     return;
   }
 
-  modal._originButton = originButton;
-
-  const flipId = `modal-${modal.dataset.modal}`;
-  originButton.dataset.flipId = flipId;
-
   const panel = getModalPanel(modal);
   if (!panel) {
     return;
   }
 
+  // Cierra otro modal abierto para no apilar focos ni animaciones.
+  const alreadyOpen = document.querySelector('.modal-backdrop:not([hidden])');
+  if (alreadyOpen && alreadyOpen !== modal) {
+    cleanupModal(alreadyOpen, getModalPanel(alreadyOpen));
+  }
+
+  modal._originButton = originButton;
+
+  const flipId = `modal-${modal.dataset.modal}`;
+  originButton.dataset.flipId = flipId;
+
   const isArchiveModal = usesArchiveEffect(modal);
+  document.addEventListener("keydown", handleModalTabTrap, true);
+
+  if (prefersReducedMotion() || !hasGsap() || (!isArchiveModal && !hasGsap())) {
+    showModalBasic(modal, panel);
+    return;
+  }
 
   if (!isArchiveModal) {
     modal.hidden = false;
+    lockModalScroll();
 
     gsap.set(modal, { opacity: 0 });
     gsap.set(panel, { opacity: 0, y: -16, scale: 0.97 });
 
-    const timeline = gsap.timeline();
+    const timeline = gsap.timeline({
+      onComplete: () => focusFirstElement(panel),
+    });
 
     timeline.to(modal, {
       opacity: 1,
@@ -465,11 +604,17 @@ function openModal(modal, originButton) {
     return;
   }
 
+  if (!hasFlip()) {
+    showModalBasic(modal, panel);
+    return;
+  }
+
   panel.dataset.flipId = flipId;
 
   const originState = Flip.getState(originButton);
 
   modal.hidden = false;
+  lockModalScroll();
 
   gsap.set(modal, { opacity: 0 });
   gsap.set(panel, { opacity: 1 });
@@ -487,6 +632,7 @@ function openModal(modal, originButton) {
     absolute: true,
     scale: true,
     toggleClass: "pretty-modal-opening",
+    onComplete: () => focusFirstElement(panel),
   });
 }
 
@@ -503,6 +649,11 @@ function closeModal(modal) {
   const originButton = modal._originButton;
   const archiveElements = getModalArchiveElements(modal);
   const isArchiveModal = usesArchiveEffect(modal);
+
+  if (prefersReducedMotion() || !hasGsap()) {
+    cleanupModal(modal, panel);
+    return;
+  }
 
   if (!isArchiveModal || !originButton) {
     const timeline = gsap.timeline({
@@ -526,6 +677,11 @@ function closeModal(modal) {
       },
       "-=0.12",
     );
+    return;
+  }
+
+  if (!hasFlip()) {
+    cleanupModal(modal, panel);
     return;
   }
 
@@ -563,6 +719,9 @@ function closeModal(modal) {
   });
 }
 
+window.openModal = openModal;
+window.closeModal = closeModal;
+
 document.addEventListener("click", (event) => {
   const settingsToggle = event.target.closest("[data-settings-menu-toggle]");
   if (settingsToggle) {
@@ -591,10 +750,13 @@ document.addEventListener("click", (event) => {
   if (feedLikeButton) {
     const likeCountElement = feedLikeButton.querySelector("[data-feed-like-count]");
     const isActive = feedLikeButton.classList.toggle("is-active");
+    feedLikeButton.setAttribute("aria-pressed", String(isActive));
 
     if (likeCountElement) {
       const currentCount = Number.parseInt(likeCountElement.textContent || "0", 10);
-      likeCountElement.textContent = String(currentCount + (isActive ? 1 : -1));
+      const nextCount = currentCount + (isActive ? 1 : -1);
+      likeCountElement.textContent = String(nextCount);
+      feedLikeButton.setAttribute("aria-label", `Me gusta, ${nextCount} me gusta`);
     }
 
     return;
@@ -604,10 +766,13 @@ document.addEventListener("click", (event) => {
   if (commentLikeButton) {
     const likeCountElement = commentLikeButton.querySelector("[data-comment-like-count]");
     const isActive = commentLikeButton.classList.toggle("is-active");
+    commentLikeButton.setAttribute("aria-pressed", String(isActive));
 
     if (likeCountElement) {
       const currentCount = Number.parseInt(likeCountElement.textContent || "0", 10);
-      likeCountElement.textContent = String(currentCount + (isActive ? 1 : -1));
+      const nextCount = currentCount + (isActive ? 1 : -1);
+      likeCountElement.textContent = String(nextCount);
+      commentLikeButton.setAttribute("aria-label", `Me gusta en comentario, ${nextCount} me gusta`);
     }
 
     return;
@@ -620,6 +785,10 @@ document.addEventListener("click", (event) => {
 
     if (replyForm) {
       replyForm.hidden = !replyForm.hidden;
+      commentReplyToggle.setAttribute("aria-expanded", String(!replyForm.hidden));
+      if (!replyForm.hidden) {
+        replyForm.querySelector("textarea")?.focus({ preventScroll: true });
+      }
     }
 
     return;
@@ -633,6 +802,7 @@ document.addEventListener("click", (event) => {
     if (expanded) {
       const isOpen = !expanded.hidden;
       expanded.hidden = isOpen;
+      commentRepliesToggle.setAttribute("aria-expanded", String(!isOpen));
       commentRepliesToggle.textContent = isOpen
         ? `Ver todas las respuestas (${expanded.children.length})`
         : "Ocultar respuestas";
@@ -694,6 +864,8 @@ document.addEventListener("keydown", (event) => {
   if (event.key !== "Escape") {
     return;
   }
+
+  event.preventDefault();
 
   if (isMobileNavOpen()) {
     closeMobileNav();
@@ -758,13 +930,15 @@ document.addEventListener("submit", (event) => {
       const commentsShell = commentsComposerForm.closest(".comments-thread-shell");
       const list = commentsShell?.querySelector(".comments-thread-list");
       if (list) {
+        const viewer = getCurrentViewerFromDom();
         const comment = document.createElement("article");
         comment.className = "comment-thread-card";
+        comment.setAttribute("tabindex", "-1");
         comment.innerHTML = `
           <div class="comment-thread-header">
-            <img src="/images/avatars/profile.svg" alt="Avatar de Ricardo Navarrete" width="80">
+            <img src="${viewer.avatar}" alt="Perfil de ${viewer.name}" width="80" height="80">
             <div>
-              <h3>Ricardo Navarrete</h3>
+              <h3></h3>
               <p>Jugador · Ahora</p>
             </div>
           </div>
@@ -789,8 +963,10 @@ document.addEventListener("submit", (event) => {
           </form>
         `;
 
+        comment.querySelector(".comment-thread-header h3").textContent = viewer.name;
         comment.querySelector(".comment-thread-content").textContent = text;
         list.prepend(comment);
+        comment.focus({ preventScroll: true });
       }
 
       const modal = commentsComposerForm.closest("[data-modal]");

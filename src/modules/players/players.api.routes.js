@@ -10,8 +10,8 @@ import {
 
 const router = Router();
 
-router.get("/", listPlayers);
-router.get("/:id", getPlayerById);
+router.get("/", authenticateJwt, listPlayers);
+router.get("/:id", authenticateJwt, getPlayerById);
 router.put("/:id", authenticateJwt, authorizeRoles("admin", "coach"), updatePlayer);
 router.patch("/:id/status", authenticateJwt, authorizeRoles("admin", "coach"), patchPlayerStatus);
 

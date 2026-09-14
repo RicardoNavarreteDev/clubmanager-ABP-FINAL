@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /$
+Allow: /crear-club
+Disallow: /api/
+Disallow: /dashboard
+Disallow: /jugadores
+Disallow: /eventos
+Disallow: /campeonatos
+Disallow: /perfil
+Disallow: /gestion/
+Disallow: /login
+Disallow: /registro
+Disallow: /status

@@ -11,6 +11,11 @@ const Match = sequelize.define(
       autoIncrement: true,
       primaryKey: true,
     },
+    clubId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      field: "club_id",
+    },
     championshipId: {
       type: DataTypes.INTEGER,
       allowNull: true,

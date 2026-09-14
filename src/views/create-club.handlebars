@@ -1,0 +1,80 @@
+<main class="founder-page">
+  <a class="auth-back-link" href="/" aria-label="Volver a la landing">&#8592; Volver</a>
+  <section class="founder-shell">
+    <div class="founder-intro">
+      <a class="public-brand public-brand-light" href="/">
+        <span class="public-brand-mark">CM</span>
+        <span>ClubManager</span>
+      </a>
+      <div>
+        <p class="public-eyebrow">Configura tu espacio</p>
+        <h1>El primer paso para ordenar tu club.</h1>
+        <p>Crea la cuenta administradora y deja lista la identidad que vera todo tu equipo.</p>
+      </div>
+      <ol class="founder-progress" aria-label="Proceso de configuración">
+        <li aria-current="step"><span class="active">1</span></li><li aria-hidden="true"><i></i></li><li><span>2</span></li><li aria-hidden="true"><i></i></li><li><span>3</span></li>
+      </ol>
+    </div>
+
+    <div class="founder-form-panel">
+      {{#if hasConfiguredClub}}
+        <div class="founder-unavailable">
+          <p class="public-eyebrow">Club configurado</p>
+          <h2>Esta instalacion ya tiene un club.</h2>
+          <p>Inicia sesion con una cuenta existente para entrar al panel.</p>
+          <a class="public-button public-button-primary" href="/login">Ir al login</a>
+        </div>
+      {{else}}
+        <header class="founder-form-header">
+          <p>Paso inicial</p>
+          <h2>Crea tu club</h2>
+          <span>Todos los campos marcados son necesarios.</span>
+        </header>
+
+        {{#if createClubError}}
+          <div class="web-alert web-alert-error" role="alert">{{createClubError}}</div>
+        {{/if}}
+
+        <form class="founder-form" action="/crear-club" method="post" enctype="multipart/form-data">
+          <fieldset>
+            <legend>Tu cuenta administradora</legend>
+            <div class="founder-fields-grid">
+              <label class="public-field"><span>Nombre completo *</span><input type="text" name="ownerName" value="{{createClubForm.ownerName}}" required autocomplete="name"></label>
+              <label class="public-field"><span>Correo *</span><input type="email" name="email" value="{{createClubForm.email}}" required autocomplete="email"></label>
+              <label class="public-field"><span>Password *</span><input type="password" name="password" required minlength="8" autocomplete="new-password"></label>
+              <label class="public-field"><span>Confirmar password *</span><input type="password" name="confirmPassword" required minlength="8" autocomplete="new-password"></label>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Identidad del club</legend>
+            <div class="founder-fields-grid">
+              <label class="public-field"><span>Nombre del club *</span><input type="text" name="clubName" value="{{createClubForm.clubName}}" required></label>
+              <label class="public-field"><span>Deporte *</span><input type="text" name="sport" value="{{createClubForm.sport}}" placeholder="Ej. Basquetbol" required></label>
+              <label class="public-field founder-field-wide"><span>Ciudad o ubicacion</span><input type="text" name="location" value="{{createClubForm.location}}"></label>
+              <label class="public-field founder-field-wide"><span>Descripcion</span><textarea name="description" rows="3" placeholder="Cuenta brevemente que identifica a tu club">{{createClubForm.description}}</textarea></label>
+              <label class="club-logo-field founder-field-wide">
+                <span class="club-logo-preview" data-logo-preview aria-hidden="true">CM</span>
+                <span><strong>Logo del club</strong><small>JPG, PNG o WEBP. Maximo 2 MB.</small></span>
+                <input type="file" name="logo" accept="image/jpeg,image/png,image/webp" data-logo-input aria-label="Logo del club JPG PNG WEBP hasta 2 MB">
+              </label>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Primera categoria</legend>
+            <div class="founder-fields-grid">
+              <label class="public-field"><span>Nombre de la categoria *</span><input type="text" name="categoryName" value="{{createClubForm.categoryName}}" placeholder="Ej. Adulto" required></label>
+              <label class="public-field"><span>Alcance de genero *</span><select name="categoryGenderScope" required><option value="mixto">Mixto</option><option value="femenino">Femenino</option><option value="masculino">Masculino</option></select></label>
+              <label class="public-field"><span>Edad minima *</span><input type="number" name="categoryMinAge" min="0" value="{{createClubForm.categoryMinAge}}" required></label>
+              <label class="public-field"><span>Edad maxima</span><input type="number" name="categoryMaxAge" min="0" value="{{createClubForm.categoryMaxAge}}"></label>
+            </div>
+          </fieldset>
+
+          <button class="public-button public-button-primary founder-submit" type="submit">Crear club y entrar al panel</button>
+          <p class="founder-login-note">Ya tienes cuenta? <a href="/login">Inicia sesion</a></p>
+        </form>
+      {{/if}}
+    </div>
+  </section>
+</main>

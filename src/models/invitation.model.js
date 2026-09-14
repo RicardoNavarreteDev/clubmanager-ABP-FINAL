@@ -11,6 +11,11 @@ const Invitation = sequelize.define(
       autoIncrement: true,
       primaryKey: true,
     },
+    clubId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      field: "club_id",
+    },
     email: {
       type: DataTypes.STRING(160),
       allowNull: false,

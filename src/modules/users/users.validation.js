@@ -31,6 +31,25 @@ const parseBooleanString = (value, fieldName) => {
   throw new Error(`El campo ${fieldName} debe ser true o false.`);
 };
 
+const isValidEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+
+const normalizeBirthDate = (value) => {
+  if (value === null || value === undefined || value === "") {
+    return null;
+  }
+
+  if (typeof value !== "string") {
+    throw new Error("Si envias birthDate, debe ser una fecha valida YYYY-MM-DD.");
+  }
+
+  const trimmed = value.trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(trimmed) || Number.isNaN(new Date(trimmed).getTime())) {
+    throw new Error("Si envias birthDate, debe ser una fecha valida YYYY-MM-DD.");
+  }
+
+  return trimmed;
+};
+
 export const validateUserId = (id) => {
   const parsedId = Number.parseInt(id, 10);
 
@@ -64,7 +83,7 @@ export const validateCreateUserPayload = (payload) => {
     throw new Error("Debes enviar un body JSON valido para crear el usuario.");
   }
 
-  if (!isNonEmptyString(payload.email) || !payload.email.includes("@")) {
+  if (!isNonEmptyString(payload.email) || !isValidEmail(payload.email.trim())) {
     throw new Error("El email es obligatorio y debe tener un formato valido.");
   }
 
@@ -72,8 +91,8 @@ export const validateCreateUserPayload = (payload) => {
     throw new Error("El displayName es obligatorio.");
   }
 
-  if (!isNonEmptyString(payload.password) || payload.password.trim().length < 6) {
-    throw new Error("La password es obligatoria y debe tener al menos 6 caracteres.");
+  if (!isNonEmptyString(payload.password) || payload.password.trim().length < 8) {
+    throw new Error("La password es obligatoria y debe tener al menos 8 caracteres.");
   }
 
   return {
@@ -83,7 +102,7 @@ export const validateCreateUserPayload = (payload) => {
     avatar: normalizeOptionalString(payload.avatar),
     bio: normalizeOptionalString(payload.bio),
     location: normalizeOptionalString(payload.location),
-    birthDate: normalizeOptionalString(payload.birthDate),
+    birthDate: normalizeBirthDate(normalizeOptionalString(payload.birthDate) ?? null),
     isActive: payload.isActive === undefined ? true : parseBooleanString(payload.isActive, "isActive"),
   };
 };
@@ -116,7 +135,7 @@ export const validateUpdateUserPayload = (payload) => {
   }
 
   if (payload.birthDate !== undefined) {
-    sanitizedPayload.birthDate = normalizeOptionalString(payload.birthDate);
+    sanitizedPayload.birthDate = normalizeBirthDate(normalizeOptionalString(payload.birthDate) ?? null);
   }
 
   if (payload.isActive !== undefined) {
@@ -124,8 +143,8 @@ export const validateUpdateUserPayload = (payload) => {
   }
 
   if (payload.password !== undefined) {
-    if (!isNonEmptyString(payload.password) || payload.password.trim().length < 6) {
-      throw new Error("Si envias password, debe tener al menos 6 caracteres.");
+    if (!isNonEmptyString(payload.password) || payload.password.trim().length < 8) {
+      throw new Error("Si envias password, debe tener al menos 8 caracteres.");
     }
 
     sanitizedPayload.password = payload.password.trim();

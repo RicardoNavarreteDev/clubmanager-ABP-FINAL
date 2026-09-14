@@ -1,10 +1,16 @@
 // Este archivo valida JWT en las rutas privadas de la API y deja la identidad basica en req.user.
 import jwt from "jsonwebtoken";
+import User from "../models/user.model.js";
+import { initModelAssociations } from "../models/associations.js";
+import { getAuthTokenFromRequest } from "./web-auth.middleware.js";
 
-export const authenticateJwt = (req, res, next) => {
+const isUnsafeMethod = (method) => ["POST", "PUT", "PATCH", "DELETE"].includes(String(method).toUpperCase());
+
+export const authenticateJwt = async (req, res, next) => {
   const authorizationHeader = req.headers.authorization;
+  const cookieToken = getAuthTokenFromRequest(req);
 
-  if (!authorizationHeader) {
+  if (!authorizationHeader && !cookieToken) {
     res.status(401).json({
       status: "error",
       message: "Debes enviar un token de autenticacion.",
@@ -13,9 +19,9 @@ export const authenticateJwt = (req, res, next) => {
     return;
   }
 
-  const [scheme, token] = authorizationHeader.split(" ");
+  const [scheme, bearerToken] = authorizationHeader?.split(" ") ?? [];
 
-  if (scheme !== "Bearer" || !token) {
+  if (authorizationHeader && (scheme !== "Bearer" || !bearerToken)) {
     res.status(401).json({
       status: "error",
       message: "El header Authorization debe usar el formato Bearer <token>.",
@@ -24,9 +30,43 @@ export const authenticateJwt = (req, res, next) => {
     return;
   }
 
+  // Las operaciones de escritura exigen Bearer para evitar CSRF con cookie sola.
+  if (isUnsafeMethod(req.method) && !bearerToken) {
+    res.status(401).json({
+      status: "error",
+      message: "Usa Authorization Bearer para operaciones de escritura.",
+      data: null,
+    });
+    return;
+  }
+
   try {
+    const token = bearerToken || cookieToken;
     const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decodedToken;
+
+    // Rehidratamos roles y estado desde DB para no confiar en un JWT viejo.
+    initModelAssociations();
+    const user = await User.findByPk(decodedToken.userId, { include: [{ association: "memberships", include: [{ association: "role", attributes: ["name"] }] }] });
+
+    if (!user || !user.isActive) {
+      res.status(401).json({
+        status: "error",
+        message: "El token no es valido o ya expiro.",
+        data: null,
+      });
+      return;
+    }
+
+    const membership = (user.memberships ?? []).find((entry) => entry.clubId === decodedToken.clubId);
+    if (!membership) {
+      throw new Error("El token no corresponde a una membresia activa.");
+    }
+    req.user = {
+      userId: user.id,
+      email: user.email,
+      roles: membership.role ? [membership.role.name] : [],
+      clubId: membership.clubId,
+    };
     next();
   } catch (error) {
     res.status(401).json({

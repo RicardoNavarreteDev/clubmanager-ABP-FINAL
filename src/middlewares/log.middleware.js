@@ -17,7 +17,12 @@ export const logRouteAccess = async (req, res, next) => {
   const logLine = `${now.toLocaleDateString()} ${now.toLocaleTimeString()} - ${req.originalUrl}\n`;
 
   // appendFile agrega el texto al final del archivo sin borrar lo anterior.
-  await appendFile(logFilePath, logLine);
+  try {
+    await appendFile(logFilePath, logLine);
+  } catch (error) {
+    next(error);
+    return;
+  }
 
   // next() permite que Express siga hacia el siguiente middleware o handler.
   next();

@@ -8,7 +8,10 @@ Este archivo resume las decisiones tomadas para que la transicion desde JSON hac
 
 ## Reglas de negocio ya definidas
 
-- El sistema actual trabaja con un solo club por instalacion.
+- Una cuenta puede crear y administrar varios clubes.
+- Cada usuario accede a un club mediante una membresía con rol propio; el panel opera sobre un club activo.
+- La cuenta que crea un club recibe la membresía `admin` propietaria de ese club.
+- Las invitaciones solo otorgan acceso al club que las emitió; una cuenta puede aceptar invitaciones de varios clubes.
 - Las categorias del club las definen `admin` o `coach`.
 - Un jugador debe pertenecer al menos a una categoria.
 - Un jugador puede pertenecer a varias categorias.
@@ -22,6 +25,8 @@ Este archivo resume las decisiones tomadas para que la transicion desde JSON hac
 - Los entrenamientos actuales son generales por categoria, no por campeonato.
 - Todo jugador que entra al dashboard tendra cuenta de usuario creada via invitacion.
 - El perfil pertenece al usuario y esta ligado a un `playerId`.
+- La creacion del club incluye su primera categoria obligatoria.
+- Las publicaciones, comentarios, reacciones, encuestas y votos pertenecen al club.
 
 ## Roles
 
@@ -105,6 +110,7 @@ Estados definidos:
 
 ### Tablas base
 
+- `clubs`
 - `users`
 - `roles`
 - `user_roles`
@@ -116,9 +122,16 @@ Estados definidos:
 - `matches`
 - `match_callups`
 - `trainings`
+- `posts`
+- `post_comments`
+- `post_likes`
+- `post_polls`
+- `post_poll_options`
+- `post_poll_votes`
 
 ### Relaciones clave
 
+- `users` N:M `clubs` mediante `club_memberships`
 - `users` 1:1 `players`
 - `users` N:M `roles`
 - `players` N:M `categories`
@@ -126,6 +139,10 @@ Estados definidos:
 - `championships` 1:N `matches`
 - `matches` 1:N `match_callups`
 - `categories` 1:N `trainings`
+- `clubs` 1:N `posts`
+- `users` 1:N `posts`
+- `posts` 1:N `post_comments`
+- `posts` N:M `users` mediante `post_likes`
 
 ## Entidades y campos sugeridos
 
@@ -230,7 +247,7 @@ Estados definidos:
 - `createdAt`
 - `updatedAt`
 
-## Alcance recomendado para la primera migracion a DB
+## Persistencia implementada
 
 Migrar primero:
 
@@ -245,12 +262,16 @@ Migrar primero:
 9. `matches`
 10. `trainings`
 
-Dejar para una segunda fase:
+Persistencia social implementada:
+
+- publicaciones de texto, foto, encuesta, evento y anuncio
+- likes de publicaciones
+- comentarios y respuestas de un nivel
+- opciones y votos de encuestas
+
+Pendiente para una fase posterior:
 
 - `match_callups`
-- `invitations`
-- `posts`
-- `announcements`
 
 ## Impacto actual en vistas y controladores
 

@@ -1,12 +1,12 @@
 {{!-- Este archivo muestra la pagina de eventos con bloques de partidos jugados, proximos partidos y entrenamientos. --}}
 <header class="page-header">
   <h1>Eventos</h1>
-  <p>Partidos y entrenamientos del Club Prueba.</p>
+  <p>Partidos y entrenamientos de {{currentClub.name}}.</p>
 </header>
 
 <section class="events-filter-bar">
   {{#each eventFilters}}
-    <button type="button" class="event-filter-chip {{#if isActive}}active{{/if}}">{{label}}</button>
+    <button type="button" class="event-filter-chip {{#if isActive}}active{{/if}}" aria-pressed="{{#if isActive}}true{{else}}false{{/if}}">{{label}}</button>
   {{/each}}
 </section>
 
@@ -16,7 +16,7 @@
       <p class="events-section-kicker">Partidos</p>
       <h2>Partidos jugados</h2>
     </div>
-    <a href="/eventos" class="events-inline-link">Ver todos</a>
+    <a href="/eventos" class="events-inline-link" aria-label="Ver todos los partidos jugados">Ver todos los partidos</a>
   </div>
 
   <div class="events-showcase-grid">
@@ -45,8 +45,8 @@
 
         <div class="event-scoreboard-grid">
           <div class="event-team-block">
-            <div class="event-team-badge event-team-badge-home">CP</div>
-            <h3>Club Prueba</h3>
+            <div class="event-team-badge event-team-badge-home">{{../clubInitials}}</div>
+            <h3>{{../currentClub.name}}</h3>
           </div>
 
           <div class="event-score-block">
@@ -68,6 +68,8 @@
           <span class="event-showcase-link">Ver detalle</span>
         </div>
       </article>
+    {{else}}
+      <article class="empty-state-card collection-empty-state"><h2>Sin partidos jugados</h2><p>Los resultados de {{currentClub.name}} apareceran aqui.</p></article>
     {{/each}}
   </div>
 </section>
@@ -78,7 +80,7 @@
       <p class="events-section-kicker">Agenda</p>
       <h2>Proximos partidos</h2>
     </div>
-    <a href="/eventos" class="events-inline-link">Ver todos</a>
+    <a href="/eventos" class="events-inline-link" aria-label="Ver todos los próximos partidos">Ver próximos partidos</a>
   </div>
 
   <div class="events-upcoming-grid">
@@ -147,6 +149,8 @@
           <span class="event-showcase-link">Ver detalle</span>
         </div>
       </article>
+    {{else}}
+      <article class="empty-state-card collection-empty-state"><h2>Sin proximos partidos</h2><p>La agenda competitiva aun esta vacia.</p></article>
     {{/each}}
   </div>
 </section>
@@ -157,7 +161,7 @@
       <p class="events-section-kicker">Entrenamientos</p>
       <h2>Proximos entrenamientos</h2>
     </div>
-    <a href="/eventos" class="events-inline-link">Ver todos</a>
+    <a href="/eventos" class="events-inline-link" aria-label="Ver todos los entrenamientos">Ver entrenamientos</a>
   </div>
 
   <div class="events-training-cards-grid">
@@ -210,6 +214,8 @@
           <span class="events-training-card-arrow">→</span>
         </div>
       </article>
+    {{else}}
+      <article class="empty-state-card collection-empty-state"><h2>Sin entrenamientos</h2><p>Las nuevas sesiones apareceran en esta seccion.</p></article>
     {{/each}}
   </div>
 </section>
@@ -217,8 +223,8 @@
 <div class="modal-backdrop" data-modal="event-detail-modal" data-modal-archive hidden>
   <div class="modal-panel event-detail-modal-panel" role="dialog" aria-modal="true" aria-labelledby="event-detail-title">
     <div class="modal-header" data-modal-archive-item>
-      <button type="button" class="modal-close-button" data-modal-close="event-detail-modal">×</button>
-      <h2 id="event-detail-title">Detalle del evento</h2>
+      <button type="button" class="modal-close-button" data-modal-close="event-detail-modal" aria-label="Cerrar diálogo Detalle del evento">×</button>
+      <h2 id="event-detail-title" tabindex="-1">Detalle del evento</h2>
       <button type="button" class="modal-save-button event-detail-close-button" data-modal-close="event-detail-modal">Cerrar</button>
     </div>
 

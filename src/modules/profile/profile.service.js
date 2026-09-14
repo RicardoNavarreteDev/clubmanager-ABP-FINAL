@@ -6,21 +6,6 @@ import { getProfile as getProfileFromJson } from "../../shared/data/json.service
 const shouldUseDatabase = () => process.env.DB_READ_PROFILE === "true";
 const getCurrentProfileUserId = () => Number(process.env.DB_PROFILE_USER_ID ?? 3);
 
-const inferRoleNamesFromLabel = (roleLabel = "") => {
-  const normalizedLabel = String(roleLabel).toLowerCase();
-
-  if (normalizedLabel.includes("admin")) {
-    return ["admin"];
-  }
-
-  if (normalizedLabel.includes("coach") || normalizedLabel.includes("entrenadora") || normalizedLabel.includes("entrenador")) {
-    return ["coach"];
-  }
-
-  return ["player"];
-};
-
-// Traducimos los nombres tecnicos de rol a etiquetas mas humanas para la UI.
 const mapRoleLabel = (roles) => {
   const roleLabels = roles
     .map((role) => {
@@ -43,7 +28,39 @@ const mapRoleLabel = (roles) => {
   return roleLabels.join(" · ");
 };
 
-export const getProfile = async () => {
+const mapProfileFromAuthenticatedSession = (session) => ({
+  playerId: session.player?.id ?? null,
+  name: session.user.displayName,
+  username: `@${session.user.email.split("@")[0]}`,
+  email: session.user.email,
+  role: mapRoleLabel(session.user.roles ?? []),
+  category: session.player?.primaryCategory?.name ?? "Sin categoria",
+  team: session.player?.team ?? session.user.club?.name ?? "Club Prueba",
+  bio: session.user.bio ?? session.player?.bio ?? "",
+  location: session.user.location ?? session.player?.location ?? "",
+  birthDate: session.user.birthDate ?? session.player?.birthDate ?? null,
+  avatar: session.user.avatar ?? session.player?.avatar ?? "/images/avatars/profile.svg",
+});
+
+const inferRoleNamesFromLabel = (roleLabel = "") => {
+  const normalizedLabel = String(roleLabel).toLowerCase();
+
+  if (normalizedLabel.includes("admin")) {
+    return ["admin"];
+  }
+
+  if (normalizedLabel.includes("coach") || normalizedLabel.includes("entrenadora") || normalizedLabel.includes("entrenador")) {
+    return ["coach"];
+  }
+
+  return ["player"];
+};
+
+export const getProfile = async (authenticatedSession = null) => {
+  if (authenticatedSession) {
+    return mapProfileFromAuthenticatedSession(authenticatedSession);
+  }
+
   if (!shouldUseDatabase()) {
     return getProfileFromJson();
   }
@@ -85,7 +102,24 @@ export const getProfile = async () => {
   };
 };
 
-export const getCurrentViewerContext = async () => {
+export const getCurrentViewerContext = async (authenticatedSession = null) => {
+  if (authenticatedSession) {
+    const profile = mapProfileFromAuthenticatedSession(authenticatedSession);
+    const roleNames = (authenticatedSession.user.roles ?? []).map((role) => role.name);
+
+    return {
+      name: profile.name,
+      username: profile.username,
+      avatar: profile.avatar,
+      roleLabel: profile.role,
+      roleNames,
+      isAdmin: roleNames.includes("admin"),
+      isCoach: roleNames.includes("coach"),
+      isPlayer: roleNames.includes("player"),
+      showManagementLinks: roleNames.includes("admin") || roleNames.includes("coach"),
+    };
+  }
+
   const profile = await getProfile();
 
   if (!shouldUseDatabase()) {

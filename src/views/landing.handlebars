@@ -1,0 +1,105 @@
+<main class="auth-entry">
+  <section class="auth-entry-intro" aria-labelledby="auth-entry-title">
+    <a class="auth-entry-brand" href="/" aria-label="ClubManager, inicio">
+      <span class="auth-entry-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+      <span>ClubManager</span>
+    </a>
+
+    <div class="auth-entry-copy">
+      <p>Gestión deportiva</p>
+      <h1 id="auth-entry-title">Tu club,<br>en un solo lugar.</h1>
+      <span>Organiza el equipo, los eventos y cada nueva temporada.</span>
+    </div>
+  </section>
+
+  <section class="auth-entry-panel">
+    <div class="auth-entry-card">
+      <nav class="auth-tabs" aria-label="Acceso a ClubManager">
+        <button type="button" class="auth-tab is-active" data-auth-tab="login" aria-selected="true">Iniciar sesión</button>
+        <button type="button" class="auth-tab" data-auth-tab="register" aria-selected="false">Registrarse</button>
+      </nav>
+
+      <section class="auth-pane is-active" data-auth-pane="login">
+        <header class="auth-pane-header">
+          <p>Bienvenido de nuevo</p>
+          <h2>Accede a tu cuenta</h2>
+        </header>
+
+        {{#if landingError}}<div class="auth-alert" role="alert">{{landingError}}</div>{{/if}}
+
+        <form class="auth-entry-form" action="/login" method="post">
+          <label>
+            <span>Correo electrónico</span>
+            <input type="email" name="email" placeholder="tu@correo.com" required autocomplete="email">
+          </label>
+          <label>
+            <span>Contraseña</span>
+            <input type="password" name="password" placeholder="Tu contraseña" required autocomplete="current-password">
+          </label>
+          <button class="auth-submit" type="submit">Iniciar sesión</button>
+        </form>
+
+        <p class="auth-switch-copy">¿No tienes una cuenta? <button type="button" data-auth-show="register">Regístrate</button></p>
+      </section>
+
+      <section class="auth-pane" data-auth-pane="register" hidden>
+        <header class="auth-pane-header">
+          <p>Empieza ahora</p>
+          <h2>Crea tu cuenta y club</h2>
+        </header>
+
+        {{#if landingError}}<div class="auth-alert" role="alert">{{landingError}}</div>{{/if}}
+
+        <form class="auth-entry-form auth-register-form" action="/crear-club" method="post">
+          <label>
+            <span>Nombre completo</span>
+            <input type="text" name="ownerName" required autocomplete="name">
+          </label>
+          <label>
+            <span>Correo electrónico</span>
+            <input type="email" name="email" required autocomplete="email">
+          </label>
+          <label>
+            <span>Contraseña</span>
+            <input type="password" name="password" minlength="8" required autocomplete="new-password">
+          </label>
+          <label>
+            <span>Confirmar contraseña</span>
+            <input type="password" name="confirmPassword" minlength="8" required autocomplete="new-password">
+          </label>
+          <label>
+            <span>Nombre del club</span>
+            <input type="text" name="clubName" required>
+          </label>
+          <label>
+            <span>Deporte</span>
+            <input type="text" name="sport" placeholder="Ej. Básquetbol" required>
+          </label>
+          <label>
+            <span>Primera categoría</span>
+            <input type="text" name="categoryName" placeholder="Ej. Adulto" required>
+          </label>
+          <label>
+            <span>Género</span>
+            <select name="categoryGenderScope" required>
+              <option value="mixto">Mixto</option>
+              <option value="femenino">Femenino</option>
+              <option value="masculino">Masculino</option>
+            </select>
+          </label>
+          <label>
+            <span>Edad mínima</span>
+            <input type="number" name="categoryMinAge" min="0" value="0" required>
+          </label>
+          <label>
+            <span>Edad máxima <small>(opcional)</small></span>
+            <input type="number" name="categoryMaxAge" min="0">
+          </label>
+          <button class="auth-submit auth-register-submit" type="submit">Crear cuenta</button>
+        </form>
+
+        <p class="auth-switch-copy">¿Ya tienes una cuenta? <button type="button" data-auth-show="login">Inicia sesión</button></p>
+      </section>
+    </div>
+  </section>
+</main>
